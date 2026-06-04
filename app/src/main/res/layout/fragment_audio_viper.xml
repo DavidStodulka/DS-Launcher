@@ -18,6 +18,25 @@
         android:paddingTop="12dp"
         android:paddingBottom="16dp">
 
+        <!-- Status / install instructions (shown when V4A not installed) -->
+        <TextView
+            android:id="@+id/tvViperStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ViPER4Android aktivní"
+            android:textColor="#757575"
+            android:textSize="13sp"
+            android:fontFamily="sans-serif-condensed"
+            android:layout_marginBottom="8dp"
+            android:visibility="gone" />
+
+        <!-- Controls wrapper (hidden when V4A not installed) -->
+        <LinearLayout
+            android:id="@+id/layoutViperControls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
         <!-- Master Switch -->
         <LinearLayout
             android:id="@+id/masterSwitchRow"
@@ -49,7 +68,7 @@
                 android:textStyle="bold" />
 
             <Switch
-                android:id="@+id/v4aMasterSwitch"
+                android:id="@+id/switchViperMaster"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:thumbTint="#E65100"
@@ -534,6 +553,8 @@
                 android:layout_marginStart="8dp" />
 
         </LinearLayout>
+
+        </LinearLayout><!-- end layoutViperControls -->
 
     </LinearLayout>
 

@@ -10,7 +10,7 @@
     tools:context=".ui.fragments.AudioFragment">
 
     <com.google.android.material.tabs.TabLayout
-        android:id="@+id/audioTabLayout"
+        android:id="@+id/tabLayout"
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:background="#111111"
@@ -49,7 +49,7 @@
         android:background="#1E1E1E" />
 
     <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/audioViewPager"
+        android:id="@+id/viewPager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Down arrow shaft -->
+    <path android:fillColor="#FFFFFF" android:pathData="M13,5V13.17L15.59,10.59L17,12L12,17L7,12L8.41,10.59L11,13.17V5H13Z" />
+    <!-- Box / tray at bottom -->
+    <path android:fillColor="#FFFFFF" android:pathData="M20,18H4V20H20V18Z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M4,14H6V16H4V14Z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M18,14H20V16H18V14Z" />
+</vector>
