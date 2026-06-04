@@ -78,7 +78,7 @@ class CodingPresetsFragment : Fragment() {
             val tvName: TextView = view.findViewById(R.id.tvPresetName)
             val tvDesc: TextView = view.findViewById(R.id.tvPresetDesc)
             val tvCurrentStatus: TextView = view.findViewById(R.id.tvCurrentStatus)
-            val switchToggle: Switch = view.findViewById(R.id.switchToggle)
+            val switchToggle: Switch = view.findViewById(R.id.switchPreset)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PresetViewHolder {

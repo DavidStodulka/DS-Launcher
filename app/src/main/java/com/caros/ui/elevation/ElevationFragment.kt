@@ -9,6 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import com.caros.databinding.FragmentElevationBinding
 import com.caros.elevation.ElevationTracker
 import com.caros.elevation.RouteRecorder
+import com.caros.views.ElevationViewPoint
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -65,8 +66,11 @@ class ElevationFragment : Fragment() {
             elevationTracker.points.collect { points ->
                 if (points.isNotEmpty()) {
                     val profileData = points.mapIndexed { idx, point ->
-                        // Pair: cumulative distance index to altitude
-                        idx.toFloat() to point.altM
+                        ElevationViewPoint(
+                            distanceKm = idx.toFloat() * 0.01f,  // crude 10m spacing
+                            altitudeM  = point.altM,
+                            slopePct   = point.slopePercent
+                        )
                     }
                     binding.elevationProfileView.setData(profileData)
                 }

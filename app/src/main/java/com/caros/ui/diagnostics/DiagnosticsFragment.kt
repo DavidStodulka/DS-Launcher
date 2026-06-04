@@ -58,8 +58,9 @@ class DiagnosticsFragment : Fragment() {
                             (trip.endTime - trip.startTime) / 1_000L else 0L
                         binding.tvTripTime.text = "%02d:%02d".format(durationSec / 60, durationSec % 60)
 
-                        val fuel = trip?.fuelUsedLitres
-                        binding.tvFuelEst.text = if (fuel != null) "~%.1f L".format(fuel) else "-- L"
+                        // tvMaxRpm and tvAvgThrottle populated from live CAN in updateGauges
+                        binding.tvMaxRpm.text = "--"
+                        binding.tvAvgThrottle.text = "--"
                     }
                 } catch (e: Exception) {
                     // Leave fields as default
@@ -84,17 +85,12 @@ class DiagnosticsFragment : Fragment() {
 
         // Oil Temp gauge
         frame.oilTemp?.celsius?.let { oilTemp ->
-            binding.gaugeOil.setValue(oilTemp)
+            binding.gaugeOilTemp.setValue(oilTemp)
         }
 
         // Battery Voltage gauge
         frame.batteryVoltage?.let { batt ->
             binding.gaugeVoltage.setValue(batt.volts)
-        }
-
-        // Oil gauge (uses separate id in linter-revised layout)
-        frame.oilTemp?.celsius?.let { oilTemp ->
-            binding.gaugeOilTemp.setValue(oilTemp)
         }
 
         // DPF Load gauge

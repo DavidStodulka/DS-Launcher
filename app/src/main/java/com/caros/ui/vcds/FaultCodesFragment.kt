@@ -154,7 +154,7 @@ class FaultCodesFragment : Fragment() {
         inner class DTCViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val tvCode: TextView = view.findViewById(R.id.tvDTCCode)
             val tvDesc: TextView = view.findViewById(R.id.tvDTCDescription)
-            val tvStatus: TextView = view.findViewById(R.id.tvStatus)
+            val tvStatus: TextView = view.findViewById(R.id.tvDTCStatus)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DTCViewHolder {

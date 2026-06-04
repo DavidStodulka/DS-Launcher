@@ -82,13 +82,12 @@ class TelemetryFragment : Fragment() {
         binding.tvSessionDistance.text = "%.1f km".format(session.distanceKm ?: 0.0)
 
         // Radar chart data
-        val radarData = floatArrayOf(
-            score.ecoScore.toFloat(),
-            score.sportScore.toFloat(),
-            score.mechanicalScore.toFloat(),
-            score.smoothnessScore.toFloat()
+        binding.radarChartView.setScores(
+            score.ecoScore,
+            score.sportScore,
+            score.mechanicalScore,
+            score.smoothnessScore
         )
-        binding.radarChartView.setData(radarData)
 
         // Score values
         binding.tvEcoScore.text = score.ecoScore.toString()

@@ -12,6 +12,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import com.caros.can.CANService
 import com.caros.databinding.ActivityMainBinding
@@ -85,49 +86,63 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupNavigation() {
-        val navHostFragment = supportFragmentManager
-            .findFragmentById(R.id.centerPanel) as NavHostFragment
-        navController = navHostFragment.navController
+        // Dynamically add NavHostFragment into the centerPanel FrameLayout
+        val existing = supportFragmentManager.findFragmentById(R.id.centerPanel)
+        if (existing is NavHostFragment) {
+            navController = existing.navController
+        } else {
+            val navHost = NavHostFragment.create(R.navigation.nav_graph)
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.centerPanel, navHost, "navHost")
+                .setPrimaryNavigationFragment(navHost)
+                .commitNow()
+            navController = navHost.navController
+        }
     }
 
     private fun setupBottomNav() {
-        binding.btnHome.setOnClickListener {
-            navController.navigate(R.id.mainFragment)
-            updateNavHighlight(R.id.btnHome)
+        val navOpts = NavOptions.Builder()
+            .setLaunchSingleTop(true)
+            .setPopUpTo(R.id.mainFragment, inclusive = false)
+            .build()
+
+        binding.navHome.setOnClickListener {
+            navController.navigate(R.id.mainFragment, null, navOpts)
+            updateNavHighlight(R.id.navHome)
         }
-        binding.btnMedia.setOnClickListener {
-            navController.navigate(R.id.mediaFragment)
-            updateNavHighlight(R.id.btnMedia)
+        binding.navMedia.setOnClickListener {
+            navController.navigate(R.id.mediaFragment, null, navOpts)
+            updateNavHighlight(R.id.navMedia)
         }
-        binding.btnRace.setOnClickListener {
-            navController.navigate(R.id.raceFragment)
-            updateNavHighlight(R.id.btnRace)
+        binding.navRace.setOnClickListener {
+            navController.navigate(R.id.raceFragment, null, navOpts)
+            updateNavHighlight(R.id.navRace)
         }
-        binding.btnVCDS.setOnClickListener {
-            navController.navigate(R.id.vcdsFragment)
-            updateNavHighlight(R.id.btnVCDS)
+        binding.navVcds.setOnClickListener {
+            navController.navigate(R.id.vcdsFragment, null, navOpts)
+            updateNavHighlight(R.id.navVcds)
         }
-        binding.btnAndroid.setOnClickListener {
-            navController.navigate(R.id.settingsFragment)
-            updateNavHighlight(R.id.btnAndroid)
+        binding.navAndroid.setOnClickListener {
+            navController.navigate(R.id.settingsFragment, null, navOpts)
+            updateNavHighlight(R.id.navAndroid)
         }
-        binding.btnDiag.setOnClickListener {
-            navController.navigate(R.id.diagnosticsFragment)
-            updateNavHighlight(R.id.btnDiag)
+        binding.navDiag.setOnClickListener {
+            navController.navigate(R.id.diagnosticsFragment, null, navOpts)
+            updateNavHighlight(R.id.navDiag)
         }
     }
 
     private fun updateNavHighlight(selectedId: Int) {
-        val allButtons = listOf(
-            binding.btnHome,
-            binding.btnMedia,
-            binding.btnRace,
-            binding.btnVCDS,
-            binding.btnAndroid,
-            binding.btnDiag
+        val allNavItems = listOf(
+            binding.navHome,
+            binding.navMedia,
+            binding.navRace,
+            binding.navVcds,
+            binding.navAndroid,
+            binding.navDiag
         )
-        allButtons.forEach { btn ->
-            btn.alpha = if (btn.id == selectedId) 1.0f else 0.55f
+        allNavItems.forEach { item ->
+            item.alpha = if (item.id == selectedId) 1.0f else 0.55f
         }
     }
 

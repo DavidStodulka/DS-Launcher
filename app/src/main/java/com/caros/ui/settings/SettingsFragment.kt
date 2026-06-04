@@ -86,24 +86,24 @@ class SettingsFragment : Fragment() {
     private fun setupPowerMode() {
         val savedMode = prefs.getString("acc_power_mode", "deep_sleep") ?: "deep_sleep"
         if (savedMode == "deep_sleep") {
-            binding.radioDeepSleep.isChecked = true
+            binding.rbDeepSleep.isChecked = true
         } else {
-            binding.radioPowerOff.isChecked = true
+            binding.rbPowerOff.isChecked = true
         }
-        binding.rgPowerMode.setOnCheckedChangeListener { _, checkedId ->
-            val mode = if (checkedId == binding.radioDeepSleep.id) "deep_sleep" else "power_off"
+        binding.rgShutdownMode.setOnCheckedChangeListener { _, checkedId ->
+            val mode = if (checkedId == binding.rbDeepSleep.id) "deep_sleep" else "power_off"
             prefs.edit().putString("acc_power_mode", mode).apply()
         }
 
         // Shutdown delay
-        val delay = prefs.getInt("shutdown_delay_sec", 30)
-        binding.seekBarShutdownDelay.max = 300
-        binding.seekBarShutdownDelay.progress = delay
-        binding.tvShutdownDelay.text = "$delay s"
+        val delay = prefs.getInt("shutdown_delay_sec", 60)
+        binding.seekShutdownDelay.max = 300
+        binding.seekShutdownDelay.progress = delay
+        binding.tvShutdownDelay.text = "${delay}s"
 
-        binding.seekBarShutdownDelay.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        binding.seekShutdownDelay.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
-                binding.tvShutdownDelay.text = "$progress s"
+                binding.tvShutdownDelay.text = "${progress}s"
                 if (fromUser) prefs.edit().putInt("shutdown_delay_sec", progress).apply()
             }
             override fun onStartTrackingTouch(sb: SeekBar?) {}
@@ -148,33 +148,27 @@ class SettingsFragment : Fragment() {
 
     private fun refreshSystemInfo() {
         val temp = systemSettings.getCpuTemperature()
-        binding.tvTemp.text = if (temp != null) "CPU temp: %.1f°C".format(temp) else "CPU temp: N/A"
-
-        val uptime = systemSettings.getUptimeSeconds()
-        val uptimeStr = "%02d:%02d:%02d".format(uptime / 3600, (uptime % 3600) / 60, uptime % 60)
-        binding.tvUptime.text = "Uptime: $uptimeStr"
-
         val runtime = Runtime.getRuntime()
         val usedMb = (runtime.totalMemory() - runtime.freeMemory()) / 1_048_576L
         val totalMb = runtime.maxMemory() / 1_048_576L
-        binding.tvRAM.text = "RAM: ${usedMb}MB / ${totalMb}MB"
 
-        binding.tvBuild.text = "Build: ${android.os.Build.DISPLAY}"
-
-        // CPU usage via /proc/stat is not straightforward; show load average instead
-        binding.tvCPU.text = try {
+        binding.tvCPUUsage.text = try {
             val load = java.io.File("/proc/loadavg").readText().trim().split(" ")
-            "CPU Load: ${load[0]} ${load[1]} ${load[2]}"
+            val tempStr = if (temp != null) "  Teplota: %.1f°C".format(temp) else ""
+            "CPU: ${load[0]}$tempStr"
         } catch (e: Exception) {
-            "CPU Load: N/A"
+            "CPU: N/A" + (if (temp != null) "  Teplota: %.1f°C".format(temp) else "")
         }
+
+        binding.tvRAMUsage.text = "RAM: ${usedMb} / ${totalMb} MB"
+        binding.tvBuildInfo.text = "Build: ${android.os.Build.DISPLAY}"
     }
 
     private fun refreshNetworkInfo() {
         val ssid = systemSettings.getWifiSsid()
         val ip = systemSettings.getWifiIpAddress()
-        binding.tvCurrentSSID.text = "SSID: ${ssid ?: "Nepřipojeno"}"
-        binding.tvIP.text = "IP: ${ip ?: "N/A"}"
+        binding.tvCurrentSSID.text = ssid ?: "Nepřipojeno"
+        binding.tvIP.text = ip ?: ""
     }
 
     override fun onDestroyView() {

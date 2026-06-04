@@ -39,7 +39,7 @@ class RightPanelFragment : Fragment() {
             mainViewModel.canFrame.collect { frame ->
                 // RPM gauge
                 frame.engineRpm?.let { rpm ->
-                    binding.rpmGaugeView.setRPM(rpm.rpm)
+                    binding.rpmGaugeView.setRpm(rpm.rpm)
                 }
 
                 // Speed numeric
