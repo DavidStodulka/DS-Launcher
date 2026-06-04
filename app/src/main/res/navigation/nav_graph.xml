@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/mainFragment">
+
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="com.caros.ui.main.MainFragment"
+        android:label="Home"/>
+
+    <fragment
+        android:id="@+id/mediaFragment"
+        android:name="com.caros.ui.media.MediaFragment"
+        android:label="Media"/>
+
+    <fragment
+        android:id="@+id/raceFragment"
+        android:name="com.caros.ui.race.RaceFragment"
+        android:label="Race"/>
+
+    <fragment
+        android:id="@+id/vcdsFragment"
+        android:name="com.caros.ui.vcds.VCDSFragment"
+        android:label="VCDS"/>
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.caros.ui.settings.SettingsFragment"
+        android:label="Android"/>
+
+    <fragment
+        android:id="@+id/diagnosticsFragment"
+        android:name="com.caros.ui.diagnostics.DiagnosticsFragment"
+        android:label="Diagnostics"/>
+
+    <fragment
+        android:id="@+id/audioFragment"
+        android:name="com.caros.ui.audio.AudioFragment"
+        android:label="Audio"/>
+
+    <fragment
+        android:id="@+id/elevationFragment"
+        android:name="com.caros.ui.elevation.ElevationFragment"
+        android:label="Elevation"/>
+
+    <fragment
+        android:id="@+id/telemetryFragment"
+        android:name="com.caros.ui.telemetry.TelemetryFragment"
+        android:label="Telemetry"/>
+
+    <fragment
+        android:id="@+id/serviceAdvisorFragment"
+        android:name="com.caros.ui.service.ServiceAdvisorFragment"
+        android:label="Service"/>
+</navigation>

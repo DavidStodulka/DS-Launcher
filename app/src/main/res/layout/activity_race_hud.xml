@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    tools:context=".ui.activities.RaceHudActivity">
+
+    <!-- Timer display — huge, centered top -->
+    <TextView
+        android:id="@+id/hudTimer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0:00.000"
+        android:textColor="#FFFFFF"
+        android:textSize="80sp"
+        android:fontFamily="sans-serif-condensed"
+        android:textStyle="bold"
+        android:letterSpacing="-0.02"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp"
+        tools:text="0:05.843" />
+
+    <!-- Gear indicator — large, left side -->
+    <TextView
+        android:id="@+id/hudGear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="N"
+        android:textColor="#1565C0"
+        android:textSize="120sp"
+        android:fontFamily="sans-serif-condensed"
+        android:textStyle="bold"
+        android:alpha="0.9"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="48dp"
+        android:layout_marginBottom="80dp"
+        tools:text="3" />
+
+    <!-- Speed display — right side, large -->
+    <LinearLayout
+        android:id="@+id/hudSpeedContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="end"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginEnd="48dp"
+        android:layout_marginBottom="80dp">
+
+        <TextView
+            android:id="@+id/hudSpeed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textColor="#FFFFFF"
+            android:textSize="100sp"
+            android:fontFamily="sans-serif-condensed"
+            android:textStyle="bold"
+            android:gravity="end"
+            tools:text="127" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="km/h"
+            android:textColor="#757575"
+            android:textSize="20sp"
+            android:fontFamily="sans-serif-condensed"
+            android:gravity="end" />
+
+    </LinearLayout>
+
+    <!-- G-Force indicator — custom view, center of screen -->
+    <View
+        android:id="@+id/gForceView"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:background="#0D0D0D"
+        app:layout_constraintTop_toBottomOf="@id/hudTimer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/rpmBar"
+        tools:background="#111111" />
+
+    <!-- RPM bar — full width, bottom -->
+    <ProgressBar
+        android:id="@+id/rpmBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="20dp"
+        android:max="8000"
+        android:progress="0"
+        android:progressTint="#1565C0"
+        android:progressBackgroundTint="#111111"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="48dp"
+        tools:progress="4500" />
+
+    <!-- RPM redline marker (visual only) -->
+    <View
+        android:id="@+id/rpmRedlineMarker"
+        android:layout_width="3dp"
+        android:layout_height="24dp"
+        android:background="#C62828"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="128dp"
+        android:layout_marginBottom="44dp" />
+
+    <!-- RPM labels row -->
+    <LinearLayout
+        android:id="@+id/rpmLabelsRow"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@id/rpmBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="2dp"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="0"
+            android:textColor="#757575"
+            android:textSize="11sp"
+            android:fontFamily="sans-serif-condensed"
+            android:gravity="start" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="2k"
+            android:textColor="#757575"
+            android:textSize="11sp"
+            android:fontFamily="sans-serif-condensed"
+            android:gravity="center" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="4k"
+            android:textColor="#757575"
+            android:textSize="11sp"
+            android:fontFamily="sans-serif-condensed"
+            android:gravity="center" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="6k"
+            android:textColor="#757575"
+            android:textSize="11sp"
+            android:fontFamily="sans-serif-condensed"
+            android:gravity="center" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="8k"
+            android:textColor="#C62828"
+            android:textSize="11sp"
+            android:fontFamily="sans-serif-condensed"
+            android:gravity="end" />
+
+    </LinearLayout>
+
+    <!-- RPM numeric readout -->
+    <TextView
+        android:id="@+id/hudRpm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0 RPM"
+        android:textColor="#757575"
+        android:textSize="16sp"
+        android:fontFamily="sans-serif-condensed"
+        app:layout_constraintBottom_toTopOf="@id/rpmLabelsRow"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="4dp"
+        tools:text="4500 RPM" />
+
+    <!-- Exit HUD button (small, corner) -->
+    <ImageButton
+        android:id="@+id/hudExitButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/ic_close"
+        android:background="@drawable/hud_btn_bg"
+        android:tint="#757575"
+        android:contentDescription="Exit HUD"
+        android:padding="10dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

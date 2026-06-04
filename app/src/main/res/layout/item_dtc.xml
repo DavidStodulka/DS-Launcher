@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#111111"
+    android:padding="12dp"
+    android:paddingStart="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/tvDTCCode"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:fontFamily="monospace"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/tvDTCStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#C62828"
+            android:textSize="12sp"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="3dp"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvDTCDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#757575"
+        android:textSize="13sp"
+        android:layout_marginTop="4dp"/>
+
+    <TextView
+        android:id="@+id/tvFreezeFrame"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#E65100"
+        android:textSize="12sp"
+        android:fontFamily="monospace"
+        android:visibility="gone"
+        android:layout_marginTop="4dp"/>
+</LinearLayout>

@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#080808"
+    tools:context=".ui.fragments.VcdsFaultCodesFragment">
+
+    <!-- Top Action Bar -->
+    <LinearLayout
+        android:id="@+id/faultCodesActionBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#111111"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:gravity="center_vertical">
+
+        <!-- Scan All ECUs button -->
+        <Button
+            android:id="@+id/btnScanAllEcus"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="SCAN ALL ECUs"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-condensed"
+            android:letterSpacing="0.05"
+            android:backgroundTint="#1565C0"
+            android:elevation="2dp"
+            android:layout_marginEnd="8dp" />
+
+        <!-- ECU filter spinner -->
+        <Spinner
+            android:id="@+id/ecuFilterSpinner"
+            android:layout_width="160dp"
+            android:layout_height="48dp"
+            android:background="@drawable/spinner_bg"
+            android:popupBackground="#111111"
+            tools:entries="@array/ecu_list" />
+
+    </LinearLayout>
+
+    <!-- Scan status bar -->
+    <LinearLayout
+        android:id="@+id/scanStatusBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#0D1A2E"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:gravity="center_vertical"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:id="@+id/scanProgressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="4dp"
+            android:layout_weight="1"
+            android:max="100"
+            android:progress="0"
+            android:progressTint="#1565C0"
+            android:progressBackgroundTint="#1E1E1E"
+            android:layout_marginEnd="12dp" />
+
+        <TextView
+            android:id="@+id/scanStatusText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Scanning..."
+            android:textColor="#757575"
+            android:textSize="12sp"
+            android:fontFamily="sans-serif-condensed"
+            tools:text="Scanning Engine ECU..." />
+
+    </LinearLayout>
+
+    <!-- DTC Summary Header -->
+    <LinearLayout
+        android:id="@+id/dtcSummaryHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/dtcTotalCount"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="No DTCs found"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-condensed"
+            tools:text="3 fault codes found" />
+
+        <TextView
+            android:id="@+id/lastScanTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="#757575"
+            android:textSize="11sp"
+            android:fontFamily="sans-serif-condensed"
+            tools:text="Last scan: 14:32" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#1E1E1E" />
+
+    <!-- DTC RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/dtcRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingBottom="8dp"
+        tools:listitem="@layout/item_dtc"
+        tools:itemCount="5" />
+
+    <!-- Bottom: Clear All button -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#1E1E1E" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#111111"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
+
+        <Button
+            android:id="@+id/btnClearAllDtcs"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="CLEAR ALL FAULT CODES"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-condensed"
+            android:letterSpacing="0.05"
+            android:backgroundTint="#C62828"
+            android:elevation="2dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

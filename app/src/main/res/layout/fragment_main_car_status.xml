@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#080808"
+    tools:context=".ui.fragments.MainCarStatusFragment">
+
+    <!-- Speed Display (large, center top) -->
+    <TextView
+        android:id="@+id/speedDisplay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0"
+        android:textColor="#FFFFFF"
+        android:textSize="72sp"
+        android:fontFamily="sans-serif-condensed"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp"
+        tools:text="120" />
+
+    <TextView
+        android:id="@+id/speedUnit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="km/h"
+        android:textColor="#757575"
+        android:textSize="16sp"
+        android:fontFamily="sans-serif-condensed"
+        app:layout_constraintTop_toBottomOf="@id/speedDisplay"
+        app:layout_constraintStart_toStartOf="@id/speedDisplay"
+        app:layout_constraintEnd_toEndOf="@id/speedDisplay"
+        android:layout_marginTop="-8dp" />
+
+    <!-- Gear Indicator -->
+    <TextView
+        android:id="@+id/gearIndicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="D"
+        android:textColor="#1565C0"
+        android:textSize="28sp"
+        android:fontFamily="sans-serif-condensed"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="@id/speedDisplay"
+        app:layout_constraintBottom_toBottomOf="@id/speedDisplay"
+        app:layout_constraintStart_toEndOf="@id/speedDisplay"
+        android:layout_marginStart="16dp"
+        tools:text="3" />
+
+    <!-- Car Silhouette -->
+    <ImageView
+        android:id="@+id/carSilhouette"
+        android:layout_width="320dp"
+        android:layout_height="160dp"
+        android:src="@drawable/ic_car_silhouette"
+        android:scaleType="fitCenter"
+        android:contentDescription="Car silhouette"
+        android:alpha="0.6"
+        app:layout_constraintTop_toBottomOf="@id/speedUnit"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp" />
+
+    <!-- Door Status Indicators -->
+    <!-- Front Left Door -->
+    <View
+        android:id="@+id/doorFrontLeft"
+        android:layout_width="28dp"
+        android:layout_height="16dp"
+        android:background="#2E7D32"
+        app:layout_constraintTop_toTopOf="@id/carSilhouette"
+        app:layout_constraintEnd_toStartOf="@id/carSilhouette"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="-60dp" />
+
+    <TextView
+        android:id="@+id/doorFrontLeftLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="FL"
+        android:textColor="#757575"
+        android:textSize="9sp"
+        android:fontFamily="sans-serif-condensed"
+        app:layout_constraintTop_toBottomOf="@id/doorFrontLeft"
+        app:layout_constraintStart_toStartOf="@id/doorFrontLeft"
+        app:layout_constraintEnd_toEndOf="@id/doorFrontLeft"
+        android:layout_marginTop="2dp" />
+
+    <!-- Front Right Door -->
+    <View
+        android:id="@+id/doorFrontRight"
+        android:layout_width="28dp"
+        android:layout_height="16dp"
+        android:background="#2E7D32"
+        app:layout_constraintTop_toTopOf="@id/carSilhouette"
+        app:layout_constraintStart_toEndOf="@id/carSilhouette"
+        android:layout_marginTop="40dp"
+        android:layout_marginStart="-60dp" />
+
+    <TextView
+        android:id="@+id/doorFrontRightLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="FR"
+        android:textColor="#757575"
+        android:textSize="9sp"
+        android:fontFamily="sans-serif-condensed"
+        app:layout_constraintTop_toBottomOf="@id/doorFrontRight"
+        app:layout_constraintStart_toStartOf="@id/doorFrontRight"
+        app:layout_constraintEnd_toEndOf="@id/doorFrontRight"
+        android:layout_marginTop="2dp" />
+
+    <!-- Rear Left Door -->
+    <View
+        android:id="@+id/doorRearLeft"
+        android:layout_width="28dp"
+        android:layout_height="16dp"
+        android:background="#2E7D32"
+        app:layout_constraintTop_toTopOf="@id/carSilhouette"
+        app:layout_constraintEnd_toStartOf="@id/carSilhouette"
+        android:layout_marginTop="76dp"
+        android:layout_marginEnd="-60dp" />
+
+    <TextView
+        android:id="@+id/doorRearLeftLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="RL"
+        android:textColor="#757575"
+        android:textSize="9sp"
+        android:fontFamily="sans-serif-condensed"
+        app:layout_constraintTop_toBottomOf="@id/doorRearLeft"
+        app:layout_constraintStart_toStartOf="@id/doorRearLeft"
+        app:layout_constraintEnd_toEndOf="@id/doorRearLeft"
+        android:layout_marginTop="2dp" />
+
+    <!-- Rear Right Door -->
+    <View
+        android:id="@+id/doorRearRight"
+        android:layout_width="28dp"
+        android:layout_height="16dp"
+        android:background="#2E7D32"
+        app:layout_constraintTop_toTopOf="@id/carSilhouette"
+        app:layout_constraintStart_toEndOf="@id/carSilhouette"
+        android:layout_marginTop="76dp"
+        android:layout_marginStart="-60dp" />
+
+    <TextView
+        android:id="@+id/doorRearRightLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="RR"
+        android:textColor="#757575"
+        android:textSize="9sp"
+        android:fontFamily="sans-serif-condensed"
+        app:layout_constraintTop_toBottomOf="@id/doorRearRight"
+        app:layout_constraintStart_toStartOf="@id/doorRearRight"
+        app:layout_constraintEnd_toEndOf="@id/doorRearRight"
+        android:layout_marginTop="2dp" />
+
+    <!-- Seatbelt Indicators Row -->
+    <LinearLayout
+        android:id="@+id/seatbeltRow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/carSilhouette"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp">
+
+        <ImageView
+            android:id="@+id/beltFrontLeft"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_seatbelt"
+            android:tint="#2E7D32"
+            android:contentDescription="Front left seatbelt"
+            android:layout_marginEnd="12dp" />
+
+        <ImageView
+            android:id="@+id/beltFrontRight"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_seatbelt"
+            android:tint="#2E7D32"
+            android:contentDescription="Front right seatbelt"
+            android:layout_marginEnd="12dp" />
+
+        <ImageView
+            android:id="@+id/beltRearLeft"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_seatbelt"
+            android:tint="#757575"
+            android:contentDescription="Rear left seatbelt"
+            android:layout_marginEnd="12dp" />
+
+        <ImageView
+            android:id="@+id/beltRearRight"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_seatbelt"
+            android:tint="#757575"
+            android:contentDescription="Rear right seatbelt" />
+
+    </LinearLayout>
+
+    <!-- DPF Load Section -->
+    <LinearLayout
+        android:id="@+id/dpfSection"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        app:layout_constraintTop_toBottomOf="@id/seatbeltRow"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="12dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="4dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="DPF Load"
+                android:textColor="#757575"
+                android:textSize="11sp"
+                android:fontFamily="sans-serif-condensed" />
+
+            <TextView
+                android:id="@+id/dpfPercent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0%"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp"
+                android:fontFamily="sans-serif-condensed"
+                tools:text="68%" />
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/dpfProgressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:max="100"
+            android:progress="0"
+            android:progressTint="#2E7D32"
+            android:progressBackgroundTint="#1E1E1E"
+            tools:progress="68" />
+
+    </LinearLayout>
+
+    <!-- Active DTC Badge -->
+    <LinearLayout
+        android:id="@+id/dtcBadgeRow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toBottomOf="@id/dpfSection"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Active DTCs:"
+            android:textColor="#757575"
+            android:textSize="12sp"
+            android:fontFamily="sans-serif-condensed"
+            android:layout_marginEnd="8dp" />
+
+        <TextView
+            android:id="@+id/dtcCountBadge"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:gravity="center"
+            android:text="0"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-condensed"
+            android:textStyle="bold"
+            android:background="@drawable/badge_background"
+            tools:text="3" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

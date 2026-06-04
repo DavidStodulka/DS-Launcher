@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#080808"
+    tools:context=".ui.fragments.VcdsLiveDataFragment">
+
+    <!-- Toolbar: ECU selector + refresh button -->
+    <LinearLayout
+        android:id="@+id/liveDataToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="#111111"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ECU:"
+            android:textColor="#757575"
+            android:textSize="12sp"
+            android:fontFamily="sans-serif-condensed"
+            android:layout_marginEnd="8dp" />
+
+        <Spinner
+            android:id="@+id/ecuSpinnerLive"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_weight="1"
+            android:background="@drawable/spinner_bg"
+            android:popupBackground="#111111"
+            tools:entries="@array/ecu_list" />
+
+        <ImageButton
+            android:id="@+id/refreshLiveData"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_refresh"
+            android:background="@drawable/control_btn_bg"
+            android:tint="#1565C0"
+            android:contentDescription="Refresh live data"
+            android:padding="8dp"
+            android:layout_marginStart="8dp" />
+
+        <ImageButton
+            android:id="@+id/toggleLiveStream"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_play"
+            android:background="@drawable/control_btn_bg"
+            android:tint="#2E7D32"
+            android:contentDescription="Start/stop live stream"
+            android:padding="8dp"
+            android:layout_marginStart="4dp" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#1E1E1E" />
+
+    <!-- Column headers -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="32dp"
+        android:orientation="horizontal"
+        android:background="#111111"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:text="PARAMETER"
+            android:textColor="#757575"
+            android:textSize="10sp"
+            android:fontFamily="sans-serif-condensed"
+            android:letterSpacing="0.08" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="VALUE"
+            android:textColor="#757575"
+            android:textSize="10sp"
+            android:fontFamily="sans-serif-condensed"
+            android:letterSpacing="0.08"
+            android:gravity="end" />
+
+        <TextView
+            android:layout_width="64dp"
+            android:layout_height="wrap_content"
+            android:text="UNIT"
+            android:textColor="#757575"
+            android:textSize="10sp"
+            android:fontFamily="sans-serif-condensed"
+            android:letterSpacing="0.08"
+            android:gravity="end" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#1E1E1E" />
+
+    <!-- Live Data RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/liveDataRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingBottom="8dp"
+        tools:listitem="@layout/item_live_data_row"
+        tools:itemCount="12" />
+
+</LinearLayout>

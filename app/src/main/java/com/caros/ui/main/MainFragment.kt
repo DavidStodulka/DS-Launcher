@@ -1,0 +1,104 @@
+package com.caros.ui.main
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import com.caros.databinding.FragmentMainCarStatusBinding
+import com.caros.profiles.DrivingMode
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import timber.log.Timber
+
+@AndroidEntryPoint
+class MainFragment : Fragment() {
+
+    private var _binding: FragmentMainCarStatusBinding? = null
+    private val binding get() = _binding!!
+
+    private val viewModel: MainViewModel by viewModels()
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentMainCarStatusBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        observeCANFrame()
+        observeDrivingMode()
+    }
+
+    private fun observeCANFrame() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.canFrame.collect { frame ->
+                // Speed
+                val speedKmh = frame.vehicleSpeed?.kmh ?: 0f
+                binding.speedDisplay.text = speedKmh.toInt().toString()
+
+                // Gear indicator
+                val gear = frame.dsgData?.gear ?: "-"
+                binding.gearIndicator.text = gear
+
+                // No coolant field on this layout — handled in RightPanelFragment
+
+                // DPF bar
+                frame.dpfData?.let { dpf ->
+                    binding.dpfProgressBar.progress = dpf.loadPercent.toInt()
+                    binding.dpfPercent.text = "%.0f%%".format(dpf.loadPercent)
+                }
+
+                // Door indicators
+                frame.doorState?.let { doors ->
+                    val openColor = android.graphics.Color.parseColor("#F44336")
+                    val closedColor = android.graphics.Color.parseColor("#4CAF50")
+                    binding.doorFrontLeft.setBackgroundColor(if (doors.driver) openColor else closedColor)
+                    binding.doorFrontRight.setBackgroundColor(if (doors.passenger) openColor else closedColor)
+                    binding.doorRearLeft.setBackgroundColor(if (doors.rearLeft) openColor else closedColor)
+                    binding.doorRearRight.setBackgroundColor(if (doors.rearRight) openColor else closedColor)
+                }
+
+                // DTC badge
+                if (frame.activeDtcs.isNotEmpty()) {
+                    binding.dtcBadgeRow.visibility = View.VISIBLE
+                    binding.dtcCountBadge.text = frame.activeDtcs.size.toString()
+                } else {
+                    binding.dtcBadgeRow.visibility = View.GONE
+                }
+            }
+        }
+    }
+
+    private fun observeDrivingMode() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.drivingMode.collect { mode ->
+                when (mode) {
+                    DrivingMode.DRIVING -> {
+                        // Show only speed/gear large; hide detailed status panels
+                        binding.speedDisplay.textSize = 96f
+                        binding.dpfSection.visibility = View.GONE
+                        binding.seatbeltRow.visibility = View.GONE
+                    }
+                    DrivingMode.PARKED -> {
+                        // Full status visible
+                        binding.speedDisplay.textSize = 72f
+                        binding.dpfSection.visibility = View.VISIBLE
+                        binding.seatbeltRow.visibility = View.VISIBLE
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+}

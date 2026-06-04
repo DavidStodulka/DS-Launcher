@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--
+        Theme.CarOS — Root dark automotive theme.
+        Inherits from Theme.Material.NoActionBar to avoid Material-specific light
+        artefacts while keeping compatibility with standard View components.
+        No Compose. No MDC-based inflater overrides needed.
+    -->
+    <style name="Theme.CarOS" parent="Theme.MaterialComponents.NoActionBar">
+
+        <!-- === Primary brand === -->
+        <item name="colorPrimary">@color/caros_primary</item>
+        <item name="colorPrimaryDark">@color/caros_primary_dark</item>
+        <item name="colorPrimaryVariant">@color/caros_primary_dark</item>
+        <item name="colorOnPrimary">@color/caros_text_on_primary</item>
+
+        <!-- === Secondary brand === -->
+        <item name="colorSecondary">@color/caros_secondary</item>
+        <item name="colorSecondaryVariant">@color/caros_secondary_dark</item>
+        <item name="colorOnSecondary">@color/caros_text_on_secondary</item>
+
+        <!-- === Surfaces === -->
+        <item name="colorBackground">@color/caros_bg</item>
+        <item name="colorOnBackground">@color/caros_text_primary</item>
+        <item name="colorSurface">@color/caros_surface</item>
+        <item name="colorOnSurface">@color/caros_text_primary</item>
+        <item name="colorSurfaceVariant">@color/caros_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/caros_text_secondary</item>
+
+        <!-- === Error === -->
+        <item name="colorError">@color/caros_error</item>
+        <item name="colorOnError">@color/caros_text_primary</item>
+        <item name="colorErrorContainer">@color/caros_error_container</item>
+        <item name="colorOnErrorContainer">@color/caros_on_error_container</item>
+
+        <!-- === Outline === -->
+        <item name="colorOutline">@color/caros_outline</item>
+
+        <!-- === Window chrome === -->
+        <item name="android:windowBackground">@color/caros_bg</item>
+        <item name="android:colorBackground">@color/caros_bg</item>
+        <item name="android:windowAnimationStyle">@style/CarOS.WindowAnimation</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowSoftInputMode">stateHidden|adjustResize</item>
+        <item name="android:windowFullscreen">false</item>
+
+        <!-- Status bar — drawn by CarOS itself; hide system bar -->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@color/caros_status_bar_bg</item>
+        <item name="android:navigationBarColor">@color/caros_nav_bg</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+        <!-- === Text === -->
+        <item name="android:textColor">@color/caros_text_primary</item>
+        <item name="android:textColorPrimary">@color/caros_text_primary</item>
+        <item name="android:textColorSecondary">@color/caros_text_secondary</item>
+        <item name="android:textColorHint">@color/caros_text_hint</item>
+        <item name="android:textColorLink">@color/caros_text_accent</item>
+        <item name="android:textColorHighlight">@color/caros_primary_alpha40</item>
+
+        <!-- === Widgets default styles === -->
+        <item name="android:buttonStyle">@style/CarOS.Button</item>
+        <item name="android:editTextStyle">@style/CarOS.EditText</item>
+        <item name="android:progressBarStyleHorizontal">@style/CarOS.ProgressBar</item>
+        <item name="android:switchStyle">@style/CarOS.Switch</item>
+        <item name="android:listDivider">@color/caros_divider</item>
+        <item name="android:dividerHeight">@dimen/divider_height</item>
+        <item name="android:popupMenuStyle">@style/CarOS.PopupMenu</item>
+        <item name="android:dialogTheme">@style/CarOS.Dialog</item>
+        <item name="android:alertDialogTheme">@style/CarOS.Dialog</item>
+
+        <!-- Disable ripple overflow clipping for large touch targets -->
+        <item name="android:clipToPadding">false</item>
+        <item name="android:clipChildren">false</item>
+
+        <!-- === Elevation overlays (keep surfaces dark — no white tint) === -->
+        <item name="elevationOverlayEnabled">false</item>
+
+        <!-- === Shape === -->
+        <item name="shapeAppearanceSmallComponent">@style/CarOS.ShapeSmall</item>
+        <item name="shapeAppearanceMediumComponent">@style/CarOS.ShapeMedium</item>
+        <item name="shapeAppearanceLargeComponent">@style/CarOS.ShapeLarge</item>
+    </style>
+
+    <!-- ================================================================== -->
+    <!--  LAUNCHER THEME (fullscreen, system bars hidden or themed)           -->
+    <!-- ================================================================== -->
+    <style name="Theme.CarOS.Launcher" parent="Theme.CarOS">
+        <!-- Full screen to own every pixel; CarOS renders its own status bar -->
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <!-- Prevent back stack from appearing as split screen task -->
+        <item name="android:excludeFromRecents">true</item>
+    </style>
+
+    <!-- ================================================================== -->
+    <!--  OVERLAY THEME (for CallOverlayActivity drawn over other apps)       -->
+    <!-- ================================================================== -->
+    <style name="Theme.CarOS.Overlay" parent="Theme.CarOS">
+        <item name="android:windowBackground">@color/caros_call_bg</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <!-- Semi-transparent so content below is dimly visible -->
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.6</item>
+    </style>
+
+    <!-- ================================================================== -->
+    <!--  RACE HUD THEME (maximum contrast, no chrome, always landscape)     -->
+    <!-- ================================================================== -->
+    <style name="Theme.CarOS.RaceHUD" parent="Theme.CarOS">
+        <item name="android:windowBackground">@color/caros_hud_bg</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+        <item name="android:windowKeepScreenOn">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:textColor">@color/caros_hud_text</item>
+    </style>
+
+    <!-- ================================================================== -->
+    <!--  DIALOG THEME                                                        -->
+    <!-- ================================================================== -->
+    <style name="Theme.CarOS.Dialog" parent="Theme.MaterialComponents.Dialog">
+        <item name="android:windowBackground">@color/caros_dialog_bg</item>
+        <item name="android:colorBackground">@color/caros_dialog_bg</item>
+        <item name="android:textColor">@color/caros_text_primary</item>
+        <item name="colorPrimary">@color/caros_primary</item>
+        <item name="colorAccent">@color/caros_primary</item>
+        <item name="android:windowElevation">16dp</item>
+        <item name="android:windowAnimationStyle">@style/CarOS.DialogAnimation</item>
+        <item name="android:windowMinWidthMajor">50%</item>
+        <item name="android:windowMinWidthMinor">80%</item>
+    </style>
+
+    <!-- ================================================================== -->
+    <!--  SETTINGS ACTIVITY THEME                                             -->
+    <!-- ================================================================== -->
+    <style name="Theme.CarOS.Settings" parent="Theme.CarOS">
+        <item name="android:windowBackground">@color/caros_bg</item>
+    </style>
+
+    <!-- ================================================================== -->
+    <!--  SPLASH / STARTUP THEME (applied to window before onCreate)          -->
+    <!-- ================================================================== -->
+    <style name="Theme.CarOS.Splash" parent="Theme.CarOS">
+        <item name="android:windowBackground">@color/caros_bg</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:statusBarColor">@color/caros_bg</item>
+        <item name="android:navigationBarColor">@color/caros_bg</item>
+    </style>
+
+    <!-- ================================================================== -->
+    <!--  SHAPE APPEARANCES                                                   -->
+    <!-- ================================================================== -->
+    <style name="CarOS.ShapeSmall" parent="ShapeAppearance.Material3.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/card_corner_radius_small</item>
+    </style>
+
+    <style name="CarOS.ShapeMedium" parent="ShapeAppearance.Material3.MediumComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/card_corner_radius</item>
+    </style>
+
+    <style name="CarOS.ShapeLarge" parent="ShapeAppearance.Material3.LargeComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/card_corner_radius_large</item>
+    </style>
+
+    <!-- ================================================================== -->
+    <!--  WINDOW ANIMATIONS                                                   -->
+    <!-- ================================================================== -->
+    <style name="CarOS.WindowAnimation" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:activityOpenExitAnimation">@android:anim/fade_out</item>
+        <item name="android:activityCloseEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:activityCloseExitAnimation">@android:anim/fade_out</item>
+        <item name="android:taskOpenEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:taskCloseEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:taskOpenExitAnimation">@android:anim/fade_out</item>
+        <item name="android:taskCloseExitAnimation">@android:anim/fade_out</item>
+    </style>
+
+    <style name="CarOS.DialogAnimation" parent="@android:style/Animation.Dialog">
+        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
+    </style>
+
+    <!-- ================================================================== -->
+    <!--  ACTION MODE (text selection toolbar)                                -->
+    <!-- ================================================================== -->
+    <style name="Theme.CarOS.ActionMode" parent="Widget.AppCompat.ActionMode">
+        <item name="android:background">@color/caros_panel</item>
+        <item name="android:textColor">@color/caros_text_primary</item>
+    </style>
+
+    <!-- ================================================================== -->
+    <!--  PREFERENCE SCREEN THEME (reused by SettingsActivity)                -->
+    <!-- ================================================================== -->
+    <style name="Theme.CarOS.Preference" parent="Theme.CarOS.Settings">
+        <item name="android:listDivider">@color/caros_divider</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+    </style>
+
+    <!-- ================================================================== -->
+    <!--  NIGHT MODE — identical to base (already dark by default)            -->
+    <!-- ================================================================== -->
+    <style name="Theme.CarOS.Night" parent="Theme.CarOS">
+        <!-- No overrides needed — theme is already night-mode first -->
+    </style>
+
+</resources>

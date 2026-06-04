@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <external-path name="caros_root" path="CarOS/" />
+    <external-path name="caros_telemetry" path="CarOS/telemetry/" />
+    <external-path name="caros_routes" path="CarOS/routes/" />
+    <external-path name="caros_dtc" path="CarOS/dtc_reports/" />
+    <external-path name="caros_can" path="CarOS/can_logs/" />
+    <external-files-path name="external_files" path="." />
+</paths>

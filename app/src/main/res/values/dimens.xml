@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ================================================================== -->
+    <!--  TOUCH TARGETS (minimum 64dp for in-vehicle use)                    -->
+    <!-- ================================================================== -->
+    <!-- Primary interactive element touch target: 64dp minimum -->
+    <dimen name="touch_target_min">64dp</dimen>
+    <!-- Large touch targets for critical actions (answer/decline call) -->
+    <dimen name="touch_target_large">80dp</dimen>
+    <!-- Extra-large for primary action buttons -->
+    <dimen name="touch_target_xlarge">96dp</dimen>
+    <!-- Small targets used only for secondary / confirmatory elements -->
+    <dimen name="touch_target_small">48dp</dimen>
+    <!-- Icon size inside touch target -->
+    <dimen name="icon_size_small">20dp</dimen>
+    <dimen name="icon_size_medium">28dp</dimen>
+    <dimen name="icon_size_large">36dp</dimen>
+    <dimen name="icon_size_xlarge">48dp</dimen>
+    <dimen name="icon_size_nav">32dp</dimen>
+
+    <!-- ================================================================== -->
+    <!--  LAYOUT STRUCTURAL DIMENSIONS                                        -->
+    <!-- ================================================================== -->
+    <!-- Side panel width (app drawer, settings panel, etc.) -->
+    <dimen name="panel_width">260dp</dimen>
+    <!-- Collapsed side panel width (icon-only rail) -->
+    <dimen name="panel_width_collapsed">72dp</dimen>
+    <!-- Status / top information bar height -->
+    <dimen name="status_bar_height">36dp</dimen>
+    <!-- Bottom navigation bar height -->
+    <dimen name="bottom_nav_height">48dp</dimen>
+    <!-- Compact bottom nav for landscape / wide layouts -->
+    <dimen name="bottom_nav_height_compact">40dp</dimen>
+    <!-- System status bar overlay height (device status bar is hidden; CarOS draws its own) -->
+    <dimen name="system_status_bar_height">0dp</dimen>
+    <!-- Action / toolbar height -->
+    <dimen name="toolbar_height">56dp</dimen>
+    <!-- Top bar (inside activity) -->
+    <dimen name="top_bar_height">48dp</dimen>
+    <!-- Mini-player bar that peeks from bottom edge -->
+    <dimen name="mini_player_height">72dp</dimen>
+
+    <!-- ================================================================== -->
+    <!--  SPACING / PADDING                                                   -->
+    <!-- ================================================================== -->
+    <dimen name="spacing_xxs">2dp</dimen>
+    <dimen name="spacing_xs">4dp</dimen>
+    <dimen name="spacing_sm">8dp</dimen>
+    <dimen name="spacing_md">12dp</dimen>
+    <dimen name="spacing_lg">16dp</dimen>
+    <dimen name="spacing_xl">24dp</dimen>
+    <dimen name="spacing_xxl">32dp</dimen>
+    <dimen name="spacing_xxxl">48dp</dimen>
+    <!-- Standard content margin from screen edges -->
+    <dimen name="content_margin_horizontal">16dp</dimen>
+    <dimen name="content_margin_vertical">12dp</dimen>
+    <!-- Inset for items inside cards / panels -->
+    <dimen name="inset_horizontal">12dp</dimen>
+    <dimen name="inset_vertical">8dp</dimen>
+
+    <!-- ================================================================== -->
+    <!--  CARD / SURFACE DIMENSIONS                                           -->
+    <!-- ================================================================== -->
+    <dimen name="card_corner_radius">8dp</dimen>
+    <dimen name="card_corner_radius_large">12dp</dimen>
+    <dimen name="card_corner_radius_small">4dp</dimen>
+    <dimen name="card_elevation">2dp</dimen>
+    <dimen name="card_elevation_raised">6dp</dimen>
+    <dimen name="card_padding">12dp</dimen>
+    <dimen name="card_padding_large">16dp</dimen>
+    <!-- App launcher grid card size -->
+    <dimen name="app_card_size">120dp</dimen>
+    <dimen name="app_card_size_small">96dp</dimen>
+    <dimen name="app_icon_size">56dp</dimen>
+
+    <!-- ================================================================== -->
+    <!--  BUTTON DIMENSIONS                                                   -->
+    <!-- ================================================================== -->
+    <dimen name="button_height">48dp</dimen>
+    <dimen name="button_height_large">56dp</dimen>
+    <dimen name="button_height_small">36dp</dimen>
+    <dimen name="button_corner_radius">8dp</dimen>
+    <dimen name="button_corner_radius_pill">24dp</dimen>
+    <dimen name="button_padding_horizontal">24dp</dimen>
+    <dimen name="button_padding_vertical">12dp</dimen>
+    <dimen name="button_min_width">120dp</dimen>
+    <dimen name="fab_size">64dp</dimen>
+
+    <!-- ================================================================== -->
+    <!--  TEXT SIZES                                                          -->
+    <!-- ================================================================== -->
+    <dimen name="text_xs">10sp</dimen>
+    <dimen name="text_sm">12sp</dimen>
+    <dimen name="text_body">14sp</dimen>
+    <dimen name="text_body_large">16sp</dimen>
+    <dimen name="text_subtitle">18sp</dimen>
+    <dimen name="text_title">20sp</dimen>
+    <dimen name="text_title_large">24sp</dimen>
+    <dimen name="text_headline">28sp</dimen>
+    <dimen name="text_display">32sp</dimen>
+    <dimen name="text_display_large">40sp</dimen>
+    <!-- HUD / instrument cluster sizes -->
+    <dimen name="text_hud_value">48sp</dimen>
+    <dimen name="text_hud_label">11sp</dimen>
+    <dimen name="text_hud_secondary">22sp</dimen>
+    <dimen name="text_speed_large">80sp</dimen>
+    <dimen name="text_rpm_large">64sp</dimen>
+    <dimen name="text_gear">96sp</dimen>
+    <dimen name="text_laptime">36sp</dimen>
+    <dimen name="text_sector">20sp</dimen>
+    <!-- Navigation label sizes -->
+    <dimen name="text_nav_label">11sp</dimen>
+    <dimen name="text_status_bar">11sp</dimen>
+
+    <!-- ================================================================== -->
+    <!--  DIVIDERS / BORDERS                                                  -->
+    <!-- ================================================================== -->
+    <dimen name="divider_height">1dp</dimen>
+    <dimen name="divider_height_thick">2dp</dimen>
+    <dimen name="border_width">1dp</dimen>
+    <dimen name="border_width_focus">2dp</dimen>
+    <dimen name="border_width_active">3dp</dimen>
+
+    <!-- ================================================================== -->
+    <!--  PROGRESS / GAUGE                                                    -->
+    <!-- ================================================================== -->
+    <dimen name="gauge_stroke_width">8dp</dimen>
+    <dimen name="gauge_stroke_width_thin">4dp</dimen>
+    <dimen name="gauge_stroke_width_thick">12dp</dimen>
+    <dimen name="gauge_size_small">100dp</dimen>
+    <dimen name="gauge_size_medium">160dp</dimen>
+    <dimen name="gauge_size_large">220dp</dimen>
+    <dimen name="progress_bar_height">4dp</dimen>
+    <dimen name="progress_bar_height_thick">8dp</dimen>
+    <!-- Sector time indicator width in Race HUD -->
+    <dimen name="sector_bar_height">6dp</dimen>
+
+    <!-- ================================================================== -->
+    <!--  MEDIA PLAYER LAYOUT                                                 -->
+    <!-- ================================================================== -->
+    <dimen name="album_art_size_small">64dp</dimen>
+    <dimen name="album_art_size_medium">120dp</dimen>
+    <dimen name="album_art_size_large">200dp</dimen>
+    <dimen name="album_art_corner_radius">6dp</dimen>
+    <dimen name="media_control_size">56dp</dimen>
+    <dimen name="media_control_size_primary">72dp</dimen>
+    <dimen name="volume_slider_height">4dp</dimen>
+    <dimen name="volume_thumb_size">20dp</dimen>
+
+    <!-- ================================================================== -->
+    <!--  CALL / PHONE UI                                                     -->
+    <!-- ================================================================== -->
+    <dimen name="call_button_size">80dp</dimen>
+    <dimen name="call_button_icon_size">36dp</dimen>
+    <dimen name="call_avatar_size">96dp</dimen>
+    <dimen name="call_avatar_size_large">120dp</dimen>
+
+    <!-- ================================================================== -->
+    <!--  NOTIFICATION / TOAST / SNACKBAR                                     -->
+    <!-- ================================================================== -->
+    <dimen name="snackbar_corner_radius">6dp</dimen>
+    <dimen name="snackbar_margin">16dp</dimen>
+    <dimen name="toast_corner_radius">24dp</dimen>
+
+    <!-- ================================================================== -->
+    <!--  OVERLAY / DIALOG                                                    -->
+    <!-- ================================================================== -->
+    <dimen name="dialog_width">480dp</dimen>
+    <dimen name="dialog_corner_radius">12dp</dimen>
+    <dimen name="dialog_padding">24dp</dimen>
+    <dimen name="bottom_sheet_corner_radius">16dp</dimen>
+    <dimen name="popup_corner_radius">8dp</dimen>
+
+    <!-- ================================================================== -->
+    <!--  RECYCLER LIST ITEMS                                                 -->
+    <!-- ================================================================== -->
+    <dimen name="list_item_height">64dp</dimen>
+    <dimen name="list_item_height_compact">48dp</dimen>
+    <dimen name="list_item_height_large">72dp</dimen>
+    <!-- Contact / call log row thumbnail -->
+    <dimen name="contact_avatar_small">40dp</dimen>
+    <dimen name="contact_avatar_medium">56dp</dimen>
+    <!-- Left padding for items without a leading icon -->
+    <dimen name="list_item_indent">72dp</dimen>
+
+    <!-- ================================================================== -->
+    <!--  RACE HUD SPECIFIC                                                   -->
+    <!-- ================================================================== -->
+    <dimen name="hud_panel_width">280dp</dimen>
+    <dimen name="hud_panel_height">160dp</dimen>
+    <dimen name="hud_corner_radius">8dp</dimen>
+    <dimen name="hud_padding">12dp</dimen>
+    <dimen name="hud_delta_bar_height">8dp</dimen>
+    <dimen name="hud_delta_bar_width">200dp</dimen>
+    <dimen name="hud_tire_indicator_size">44dp</dimen>
+    <dimen name="hud_tire_grid_spacing">4dp</dimen>
+
+    <!-- ================================================================== -->
+    <!--  CAN BUS / TELEMETRY DATA DISPLAY                                   -->
+    <!-- ================================================================== -->
+    <dimen name="telemetry_cell_min_width">140dp</dimen>
+    <dimen name="telemetry_cell_height">68dp</dimen>
+    <dimen name="telemetry_value_text_size">28sp</dimen>
+    <dimen name="telemetry_unit_text_size">12sp</dimen>
+    <dimen name="telemetry_label_text_size">11sp</dimen>
+    <dimen name="can_frame_row_height">44dp</dimen>
+
+</resources>

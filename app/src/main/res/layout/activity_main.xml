@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#080808"
+    tools:context=".MainActivity">
+
+    <!-- Status Bar -->
+    <com.ds.launcher.ui.views.StatusBarView
+        android:id="@+id/statusBarView"
+        android:layout_width="0dp"
+        android:layout_height="36dp"
+        android:background="#111111"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Main Content Area (left + center + right panels) -->
+    <LinearLayout
+        android:id="@+id/mainContentArea"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/statusBarView">
+
+        <!-- Left Panel -->
+        <FrameLayout
+            android:id="@+id/leftPanel"
+            android:layout_width="260dp"
+            android:layout_height="match_parent"
+            android:background="#111111"
+            android:foreground="@drawable/panel_border_right" />
+
+        <!-- Center Panel -->
+        <FrameLayout
+            android:id="@+id/centerPanel"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#080808" />
+
+        <!-- Right Panel -->
+        <FrameLayout
+            android:id="@+id/rightPanel"
+            android:layout_width="260dp"
+            android:layout_height="match_parent"
+            android:background="#111111"
+            android:foreground="@drawable/panel_border_left" />
+
+    </LinearLayout>
+
+    <!-- Bottom Navigation Bar -->
+    <LinearLayout
+        android:id="@+id/bottomNavBar"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:background="#111111"
+        android:elevation="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <!-- Home -->
+        <LinearLayout
+            android:id="@+id/navHome"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
+
+            <ImageView
+                android:id="@+id/navHomeIcon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_home"
+                android:tint="#FFFFFF"
+                android:contentDescription="Home" />
+
+            <TextView
+                android:id="@+id/navHomeLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Home"
+                android:textColor="#FFFFFF"
+                android:textSize="10sp"
+                android:fontFamily="sans-serif-condensed"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <!-- Media -->
+        <LinearLayout
+            android:id="@+id/navMedia"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
+
+            <ImageView
+                android:id="@+id/navMediaIcon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_media"
+                android:tint="#FFFFFF"
+                android:contentDescription="Media" />
+
+            <TextView
+                android:id="@+id/navMediaLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Media"
+                android:textColor="#FFFFFF"
+                android:textSize="10sp"
+                android:fontFamily="sans-serif-condensed"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <!-- Race -->
+        <LinearLayout
+            android:id="@+id/navRace"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
+
+            <ImageView
+                android:id="@+id/navRaceIcon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_race"
+                android:tint="#FFFFFF"
+                android:contentDescription="Race" />
+
+            <TextView
+                android:id="@+id/navRaceLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Race"
+                android:textColor="#FFFFFF"
+                android:textSize="10sp"
+                android:fontFamily="sans-serif-condensed"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <!-- VCDS -->
+        <LinearLayout
+            android:id="@+id/navVcds"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
+
+            <ImageView
+                android:id="@+id/navVcdsIcon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_vcds"
+                android:tint="#FFFFFF"
+                android:contentDescription="VCDS" />
+
+            <TextView
+                android:id="@+id/navVcdsLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="VCDS"
+                android:textColor="#FFFFFF"
+                android:textSize="10sp"
+                android:fontFamily="sans-serif-condensed"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <!-- Android -->
+        <LinearLayout
+            android:id="@+id/navAndroid"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
+
+            <ImageView
+                android:id="@+id/navAndroidIcon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_android"
+                android:tint="#FFFFFF"
+                android:contentDescription="Android" />
+
+            <TextView
+                android:id="@+id/navAndroidLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Android"
+                android:textColor="#FFFFFF"
+                android:textSize="10sp"
+                android:fontFamily="sans-serif-condensed"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <!-- Diag -->
+        <LinearLayout
+            android:id="@+id/navDiag"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
+
+            <ImageView
+                android:id="@+id/navDiagIcon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_diagnostics"
+                android:tint="#FFFFFF"
+                android:contentDescription="Diagnostics" />
+
+            <TextView
+                android:id="@+id/navDiagLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Diag"
+                android:textColor="#FFFFFF"
+                android:textSize="10sp"
+                android:fontFamily="sans-serif-condensed"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

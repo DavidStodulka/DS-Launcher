@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ================================================================== -->
+    <!--  BASE TEXT APPEARANCES                                               -->
+    <!-- ================================================================== -->
+
+    <style name="CarOS.TextAppearance" parent="@android:style/TextAppearance">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textColor">@color/caros_text_primary</item>
+    </style>
+
+    <style name="CarOS.TextAppearance.Display" parent="CarOS.TextAppearance">
+        <item name="android:textSize">@dimen/text_display</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <style name="CarOS.TextAppearance.Headline" parent="CarOS.TextAppearance">
+        <item name="android:textSize">@dimen/text_headline</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="CarOS.TextAppearance.Title" parent="CarOS.TextAppearance">
+        <item name="android:textSize">@dimen/text_title</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="CarOS.TextAppearance.TitleLarge" parent="CarOS.TextAppearance">
+        <item name="android:textSize">@dimen/text_title_large</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="CarOS.TextAppearance.Subtitle" parent="CarOS.TextAppearance">
+        <item name="android:textSize">@dimen/text_subtitle</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textColor">@color/caros_text_secondary</item>
+    </style>
+
+    <style name="CarOS.TextAppearance.Body" parent="CarOS.TextAppearance">
+        <item name="android:textSize">@dimen/text_body</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="CarOS.TextAppearance.BodyLarge" parent="CarOS.TextAppearance">
+        <item name="android:textSize">@dimen/text_body_large</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="CarOS.TextAppearance.Caption" parent="CarOS.TextAppearance">
+        <item name="android:textSize">@dimen/text_sm</item>
+        <item name="android:textColor">@color/caros_text_secondary</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="CarOS.TextAppearance.Label" parent="CarOS.TextAppearance">
+        <item name="android:textSize">@dimen/text_xs</item>
+        <item name="android:textColor">@color/caros_text_secondary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:letterSpacing">0.05</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <!-- HUD / Instrument cluster monospace values -->
+    <style name="CarOS.TextAppearance.HUD.Value" parent="CarOS.TextAppearance">
+        <item name="android:textSize">@dimen/text_hud_value</item>
+        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="android:textColor">@color/caros_hud_text</item>
+        <item name="android:letterSpacing">-0.01</item>
+    </style>
+
+    <style name="CarOS.TextAppearance.HUD.Label" parent="CarOS.TextAppearance">
+        <item name="android:textSize">@dimen/text_hud_label</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/caros_text_secondary</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.08</item>
+    </style>
+
+    <style name="CarOS.TextAppearance.HUD.LapTime" parent="CarOS.TextAppearance">
+        <item name="android:textSize">@dimen/text_laptime</item>
+        <item name="android:fontFamily">monospace</item>
+        <item name="android:textColor">@color/caros_hud_laptime</item>
+    </style>
+
+    <style name="CarOS.TextAppearance.Speed" parent="CarOS.TextAppearance">
+        <item name="android:textSize">@dimen/text_speed_large</item>
+        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <style name="CarOS.TextAppearance.Gear" parent="CarOS.TextAppearance">
+        <item name="android:textSize">@dimen/text_gear</item>
+        <item name="android:fontFamily">sans-serif-condensed</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/caros_primary_variant</item>
+    </style>
+
+    <!-- ================================================================== -->
+    <!--  BUTTON STYLES                                                       -->
+    <!-- ================================================================== -->
+
+    <style name="CarOS.Button" parent="@android:style/Widget.Button">
+        <item name="android:background">@color/caros_primary</item>
+        <item name="android:textColor">@color/caros_text_on_primary</item>
+        <item name="android:textSize">@dimen/text_body_large</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:letterSpacing">0.01</item>
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:paddingStart">@dimen/button_padding_horizontal</item>
+        <item name="android:paddingEnd">@dimen/button_padding_horizontal</item>
+        <item name="android:paddingTop">@dimen/button_padding_vertical</item>
+        <item name="android:paddingBottom">@dimen/button_padding_vertical</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="CarOS.Button.Large" parent="CarOS.Button">
+        <item name="android:minHeight">@dimen/button_height_large</item>
+        <item name="android:textSize">@dimen/text_subtitle</item>
+    </style>
+
+    <style name="CarOS.Button.Secondary" parent="CarOS.Button">
+        <item name="android:background">@color/caros_secondary</item>
+        <item name="android:textColor">@color/caros_text_on_secondary</item>
+    </style>
+
+    <style name="CarOS.Button.Outline" parent="CarOS.Button">
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:textColor">@color/caros_primary_light</item>
+    </style>
+
+    <style name="CarOS.Button.Danger" parent="CarOS.Button">
+        <item name="android:background">@color/caros_error</item>
+    </style>
+
+    <style name="CarOS.Button.Success" parent="CarOS.Button">
+        <item name="android:background">@color/caros_ok</item>
+    </style>
+
+    <!-- Round icon buttons for media / call controls -->
+    <style name="CarOS.Button.Icon" parent="CarOS.Button">
+        <item name="android:minWidth">@dimen/touch_target_min</item>
+        <item name="android:minHeight">@dimen/touch_target_min</item>
+        <item name="android:paddingStart">@dimen/spacing_sm</item>
+        <item name="android:paddingEnd">@dimen/spacing_sm</item>
+        <item name="android:paddingTop">@dimen/spacing_sm</item>
+        <item name="android:paddingBottom">@dimen/spacing_sm</item>
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+
+    <!-- Call answer / decline oversized round buttons -->
+    <style name="CarOS.Button.CallAnswer" parent="CarOS.Button.Large">
+        <item name="android:background">@color/caros_call_answer</item>
+        <item name="android:minWidth">@dimen/call_button_size</item>
+        <item name="android:minHeight">@dimen/call_button_size</item>
+        <item name="android:paddingStart">@dimen/spacing_xl</item>
+        <item name="android:paddingEnd">@dimen/spacing_xl</item>
+    </style>
+
+    <style name="CarOS.Button.CallDecline" parent="CarOS.Button.Large">
+        <item name="android:background">@color/caros_call_decline</item>
+        <item name="android:minWidth">@dimen/call_button_size</item>
+        <item name="android:minHeight">@dimen/call_button_size</item>
+        <item name="android:paddingStart">@dimen/spacing_xl</item>
+        <item name="android:paddingEnd">@dimen/spacing_xl</item>
+    </style>
+
+    <!-- ================================================================== -->
+    <!--  INPUT STYLES                                                        -->
+    <!-- ================================================================== -->
+
+    <style name="CarOS.EditText" parent="@android:style/Widget.EditText">
+        <item name="android:background">@color/caros_surface</item>
+        <item name="android:textColor">@color/caros_text_primary</item>
+        <item name="android:textColorHint">@color/caros_text_hint</item>
+        <item name="android:textSize">@dimen/text_body_large</item>
+        <item name="android:padding">@dimen/spacing_md</item>
+        <item name="android:minHeight">@dimen/touch_target_min</item>
+        <item name="android:cursorVisible">true</item>
+    </style>
+
+    <style name="CarOS.SearchView" parent="CarOS.EditText">
+        <item name="android:imeOptions">actionSearch</item>
+        <item name="android:inputType">text</item>
+        <item name="android:maxLines">1</item>
+    </style>
+
+    <!-- ================================================================== -->
+    <!--  LIST / RECYCLER ITEM STYLES                                         -->
+    <!-- ================================================================== -->
+
+    <style name="CarOS.ListItem">
+        <item name="android:minHeight">@dimen/list_item_height</item>
+        <item name="android:paddingStart">@dimen/content_margin_horizontal</item>
+        <item name="android:paddingEnd">@dimen/content_margin_horizontal</item>
+        <item name="android:paddingTop">@dimen/spacing_sm</item>
+        <item name="android:paddingBottom">@dimen/spacing_sm</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="CarOS.ListItem.Contact" parent="CarOS.ListItem">
+        <item name="android:minHeight">@dimen/list_item_height_large</item>
+    </style>
+
+    <!-- ================================================================== -->
+    <!--  CARD STYLES                                                         -->
+    <!-- ================================================================== -->
+
+    <style name="CarOS.Card">
+        <item name="android:background">@color/caros_panel</item>
+        <item name="android:padding">@dimen/card_padding</item>
+        <item name="android:elevation">@dimen/card_elevation</item>
+        <item name="android:layout_margin">@dimen/spacing_sm</item>
+    </style>
+
+    <style name="CarOS.Card.Elevated" parent="CarOS.Card">
+        <item name="android:elevation">@dimen/card_elevation_raised</item>
+        <item name="android:background">@color/caros_surface</item>
+    </style>
+
+    <!-- ================================================================== -->
+    <!--  TOOLBAR / PANEL HEADER STYLES                                       -->
+    <!-- ================================================================== -->
+
+    <style name="CarOS.Toolbar">
+        <item name="android:background">@color/caros_panel</item>
+        <item name="android:minHeight">@dimen/toolbar_height</item>
+        <item name="android:paddingStart">@dimen/content_margin_horizontal</item>
+        <item name="android:paddingEnd">@dimen/content_margin_horizontal</item>
+        <item name="android:elevation">4dp</item>
+    </style>
+
+    <!-- ================================================================== -->
+    <!--  STATUS BAR WIDGET STYLES                                            -->
+    <!-- ================================================================== -->
+
+    <style name="CarOS.StatusBar">
+        <item name="android:background">@color/caros_status_bar_bg</item>
+        <item name="android:minHeight">@dimen/status_bar_height</item>
+        <item name="android:paddingStart">@dimen/spacing_sm</item>
+        <item name="android:paddingEnd">@dimen/spacing_sm</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <style name="CarOS.StatusBar.Text">
+        <item name="android:textSize">@dimen/text_status_bar</item>
+        <item name="android:textColor">@color/caros_status_icon</item>
+        <item name="android:fontFamily">sans-serif-condensed</item>
+    </style>
+
+    <!-- ================================================================== -->
+    <!--  BOTTOM NAVIGATION STYLES                                            -->
+    <!-- ================================================================== -->
+
+    <style name="CarOS.BottomNav">
+        <item name="android:background">@color/caros_nav_bg</item>
+        <item name="android:minHeight">@dimen/bottom_nav_height</item>
+        <item name="android:elevation">8dp</item>
+    </style>
+
+    <!-- ================================================================== -->
+    <!--  DIALOG STYLES                                                       -->
+    <!-- ================================================================== -->
+
+    <style name="CarOS.Dialog" parent="@android:style/Theme.Dialog">
+        <item name="android:windowBackground">@color/caros_dialog_bg</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowElevation">16dp</item>
+        <item name="android:textColor">@color/caros_text_primary</item>
+        <item name="android:colorBackground">@color/caros_dialog_bg</item>
+        <item name="android:windowTitleStyle">@style/CarOS.TextAppearance.Title</item>
+        <item name="android:buttonBarStyle">@android:style/Widget.ButtonBar</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+        <item name="android:windowMinWidthMajor">50%</item>
+        <item name="android:windowMinWidthMinor">80%</item>
+    </style>
+
+    <!-- ================================================================== -->
+    <!--  DIVIDER STYLE                                                       -->
+    <!-- ================================================================== -->
+
+    <style name="CarOS.Divider">
+        <item name="android:background">@color/caros_divider</item>
+    </style>
+
+    <!-- ================================================================== -->
+    <!--  PROGRESS BAR STYLES                                                 -->
+    <!-- ================================================================== -->
+
+    <style name="CarOS.ProgressBar" parent="@android:style/Widget.ProgressBar.Horizontal">
+        <item name="android:indeterminate">false</item>
+        <item name="android:minHeight">@dimen/progress_bar_height</item>
+        <item name="android:maxHeight">@dimen/progress_bar_height</item>
+    </style>
+
+    <style name="CarOS.ProgressBar.Indeterminate" parent="@android:style/Widget.ProgressBar">
+        <item name="android:indeterminate">true</item>
+    </style>
+
+    <!-- ================================================================== -->
+    <!--  SWITCH / TOGGLE STYLES                                              -->
+    <!-- ================================================================== -->
+
+    <style name="CarOS.Switch" parent="@android:style/Widget.CompoundButton.Switch">
+        <item name="android:minHeight">@dimen/touch_target_min</item>
+    </style>
+
+    <!-- ================================================================== -->
+    <!--  POPUP / DROPDOWN STYLES                                             -->
+    <!-- ================================================================== -->
+
+    <style name="CarOS.PopupMenu" parent="@android:style/Widget.PopupMenu">
+        <item name="android:popupBackground">@color/caros_panel</item>
+        <item name="android:textColor">@color/caros_text_primary</item>
+    </style>
+
+    <!-- ================================================================== -->
+    <!--  SCROLLBAR STYLE                                                     -->
+    <!-- ================================================================== -->
+
+    <style name="CarOS.Scrollbar">
+        <item name="android:scrollbarThumbVertical">@color/caros_outline</item>
+        <item name="android:scrollbarAlwaysDrawVerticalTrack">false</item>
+        <item name="android:scrollbars">vertical</item>
+        <item name="android:fadeScrollbars">true</item>
+    </style>
+
+</resources>

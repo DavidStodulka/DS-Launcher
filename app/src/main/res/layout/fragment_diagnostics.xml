@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#080808">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TRIP COMPUTER"
+            android:textColor="#1565C0"
+            android:textSize="12sp"
+            android:letterSpacing="0.1"
+            android:paddingBottom="8dp"/>
+
+        <GridLayout
+            android:id="@+id/gridTripStats"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="3"
+            android:rowCount="2"
+            android:padding="8dp"
+            android:background="#111111">
+
+            <LinearLayout android:orientation="vertical" android:layout_width="0dp" android:layout_weight="1" android:layout_height="64dp" android:gravity="center" android:layout_column="0" android:layout_row="0">
+                <TextView android:id="@+id/tvAvgSpeed" android:text="--" android:textSize="24sp" android:textColor="#FFFFFF" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                <TextView android:text="Prům. km/h" android:textSize="11sp" android:textColor="#757575" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            </LinearLayout>
+            <LinearLayout android:orientation="vertical" android:layout_width="0dp" android:layout_weight="1" android:layout_height="64dp" android:gravity="center" android:layout_column="1" android:layout_row="0">
+                <TextView android:id="@+id/tvMaxSpeed" android:text="--" android:textSize="24sp" android:textColor="#FFFFFF" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                <TextView android:text="Max km/h" android:textSize="11sp" android:textColor="#757575" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            </LinearLayout>
+            <LinearLayout android:orientation="vertical" android:layout_width="0dp" android:layout_weight="1" android:layout_height="64dp" android:gravity="center" android:layout_column="2" android:layout_row="0">
+                <TextView android:id="@+id/tvDistance" android:text="--" android:textSize="24sp" android:textColor="#FFFFFF" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                <TextView android:text="km" android:textSize="11sp" android:textColor="#757575" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            </LinearLayout>
+            <LinearLayout android:orientation="vertical" android:layout_width="0dp" android:layout_weight="1" android:layout_height="64dp" android:gravity="center" android:layout_column="0" android:layout_row="1">
+                <TextView android:id="@+id/tvTripTime" android:text="--" android:textSize="24sp" android:textColor="#FFFFFF" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                <TextView android:text="Čas jízdy" android:textSize="11sp" android:textColor="#757575" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            </LinearLayout>
+            <LinearLayout android:orientation="vertical" android:layout_width="0dp" android:layout_weight="1" android:layout_height="64dp" android:gravity="center" android:layout_column="1" android:layout_row="1">
+                <TextView android:id="@+id/tvMaxRpm" android:text="--" android:textSize="24sp" android:textColor="#FFFFFF" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                <TextView android:text="Max RPM" android:textSize="11sp" android:textColor="#757575" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            </LinearLayout>
+            <LinearLayout android:orientation="vertical" android:layout_width="0dp" android:layout_weight="1" android:layout_height="64dp" android:gravity="center" android:layout_column="2" android:layout_row="1">
+                <TextView android:id="@+id/tvAvgThrottle" android:text="--" android:textSize="24sp" android:textColor="#FFFFFF" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                <TextView android:text="Prům. Plyn%" android:textSize="11sp" android:textColor="#757575" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            </LinearLayout>
+        </GridLayout>
+
+        <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#1E1E1E" android:layout_marginTop="16dp" android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="LIVE GAUGES"
+            android:textColor="#1565C0"
+            android:textSize="12sp"
+            android:letterSpacing="0.1"
+            android:paddingBottom="8dp"/>
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="2"
+            android:rowCount="2">
+
+            <com.caros.views.GaugeWidgetView android:id="@+id/gaugeCoolant" android:layout_width="0dp" android:layout_weight="1" android:layout_height="120dp" android:layout_column="0" android:layout_row="0" android:layout_margin="4dp"/>
+            <com.caros.views.GaugeWidgetView android:id="@+id/gaugeOilTemp" android:layout_width="0dp" android:layout_weight="1" android:layout_height="120dp" android:layout_column="1" android:layout_row="0" android:layout_margin="4dp"/>
+            <com.caros.views.GaugeWidgetView android:id="@+id/gaugeVoltage" android:layout_width="0dp" android:layout_weight="1" android:layout_height="120dp" android:layout_column="0" android:layout_row="1" android:layout_margin="4dp"/>
+            <com.caros.views.GaugeWidgetView android:id="@+id/gaugeDPF" android:layout_width="0dp" android:layout_weight="1" android:layout_height="120dp" android:layout_column="1" android:layout_row="1" android:layout_margin="4dp"/>
+        </GridLayout>
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

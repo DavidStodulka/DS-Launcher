@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="#080808">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- DISPLAY -->
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="DISPLEJ" android:textColor="#1565C0" android:textSize="12sp" android:letterSpacing="0.1" android:paddingBottom="8dp"/>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:background="#111111" android:padding="12dp" android:layout_marginBottom="12dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:paddingBottom="8dp">
+                <TextView android:text="Jas" android:textColor="#FFFFFF" android:textSize="14sp" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"/>
+                <TextView android:id="@+id/tvBrightnessValue" android:text="128" android:textColor="#757575" android:textSize="14sp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            </LinearLayout>
+            <SeekBar android:id="@+id/seekBrightness" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="255" android:progress="128" android:thumbTint="#1565C0" android:progressTint="#1565C0"/>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="48dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingTop="8dp">
+                <TextView android:text="Auto jas" android:textColor="#FFFFFF" android:textSize="14sp" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"/>
+                <Switch android:id="@+id/switchAutoBrightness" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="48dp" android:orientation="horizontal" android:gravity="center_vertical">
+                <TextView android:text="Noční mód (po 20:00)" android:textColor="#FFFFFF" android:textSize="14sp" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"/>
+                <Switch android:id="@+id/switchNightMode" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- CAN / NAPÁJENÍ -->
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="CAN / NAPÁJENÍ" android:textColor="#1565C0" android:textSize="12sp" android:letterSpacing="0.1" android:paddingBottom="8dp"/>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:background="#111111" android:padding="12dp" android:layout_marginBottom="12dp">
+            <RadioGroup android:id="@+id/rgShutdownMode" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                <RadioButton android:id="@+id/rbDeepSleep" android:text="Hluboký spánek" android:textColor="#FFFFFF" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:checked="true" android:buttonTint="#1565C0"/>
+                <RadioButton android:id="@+id/rbPowerOff" android:text="Úplné vypnutí" android:textColor="#FFFFFF" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:buttonTint="#1565C0"/>
+            </RadioGroup>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:paddingTop="12dp" android:paddingBottom="8dp">
+                <TextView android:text="Prodleva vypnutí" android:textColor="#FFFFFF" android:textSize="14sp" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"/>
+                <TextView android:id="@+id/tvShutdownDelay" android:text="60s" android:textColor="#757575" android:textSize="14sp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            </LinearLayout>
+            <SeekBar android:id="@+id/seekShutdownDelay" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="300" android:progress="60" android:thumbTint="#E65100" android:progressTint="#E65100"/>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="48dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingTop="8dp">
+                <TextView android:text="Mock CAN (vývoj)" android:textColor="#FFFFFF" android:textSize="14sp" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"/>
+                <Switch android:id="@+id/switchMockCAN" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- WIFI -->
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="WiFi" android:textColor="#1565C0" android:textSize="12sp" android:letterSpacing="0.1" android:paddingBottom="8dp"/>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:background="#111111" android:padding="12dp" android:layout_marginBottom="12dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="48dp" android:orientation="horizontal" android:gravity="center_vertical">
+                <TextView android:text="WiFi" android:textColor="#FFFFFF" android:textSize="14sp" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"/>
+                <Switch android:id="@+id/switchWifi" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            </LinearLayout>
+            <TextView android:id="@+id/tvCurrentSSID" android:text="Nepřipojeno" android:textColor="#757575" android:textSize="13sp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            <TextView android:id="@+id/tvIP" android:text="" android:textColor="#1565C0" android:textSize="13sp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- VÝVOJÁŘ -->
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="VÝVOJÁŘ" android:textColor="#1565C0" android:textSize="12sp" android:letterSpacing="0.1" android:paddingBottom="8dp"/>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:background="#111111" android:padding="12dp" android:layout_marginBottom="12dp">
+            <Button android:id="@+id/btnADBToggle" android:layout_width="match_parent" android:layout_height="52dp" android:text="Zapnout ADB WiFi" android:background="#1565C0" android:textColor="#FFFFFF" android:layout_marginBottom="8dp"/>
+            <TextView android:id="@+id/tvADBStatus" android:text="" android:textColor="#2E7D32" android:textSize="13sp" android:fontFamily="monospace" android:layout_width="wrap_content" android:layout_height="wrap_content" android:paddingBottom="8dp"/>
+            <Button android:id="@+id/btnSELinux" android:layout_width="match_parent" android:layout_height="52dp" android:text="SELinux: Enforcing" android:background="#111111" android:textColor="#F9A825"/>
+        </LinearLayout>
+
+        <!-- SYSTEM INFO -->
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="SYSTÉM" android:textColor="#1565C0" android:textSize="12sp" android:letterSpacing="0.1" android:paddingBottom="8dp"/>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:background="#111111" android:padding="12dp">
+            <TextView android:id="@+id/tvCPUUsage" android:text="CPU: --%  Teplota: --°C" android:textColor="#FFFFFF" android:textSize="13sp" android:fontFamily="monospace" android:layout_width="wrap_content" android:layout_height="wrap_content" android:paddingBottom="4dp"/>
+            <TextView android:id="@+id/tvRAMUsage" android:text="RAM: -- / -- MB" android:textColor="#FFFFFF" android:textSize="13sp" android:fontFamily="monospace" android:layout_width="wrap_content" android:layout_height="wrap_content" android:paddingBottom="4dp"/>
+            <TextView android:id="@+id/tvBuildInfo" android:text="Build: CarOS" android:textColor="#757575" android:textSize="12sp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        </LinearLayout>
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

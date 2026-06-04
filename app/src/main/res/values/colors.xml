@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ================================================================== -->
+    <!--  CORE BACKGROUNDS                                                    -->
+    <!-- ================================================================== -->
+    <!-- Primary app background — near-black for OLED panels -->
+    <color name="caros_bg">#FF080808</color>
+    <!-- Panel surfaces: sidebars, cards, drawer backgrounds -->
+    <color name="caros_panel">#FF111111</color>
+    <!-- Elevated card surface: slightly lighter than panel -->
+    <color name="caros_surface">#FF1A1A1A</color>
+    <!-- Deepest elevation / modal scrim base -->
+    <color name="caros_surface_variant">#FF222222</color>
+    <!-- Dialog / bottom-sheet background -->
+    <color name="caros_dialog_bg">#FF161616</color>
+
+    <!-- ================================================================== -->
+    <!--  PRIMARY BRAND — DEEP BLUE                                           -->
+    <!-- ================================================================== -->
+    <color name="caros_primary">#FF1565C0</color>
+    <color name="caros_primary_dark">#FF0D47A1</color>
+    <color name="caros_primary_light">#FF1976D2</color>
+    <color name="caros_primary_variant">#FF2979FF</color>
+    <!-- Semi-transparent tint for overlays, pressed states -->
+    <color name="caros_primary_alpha20">#331565C0</color>
+    <color name="caros_primary_alpha40">#661565C0</color>
+
+    <!-- ================================================================== -->
+    <!--  SECONDARY BRAND — DEEP ORANGE / AMBER                              -->
+    <!-- ================================================================== -->
+    <color name="caros_secondary">#FFE65100</color>
+    <color name="caros_secondary_dark">#FFBF360C</color>
+    <color name="caros_secondary_light">#FFFF6D00</color>
+    <color name="caros_secondary_variant">#FFFF9100</color>
+    <color name="caros_secondary_alpha20">#33E65100</color>
+
+    <!-- ================================================================== -->
+    <!--  SEMANTIC: ERROR / DANGER                                            -->
+    <!-- ================================================================== -->
+    <color name="caros_error">#FFC62828</color>
+    <color name="caros_error_dark">#FFB71C1C</color>
+    <color name="caros_error_light">#FFEF5350</color>
+    <color name="caros_error_alpha20">#33C62828</color>
+    <!-- Error container for chip / badge backgrounds -->
+    <color name="caros_error_container">#FF3E0000</color>
+    <color name="caros_on_error_container">#FFFFB3B3</color>
+
+    <!-- ================================================================== -->
+    <!--  SEMANTIC: WARNING / CAUTION                                         -->
+    <!-- ================================================================== -->
+    <color name="caros_warning">#FFF9A825</color>
+    <color name="caros_warning_dark">#FFF57F17</color>
+    <color name="caros_warning_light">#FFFFCA28</color>
+    <color name="caros_warning_alpha20">#33F9A825</color>
+    <color name="caros_warning_container">#FF3E2800</color>
+    <color name="caros_on_warning_container">#FFFFECB3</color>
+
+    <!-- ================================================================== -->
+    <!--  SEMANTIC: OK / SUCCESS                                              -->
+    <!-- ================================================================== -->
+    <color name="caros_ok">#FF2E7D32</color>
+    <color name="caros_ok_dark">#FF1B5E20</color>
+    <color name="caros_ok_light">#FF43A047</color>
+    <color name="caros_ok_alpha20">#332E7D32</color>
+    <color name="caros_ok_container">#FF003900</color>
+    <color name="caros_on_ok_container">#FFB9F6CA</color>
+
+    <!-- ================================================================== -->
+    <!--  SEMANTIC: INFO                                                      -->
+    <!-- ================================================================== -->
+    <color name="caros_info">#FF0277BD</color>
+    <color name="caros_info_light">#FF29B6F6</color>
+    <color name="caros_info_alpha20">#330277BD</color>
+
+    <!-- ================================================================== -->
+    <!--  TEXT COLOURS                                                        -->
+    <!-- ================================================================== -->
+    <!-- Full-opacity label on dark background -->
+    <color name="caros_text_primary">#FFFFFFFF</color>
+    <!-- Secondary / descriptive text — 70 % white -->
+    <color name="caros_text_secondary">#B3FFFFFF</color>
+    <!-- Disabled / placeholder text — 38 % white -->
+    <color name="caros_text_disabled">#61FFFFFF</color>
+    <!-- Hint text inside input fields -->
+    <color name="caros_text_hint">#80FFFFFF</color>
+    <!-- Inverse text for use on light surfaces -->
+    <color name="caros_text_on_primary">#FFFFFFFF</color>
+    <color name="caros_text_on_secondary">#FFFFFFFF</color>
+    <!-- Accent / link text colour -->
+    <color name="caros_text_accent">#FF64B5F6</color>
+
+    <!-- ================================================================== -->
+    <!--  ICON / TINT COLOURS                                                 -->
+    <!-- ================================================================== -->
+    <color name="caros_icon_active">#FFFFFFFF</color>
+    <color name="caros_icon_inactive">#80FFFFFF</color>
+    <color name="caros_icon_primary">#FF90CAF9</color>
+    <color name="caros_icon_secondary">#FFFFCC80</color>
+
+    <!-- ================================================================== -->
+    <!--  DIVIDERS / BORDERS / OUTLINES                                       -->
+    <!-- ================================================================== -->
+    <color name="caros_divider">#1FFFFFFF</color>
+    <color name="caros_outline">#33FFFFFF</color>
+    <color name="caros_outline_variant">#1AFFFFFF</color>
+    <!-- Border for focused / selected items -->
+    <color name="caros_border_focused">#FF1565C0</color>
+    <color name="caros_border_selected">#FF2979FF</color>
+
+    <!-- ================================================================== -->
+    <!--  STATUS BAR INDICATORS                                               -->
+    <!-- ================================================================== -->
+    <color name="caros_status_bar_bg">#FF0A0A0A</color>
+    <color name="caros_status_icon">#CCFFFFFF</color>
+    <!-- GPS signal colours -->
+    <color name="caros_gps_fix">#FF2E7D32</color>
+    <color name="caros_gps_searching">#FFF9A825</color>
+    <color name="caros_gps_none">#FFC62828</color>
+    <!-- Network signal bars -->
+    <color name="caros_signal_full">#FF2E7D32</color>
+    <color name="caros_signal_mid">#FFF9A825</color>
+    <color name="caros_signal_low">#FFC62828</color>
+    <!-- Bluetooth connected / disconnected -->
+    <color name="caros_bt_connected">#FF29B6F6</color>
+    <color name="caros_bt_disconnected">#80FFFFFF</color>
+
+    <!-- ================================================================== -->
+    <!--  TELEMETRY / GAUGE COLOURS                                           -->
+    <!-- ================================================================== -->
+    <!-- RPM gauge gradient stops -->
+    <color name="caros_rpm_safe">#FF2E7D32</color>
+    <color name="caros_rpm_mid">#FFF9A825</color>
+    <color name="caros_rpm_high">#FFE65100</color>
+    <color name="caros_rpm_redline">#FFC62828</color>
+    <!-- Temperature gauge -->
+    <color name="caros_temp_cold">#FF0277BD</color>
+    <color name="caros_temp_normal">#FF2E7D32</color>
+    <color name="caros_temp_hot">#FFC62828</color>
+    <!-- Speed / G-force -->
+    <color name="caros_speed_normal">#FFFFFFFF</color>
+    <color name="caros_speed_high">#FFE65100</color>
+    <!-- CAN bus activity indicator -->
+    <color name="caros_can_active">#FF29B6F6</color>
+    <color name="caros_can_idle">#33FFFFFF</color>
+    <color name="caros_can_error">#FFC62828</color>
+
+    <!-- ================================================================== -->
+    <!--  NAVIGATION / BOTTOM BAR                                             -->
+    <!-- ================================================================== -->
+    <color name="caros_nav_bg">#FF0E0E0E</color>
+    <color name="caros_nav_indicator">#FF1565C0</color>
+    <color name="caros_nav_item_selected">#FF90CAF9</color>
+    <color name="caros_nav_item_unselected">#80FFFFFF</color>
+
+    <!-- ================================================================== -->
+    <!--  CALL / PHONE UI                                                     -->
+    <!-- ================================================================== -->
+    <color name="caros_call_answer">#FF2E7D32</color>
+    <color name="caros_call_decline">#FFC62828</color>
+    <color name="caros_call_mute">#FFF9A825</color>
+    <color name="caros_call_bg">#E6080808</color>
+
+    <!-- ================================================================== -->
+    <!--  RACE HUD SPECIFIC                                                   -->
+    <!-- ================================================================== -->
+    <color name="caros_hud_bg">#CC000000</color>
+    <color name="caros_hud_text">#FFFFFFFF</color>
+    <color name="caros_hud_accent">#FF2979FF</color>
+    <color name="caros_hud_sector_invalid">#33FFFFFF</color>
+    <color name="caros_hud_sector_green">#FF2E7D32</color>
+    <color name="caros_hud_sector_purple">#FF7B1FA2</color>
+    <color name="caros_hud_sector_yellow">#FFF9A825</color>
+    <color name="caros_hud_laptime">#FFFFCA28</color>
+    <color name="caros_hud_delta_positive">#FFC62828</color>
+    <color name="caros_hud_delta_negative">#FF2E7D32</color>
+
+    <!-- ================================================================== -->
+    <!--  SCRIM / OVERLAY                                                     -->
+    <!-- ================================================================== -->
+    <color name="caros_scrim">#99000000</color>
+    <color name="caros_scrim_light">#66000000</color>
+    <color name="caros_scrim_heavy">#CC000000</color>
+
+    <!-- ================================================================== -->
+    <!--  LEGACY / MATERIAL COMPAT ALIASES                                    -->
+    <!-- ================================================================== -->
+    <!-- Required by Material theme base — mapped to CarOS palette -->
+    <color name="colorPrimary">@color/caros_primary</color>
+    <color name="colorPrimaryDark">@color/caros_primary_dark</color>
+    <color name="colorPrimaryVariant">@color/caros_primary_variant</color>
+    <color name="colorSecondary">@color/caros_secondary</color>
+    <color name="colorSecondaryVariant">@color/caros_secondary_dark</color>
+    <color name="colorOnPrimary">@color/caros_text_on_primary</color>
+    <color name="colorOnSecondary">@color/caros_text_on_secondary</color>
+    <color name="colorError">@color/caros_error</color>
+    <color name="colorOnError">#FFFFFFFF</color>
+    <color name="colorBackground">@color/caros_bg</color>
+    <color name="colorOnBackground">@color/caros_text_primary</color>
+    <color name="colorSurface">@color/caros_surface</color>
+    <color name="colorOnSurface">@color/caros_text_primary</color>
+    <color name="colorSurfaceVariant">@color/caros_surface_variant</color>
+    <color name="colorOnSurfaceVariant">@color/caros_text_secondary</color>
+    <color name="colorOutline">@color/caros_outline</color>
+
+</resources>
