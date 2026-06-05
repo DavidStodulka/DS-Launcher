@@ -54,4 +54,22 @@
         android:id="@+id/serviceAdvisorFragment"
         android:name="com.caros.ui.service.ServiceAdvisorFragment"
         android:label="Service"/>
+
+    <fragment
+        android:id="@+id/ecosystemFragment"
+        android:name="com.caros.ui.ecosystem.EcosystemFragment"
+        android:label="Ecosystem"
+        app:layout="@layout/fragment_ecosystem"/>
+
+    <fragment
+        android:id="@+id/voiceSetupFragment"
+        android:name="com.caros.ui.voice.VoiceSetupFragment"
+        android:label="Voice Setup"
+        app:layout="@layout/fragment_voice_setup"/>
+
+    <fragment
+        android:id="@+id/drivingStyleFragment"
+        android:name="com.caros.ui.telemetry.DrivingStyleFragment"
+        android:label="Driving Style"
+        app:layout="@layout/fragment_driving_style"/>
 </navigation>

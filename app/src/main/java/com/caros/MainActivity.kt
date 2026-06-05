@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
+import android.view.KeyEvent
 import android.view.WindowInsets
 import android.view.WindowManager
 import androidx.activity.viewModels
@@ -21,6 +22,8 @@ import com.caros.profiles.ProfileManager
 import com.caros.ui.main.LeftPanelFragment
 import com.caros.ui.main.MainViewModel
 import com.caros.ui.main.RightPanelFragment
+import com.caros.voice.SteeringWheelButtonDetector
+import com.caros.voice.VoiceCommandExecutor
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -36,6 +39,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
 
     @Inject lateinit var profileManager: ProfileManager
+    @Inject lateinit var voiceCommandExecutor: VoiceCommandExecutor
+    @Inject lateinit var steeringWheelButtonDetector: SteeringWheelButtonDetector
 
     private val mainViewModel: MainViewModel by viewModels()
 
@@ -188,6 +193,19 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        // Route to calibration first if active
+        if (steeringWheelButtonDetector.isCalibrating && event != null) {
+            if (steeringWheelButtonDetector.onKeyEvent(event)) return true
+        }
+        val voiceKeyCode = mainViewModel.voiceKeyCode.value
+        if (keyCode == KeyEvent.KEYCODE_SEARCH || (voiceKeyCode != null && keyCode == voiceKeyCode)) {
+            mainViewModel.toggleVoiceListening()
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
     }
 
     override fun onDestroy() {

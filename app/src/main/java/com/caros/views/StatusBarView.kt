@@ -48,15 +48,19 @@ class StatusBarView @JvmOverloads constructor(
 
     // ── State ─────────────────────────────────────────────────────────────────
 
-    private var clockText   = "--:--:--"
-    private var speedKmh    = 0f
-    private var coolantC    = 0f
-    private var batteryV    = 0f
-    private var accOn       = false
-    private var hasService  = false
-    private var wifiLevel   = -1      // -1=off, 0-4 = rssi bars
-    private var btConnected = false
-    private var gpsActive   = false
+    private var clockText    = "--:--:--"
+    private var speedKmh     = 0f
+    private var coolantC     = 0f
+    private var batteryV     = 0f
+    private var accOn        = false
+    private var hasService   = false
+    private var wifiLevel    = -1      // -1=off, 0-4 = rssi bars
+    private var btConnected  = false
+    private var gpsActive    = false
+    private var voiceActive  = false
+    private var mqttConnected = false
+    private var slopeDeg     = 0f
+    private var altitudeM    = 0f
 
     private val clockFmt = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
 
@@ -122,6 +126,30 @@ class StatusBarView @JvmOverloads constructor(
         wifiLevel   = wifi
         btConnected = bt
         gpsActive   = gps
+        invalidate()
+    }
+
+    /** Show/hide the mic/voice-active indicator. */
+    fun setVoiceActive(active: Boolean) {
+        voiceActive = active
+        invalidate()
+    }
+
+    /** Show/hide the MQTT connected badge. */
+    fun setMqttConnected(connected: Boolean) {
+        mqttConnected = connected
+        invalidate()
+    }
+
+    /** Update road slope in degrees (positive = uphill). */
+    fun setSlope(degrees: Float) {
+        slopeDeg = degrees
+        invalidate()
+    }
+
+    /** Update GPS altitude in metres. */
+    fun setAltitude(metres: Float) {
+        altitudeM = metres
         invalidate()
     }
 
@@ -239,6 +267,43 @@ class StatusBarView @JvmOverloads constructor(
 
         // WiFi bars
         drawWifiBars(canvas, rx, dotY, dotR * 2.5f, dotR * 2.5f)
+        rx -= dotR * 3f + pad * 2
+
+        // MQTT badge
+        dotPaint.color = if (mqttConnected) COLOR_OK else COLOR_INACTIVE
+        rx -= dotR
+        canvas.drawCircle(rx, dotY, dotR, dotPaint)
+        textSecPaint.textSize = smallTextSz * 0.55f
+        textSecPaint.textAlign = Paint.Align.CENTER
+        textSecPaint.color = if (mqttConnected) COLOR_TEXT_PRI else COLOR_TEXT_SEC
+        canvas.drawText("MQ", rx, dotY + smallTextSz * 0.20f, textSecPaint)
+        textSecPaint.textAlign = Paint.Align.LEFT
+        textSecPaint.color = COLOR_TEXT_SEC
+        rx -= dotR + pad * 2
+
+        // Voice / mic indicator
+        if (voiceActive) {
+            dotPaint.color = COLOR_SECONDARY
+            rx -= dotR
+            canvas.drawCircle(rx, dotY, dotR * 1.1f, dotPaint)
+            textPrimPaint.textSize = smallTextSz * 0.7f
+            textPrimPaint.color = COLOR_TEXT_PRI
+            textPrimPaint.textAlign = Paint.Align.CENTER
+            canvas.drawText("M", rx, dotY + smallTextSz * 0.25f, textPrimPaint)
+            textPrimPaint.textAlign = Paint.Align.LEFT
+            textPrimPaint.color = COLOR_TEXT_PRI
+            rx -= dotR + pad * 2
+        }
+
+        // Slope and altitude (left side, after battery voltage — already drawn above)
+        // Displayed as small text in the left block
+        if (slopeDeg != 0f || altitudeM != 0f) {
+            val slopeStr = "%+.1f°".format(slopeDeg)
+            val altStr   = "%.0fm".format(altitudeM)
+            textSecPaint.textSize = smallTextSz * 0.75f
+            textSecPaint.color = COLOR_TEXT_SEC
+            canvas.drawText("$slopeStr  $altStr", x, baseLine, textSecPaint)
+        }
     }
 
     /** Draws 4 ascending bars representing WiFi signal strength. */
