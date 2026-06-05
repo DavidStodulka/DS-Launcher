@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#080808"
+    android:padding="12dp">
+
+    <!-- Frequency display -->
+    <TextView
+        android:id="@+id/tvFrequency"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="87.5 MHz"
+        android:textColor="#FFFFFF"
+        android:textSize="48sp"
+        android:fontFamily="sans-serif-condensed"
+        android:textStyle="bold"
+        android:layout_marginBottom="4dp" />
+
+    <!-- RDS text -->
+    <TextView
+        android:id="@+id/tvRds"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="– – –"
+        android:textColor="#9E9E9E"
+        android:textSize="14sp"
+        android:fontFamily="sans-serif-condensed"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Transport controls row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="10dp">
+
+        <Button android:id="@+id/btnScanDown"
+            android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:text="◀◀"
+            android:textColor="#FFFFFF" android:textSize="14sp"
+            android:backgroundTint="#1E1E1E" />
+        <Button android:id="@+id/btnStepDown"
+            android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:text="◀"
+            android:textColor="#FFFFFF" android:textSize="14sp"
+            android:backgroundTint="#1E1E1E" />
+        <Button android:id="@+id/btnPlay"
+            android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:text="▶"
+            android:textColor="#FFFFFF" android:textSize="14sp"
+            android:backgroundTint="#1565C0" />
+        <Button android:id="@+id/btnStop"
+            android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:text="■"
+            android:textColor="#FFFFFF" android:textSize="14sp"
+            android:backgroundTint="#B71C1C" />
+        <Button android:id="@+id/btnStepUp"
+            android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:text="▶"
+            android:textColor="#FFFFFF" android:textSize="14sp"
+            android:backgroundTint="#1E1E1E" />
+        <Button android:id="@+id/btnScanUp"
+            android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1"
+            android:text="▶▶"
+            android:textColor="#FFFFFF" android:textSize="14sp"
+            android:backgroundTint="#1E1E1E" />
+    </LinearLayout>
+
+    <!-- Preset buttons row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+        <Button android:id="@+id/btnPreset1"
+            android:layout_width="0dp" android:layout_height="36dp" android:layout_weight="1"
+            android:layout_marginEnd="3dp" android:text="P1"
+            android:textColor="#FFFFFF" android:textSize="11sp"
+            android:fontFamily="sans-serif-condensed"
+            android:backgroundTint="#1E1E1E" />
+        <Button android:id="@+id/btnPreset2"
+            android:layout_width="0dp" android:layout_height="36dp" android:layout_weight="1"
+            android:layout_marginEnd="3dp" android:text="P2"
+            android:textColor="#FFFFFF" android:textSize="11sp"
+            android:fontFamily="sans-serif-condensed"
+            android:backgroundTint="#1E1E1E" />
+        <Button android:id="@+id/btnPreset3"
+            android:layout_width="0dp" android:layout_height="36dp" android:layout_weight="1"
+            android:layout_marginEnd="3dp" android:text="P3"
+            android:textColor="#FFFFFF" android:textSize="11sp"
+            android:fontFamily="sans-serif-condensed"
+            android:backgroundTint="#1E1E1E" />
+        <Button android:id="@+id/btnPreset4"
+            android:layout_width="0dp" android:layout_height="36dp" android:layout_weight="1"
+            android:layout_marginEnd="3dp" android:text="P4"
+            android:textColor="#FFFFFF" android:textSize="11sp"
+            android:fontFamily="sans-serif-condensed"
+            android:backgroundTint="#1E1E1E" />
+        <Button android:id="@+id/btnPreset5"
+            android:layout_width="0dp" android:layout_height="36dp" android:layout_weight="1"
+            android:layout_marginEnd="3dp" android:text="P5"
+            android:textColor="#FFFFFF" android:textSize="11sp"
+            android:fontFamily="sans-serif-condensed"
+            android:backgroundTint="#1E1E1E" />
+        <Button android:id="@+id/btnPreset6"
+            android:layout_width="0dp" android:layout_height="36dp" android:layout_weight="1"
+            android:text="P6"
+            android:textColor="#FFFFFF" android:textSize="11sp"
+            android:fontFamily="sans-serif-condensed"
+            android:backgroundTint="#1E1E1E" />
+    </LinearLayout>
+
+    <!-- Fan control section -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="CHLADIČ JEDNOTKY"
+        android:textColor="#757575"
+        android:textSize="10sp"
+        android:fontFamily="sans-serif-condensed"
+        android:letterSpacing="0.1"
+        android:layout_marginBottom="6dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
+        <Button android:id="@+id/btnFanAuto"
+            android:layout_width="0dp" android:layout_height="36dp" android:layout_weight="1"
+            android:layout_marginEnd="4dp" android:text="AUTO"
+            android:textColor="#FFFFFF" android:textSize="11sp"
+            android:fontFamily="sans-serif-condensed"
+            android:backgroundTint="#1565C0" />
+        <Button android:id="@+id/btnFanLow"
+            android:layout_width="0dp" android:layout_height="36dp" android:layout_weight="1"
+            android:layout_marginEnd="4dp" android:text="NÍZKÉ"
+            android:textColor="#FFFFFF" android:textSize="11sp"
+            android:fontFamily="sans-serif-condensed"
+            android:backgroundTint="#1E1E1E" />
+        <Button android:id="@+id/btnFanMed"
+            android:layout_width="0dp" android:layout_height="36dp" android:layout_weight="1"
+            android:layout_marginEnd="4dp" android:text="STŘEDNÍ"
+            android:textColor="#FFFFFF" android:textSize="11sp"
+            android:fontFamily="sans-serif-condensed"
+            android:backgroundTint="#1E1E1E" />
+        <Button android:id="@+id/btnFanHigh"
+            android:layout_width="0dp" android:layout_height="36dp" android:layout_weight="1"
+            android:text="VYSOKÉ"
+            android:textColor="#FFFFFF" android:textSize="11sp"
+            android:fontFamily="sans-serif-condensed"
+            android:backgroundTint="#1E1E1E" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Teplota CPU:"
+            android:textColor="#9E9E9E"
+            android:textSize="12sp"
+            android:fontFamily="sans-serif-condensed" />
+        <TextView
+            android:id="@+id/tvCpuTemp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="--°C"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-condensed"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+</LinearLayout>

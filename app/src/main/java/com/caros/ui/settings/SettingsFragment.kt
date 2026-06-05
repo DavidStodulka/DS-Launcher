@@ -10,6 +10,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.caros.databinding.FragmentSettingsBinding
+import com.caros.multimedia.AndroidAutoManager
 import com.caros.profiles.ProfileManager
 import com.caros.core.ShellExecutor
 import com.caros.system.SystemSettings
@@ -30,6 +31,7 @@ class SettingsFragment : Fragment() {
     @Inject lateinit var systemSettings: SystemSettings
     @Inject lateinit var profileManager: ProfileManager
     @Inject lateinit var shellExecutor: ShellExecutor
+    @Inject lateinit var androidAutoManager: AndroidAutoManager
 
     private lateinit var prefs: SharedPreferences
 
@@ -49,6 +51,7 @@ class SettingsFragment : Fragment() {
         setupPowerMode()
         setupMockCAN()
         setupADB()
+        setupAndroidAuto()
         startSystemInfoRefresh()
     }
 
@@ -117,6 +120,15 @@ class SettingsFragment : Fragment() {
         binding.switchMockCAN.isChecked = prefs.getBoolean("use_mock_can", false)
         binding.switchMockCAN.setOnCheckedChangeListener { _, checked ->
             prefs.edit().putBoolean("use_mock_can", checked).apply()
+        }
+    }
+
+    // ── Android Auto ──────────────────────────────────────────────────────────
+
+    private fun setupAndroidAuto() {
+        binding.switchAndroidAuto.isChecked = androidAutoManager.autoConnectEnabled.value
+        binding.switchAndroidAuto.setOnCheckedChangeListener { _, isChecked ->
+            androidAutoManager.setAutoConnect(isChecked)
         }
     }
 

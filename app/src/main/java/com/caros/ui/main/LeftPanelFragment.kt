@@ -76,6 +76,14 @@ class LeftPanelFragment : Fragment() {
         binding.btnAudio.setOnClickListener {
             findNavController().navigate(R.id.audioFragment)
         }
+
+        binding.btnFMRadio.setOnClickListener {
+            findNavController().navigate(R.id.fmRadioFragment)
+        }
+
+        binding.btnClimate.setOnClickListener {
+            findNavController().navigate(R.id.climateFragment)
+        }
     }
 
     override fun onDestroyView() {

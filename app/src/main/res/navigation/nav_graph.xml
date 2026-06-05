@@ -2,6 +2,7 @@
 <navigation
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/mainFragment">
 
@@ -72,4 +73,16 @@
         android:name="com.caros.ui.telemetry.DrivingStyleFragment"
         android:label="Driving Style"
         app:layout="@layout/fragment_driving_style"/>
+
+    <fragment
+        android:id="@+id/fmRadioFragment"
+        android:name="com.caros.ui.media.FMRadioFragment"
+        android:label="FM Rádio"
+        tools:layout="@layout/fragment_fm_radio" />
+
+    <fragment
+        android:id="@+id/climateFragment"
+        android:name="com.caros.ui.climate.ClimateFragment"
+        android:label="Klimatizace"
+        tools:layout="@layout/fragment_climate" />
 </navigation>

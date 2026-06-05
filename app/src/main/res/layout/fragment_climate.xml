@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#080808"
+    android:padding="16dp">
+
+    <!-- Temperature row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+
+        <!-- Target temp -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="NASTAVENÁ"
+                android:textColor="#757575"
+                android:textSize="10sp"
+                android:fontFamily="sans-serif-condensed"
+                android:letterSpacing="0.1" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <Button android:id="@+id/btnTempDown"
+                    android:layout_width="40dp" android:layout_height="40dp"
+                    android:text="−" android:textColor="#FFFFFF" android:textSize="20sp"
+                    android:backgroundTint="#1E1E1E" android:padding="0dp" />
+
+                <TextView
+                    android:id="@+id/tvTargetTemp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="22.0°"
+                    android:textColor="#FFFFFF"
+                    android:textSize="36sp"
+                    android:fontFamily="sans-serif-condensed"
+                    android:textStyle="bold"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp" />
+
+                <Button android:id="@+id/btnTempUp"
+                    android:layout_width="40dp" android:layout_height="40dp"
+                    android:text="+" android:textColor="#FFFFFF" android:textSize="20sp"
+                    android:backgroundTint="#1E1E1E" android:padding="0dp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Interior temp -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="INTERIÉR"
+                android:textColor="#757575"
+                android:textSize="10sp"
+                android:fontFamily="sans-serif-condensed"
+                android:letterSpacing="0.1" />
+
+            <TextView
+                android:id="@+id/tvInteriorTemp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--°"
+                android:textColor="#4CAF50"
+                android:textSize="36sp"
+                android:fontFamily="sans-serif-condensed"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Fan speed -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="RYCHLOST VENTILÁTORU"
+        android:textColor="#757575"
+        android:textSize="10sp"
+        android:fontFamily="sans-serif-condensed"
+        android:letterSpacing="0.1"
+        android:layout_marginBottom="6dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+
+        <Button android:id="@+id/btnFanDown"
+            android:layout_width="40dp" android:layout_height="40dp"
+            android:text="−" android:textColor="#FFFFFF" android:textSize="20sp"
+            android:backgroundTint="#1E1E1E" android:padding="0dp"
+            android:layout_marginEnd="8dp" />
+
+        <!-- 7 fan speed bars -->
+        <View android:id="@+id/fanBar1" android:layout_width="0dp" android:layout_height="16dp"
+            android:layout_weight="1" android:layout_marginEnd="2dp" android:background="#2A2A2A" />
+        <View android:id="@+id/fanBar2" android:layout_width="0dp" android:layout_height="20dp"
+            android:layout_weight="1" android:layout_marginEnd="2dp" android:background="#2A2A2A" />
+        <View android:id="@+id/fanBar3" android:layout_width="0dp" android:layout_height="24dp"
+            android:layout_weight="1" android:layout_marginEnd="2dp" android:background="#2A2A2A" />
+        <View android:id="@+id/fanBar4" android:layout_width="0dp" android:layout_height="28dp"
+            android:layout_weight="1" android:layout_marginEnd="2dp" android:background="#2A2A2A" />
+        <View android:id="@+id/fanBar5" android:layout_width="0dp" android:layout_height="32dp"
+            android:layout_weight="1" android:layout_marginEnd="2dp" android:background="#2A2A2A" />
+        <View android:id="@+id/fanBar6" android:layout_width="0dp" android:layout_height="36dp"
+            android:layout_weight="1" android:layout_marginEnd="2dp" android:background="#2A2A2A" />
+        <View android:id="@+id/fanBar7" android:layout_width="0dp" android:layout_height="40dp"
+            android:layout_weight="1" android:layout_marginEnd="2dp" android:background="#2A2A2A" />
+
+        <TextView android:id="@+id/tvFanSpeed"
+            android:layout_width="24dp" android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="2"
+            android:textColor="#FFFFFF" android:textSize="16sp"
+            android:fontFamily="sans-serif-condensed" android:textStyle="bold"
+            android:layout_marginStart="4dp" android:layout_marginEnd="8dp" />
+
+        <Button android:id="@+id/btnFanUp"
+            android:layout_width="40dp" android:layout_height="40dp"
+            android:text="+" android:textColor="#FFFFFF" android:textSize="20sp"
+            android:backgroundTint="#1E1E1E" android:padding="0dp" />
+
+    </LinearLayout>
+
+    <!-- AC Controls row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button android:id="@+id/btnAC"
+            android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:text="A/C"
+            android:textColor="#FFFFFF" android:textSize="13sp"
+            android:fontFamily="sans-serif-condensed"
+            android:backgroundTint="#1E1E1E" />
+
+        <Button android:id="@+id/btnRecirc"
+            android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:text="⟳ RECIRK"
+            android:textColor="#FFFFFF" android:textSize="13sp"
+            android:fontFamily="sans-serif-condensed"
+            android:backgroundTint="#1E1E1E" />
+
+        <Button android:id="@+id/btnDefrost"
+            android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:text="≋ ODMRZ"
+            android:textColor="#FFFFFF" android:textSize="13sp"
+            android:fontFamily="sans-serif-condensed"
+            android:backgroundTint="#1E1E1E" />
+
+        <Button android:id="@+id/btnAuto"
+            android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1"
+            android:text="AUTO"
+            android:textColor="#FFFFFF" android:textSize="13sp"
+            android:fontFamily="sans-serif-condensed"
+            android:backgroundTint="#1E1E1E" />
+
+    </LinearLayout>
+
+</LinearLayout>

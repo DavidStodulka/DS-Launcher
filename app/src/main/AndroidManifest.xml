@@ -264,6 +264,18 @@
         </receiver>
 
         <!-- ================================================== -->
+        <!--  USB / ANDROID AUTO RECEIVER                        -->
+        <!-- ================================================== -->
+        <receiver
+            android:name=".multimedia.UsbConnectionReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+                <action android:name="android.hardware.usb.action.USB_DEVICE_DETACHED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- ================================================== -->
         <!--  PROVIDERS                                          -->
         <!-- ================================================== -->
         <provider
