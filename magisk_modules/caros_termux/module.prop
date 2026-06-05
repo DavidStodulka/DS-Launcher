@@ -1,0 +1,7 @@
+id=caros_termux
+name=CarOS Termux Integration
+version=v1
+versionCode=1
+author=CarOS
+description=Autostart Termux services (SSH, MQTT, InfluxDB, Python bridge) on boot. Grants necessary permissions.
+minMagisk=24000

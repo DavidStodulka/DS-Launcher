@@ -2,83 +2,56 @@ package com.caros.audio
 
 import kotlinx.serialization.Serializable
 
-enum class AudioProfileType { FLAT, BASS_BOOST, VOCAL, STAGE, NIGHT, CUSTOM1, CUSTOM2, CUSTOM3 }
-
 @Serializable
 data class AudioProfile(
-    val id: Long = 0,
-    val type: AudioProfileType = AudioProfileType.FLAT,
-    val name: String = "",
-    val eqBands: FloatArray = FloatArray(10) { 0f }, // 10-band, -12 to +12 dB
-    val bassBoostEnabled: Boolean = false,
-    val bassBoostStrength: Int = 500,               // 0-1000
-    val virtualizerEnabled: Boolean = false,
-    val virtualizerStrength: Int = 500,
-    val viperEnabled: Boolean = false,
-    val viperSettings: String = "{}",               // JSON blob
-    val masterVolume: Float = 1.0f
+    val id: String,
+    val name: String,
+    val icon: Int = 0,
+    val bassStrength: Int = 50,
+    val trebleStrength: Int = 50,
+    val midrangeStrength: Int = 50,
+    val vocalClarity: Boolean = false,
+    val surroundStrength: Int = 0,
+    val compressionEnabled: Boolean = false,
+    val compressionThreshold: Float = -18f,
+    val reverbEnabled: Boolean = false,
+    val reverbRoomSize: Float = 0f,
+    val reverbWetLevel: Float = 0f,
+    val eqBands: FloatArray = FloatArray(10),   // user offset per band
+    val masterGain: Float = 0f,
+    val autoEQEnabled: Boolean = true,
+    val autoSwitchSource: AudioSource? = null
 ) {
-    // FloatArray requires manual equals/hashCode when used in a data class.
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is AudioProfile) return false
-        return id == other.id &&
-            type == other.type &&
-            name == other.name &&
-            eqBands.contentEquals(other.eqBands) &&
-            bassBoostEnabled == other.bassBoostEnabled &&
-            bassBoostStrength == other.bassBoostStrength &&
-            virtualizerEnabled == other.virtualizerEnabled &&
-            virtualizerStrength == other.virtualizerStrength &&
-            viperEnabled == other.viperEnabled &&
-            viperSettings == other.viperSettings &&
-            masterVolume == other.masterVolume
-    }
-
-    override fun hashCode(): Int {
-        var result = id.hashCode()
-        result = 31 * result + type.hashCode()
-        result = 31 * result + name.hashCode()
-        result = 31 * result + eqBands.contentHashCode()
-        result = 31 * result + bassBoostEnabled.hashCode()
-        result = 31 * result + bassBoostStrength
-        result = 31 * result + virtualizerEnabled.hashCode()
-        result = 31 * result + virtualizerStrength
-        result = 31 * result + viperEnabled.hashCode()
-        result = 31 * result + viperSettings.hashCode()
-        result = 31 * result + masterVolume.hashCode()
-        return result
-    }
-
     companion object {
-        val FLAT = AudioProfile(
-            type = AudioProfileType.FLAT,
-            name = "Flat"
-        )
-        val BASS_BOOST = AudioProfile(
-            type = AudioProfileType.BASS_BOOST,
-            name = "Bass Boost",
-            eqBands = floatArrayOf(8f, 6f, 4f, 2f, 0f, 0f, 0f, 0f, 0f, 0f),
-            bassBoostEnabled = true,
-            bassBoostStrength = 700
+        val FLAT = AudioProfile("flat", "Flat", autoEQEnabled = true)
+        val BASS_PLUS = AudioProfile(
+            "bass", "Bass+", bassStrength = 85,
+            eqBands = floatArrayOf(4f, 6f, 4f, 2f, 0f, 0f, 0f, 0f, 0f, 0f)
         )
         val VOCAL = AudioProfile(
-            type = AudioProfileType.VOCAL,
-            name = "Vocal",
-            eqBands = floatArrayOf(-2f, -1f, 0f, 2f, 4f, 4f, 2f, 1f, 0f, -1f)
+            "vocal", "Vocal", vocalClarity = true,
+            eqBands = floatArrayOf(-1f, -1f, 0f, 2f, 3f, 2f, 1f, 0f, 0f, 0f)
         )
         val STAGE = AudioProfile(
-            type = AudioProfileType.STAGE,
-            name = "Stage",
-            eqBands = floatArrayOf(4f, 3f, 1f, 0f, -1f, 0f, 2f, 3f, 4f, 4f),
-            virtualizerEnabled = true,
-            virtualizerStrength = 600
+            "stage", "Stage", surroundStrength = 60,
+            eqBands = floatArrayOf(2f, 3f, 1f, 0f, 0f, 1f, 2f, 2f, 1f, 0f)
         )
         val NIGHT = AudioProfile(
-            type = AudioProfileType.NIGHT,
-            name = "Night",
-            eqBands = floatArrayOf(-2f, -1f, 0f, 1f, 2f, 2f, 1f, 0f, -1f, -2f)
+            "night", "Night", compressionEnabled = true,
+            compressionThreshold = -24f, autoEQEnabled = true,
+            eqBands = floatArrayOf(-1f, -0.5f, 0f, 0f, 0f, 0.5f, 1f, 0f, 0f, 0f)
         )
-        val ALL = listOf(FLAT, BASS_BOOST, VOCAL, STAGE, NIGHT)
+        val SPORT = AudioProfile(
+            "sport", "Sport", bassStrength = 70, surroundStrength = 40,
+            eqBands = floatArrayOf(3f, 4f, 2f, 0f, 0f, 1f, 2f, 2f, 1f, 1f)
+        )
+        val ALL = listOf(FLAT, BASS_PLUS, VOCAL, STAGE, NIGHT, SPORT)
+
+        // Legacy aliases kept for compatibility with EQFragment preset buttons
+        val BASS_BOOST get() = BASS_PLUS
     }
+
+    // FloatArray equals by content
+    override fun equals(other: Any?) = other is AudioProfile && id == other.id
+    override fun hashCode() = id.hashCode()
 }

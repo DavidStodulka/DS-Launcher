@@ -77,22 +77,26 @@ class EQController @Inject constructor(
     fun applyProfile(profile: AudioProfile) {
         applyEQBands(profile.eqBands)
 
+        // bassStrength 0-100 maps to BassBoost strength 0-1000
+        val bassEnabled = profile.bassStrength > 0
         bassBoost?.apply {
             try {
-                enabled = profile.bassBoostEnabled
-                if (profile.bassBoostEnabled) {
-                    setStrength(profile.bassBoostStrength.toShort())
+                enabled = bassEnabled
+                if (bassEnabled) {
+                    setStrength((profile.bassStrength * 10).toShort())
                 }
             } catch (e: Exception) {
                 Timber.w(e, "BassBoost apply failed")
             }
         }
 
+        // surroundStrength 0-100 maps to Virtualizer strength 0-1000
+        val surroundEnabled = profile.surroundStrength > 0
         virtualizer?.apply {
             try {
-                enabled = profile.virtualizerEnabled
-                if (profile.virtualizerEnabled) {
-                    setStrength(profile.virtualizerStrength.toShort())
+                enabled = surroundEnabled
+                if (surroundEnabled) {
+                    setStrength((profile.surroundStrength * 10).toShort())
                 }
             } catch (e: Exception) {
                 Timber.w(e, "Virtualizer apply failed")

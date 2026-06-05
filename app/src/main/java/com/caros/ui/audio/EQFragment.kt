@@ -9,7 +9,6 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import com.caros.R
 import com.caros.audio.AudioProfile
 import com.caros.databinding.FragmentAudioEqBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -21,7 +20,7 @@ class EQFragment : Fragment() {
     private var _binding: FragmentAudioEqBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: AudioViewModel by viewModels()
+    private val viewModel: AudioViewModel by viewModels({ requireParentFragment() })
 
     // SeekBars: bands 1–10 (index 0–9)
     private val seekBars: Array<SeekBar?> by lazy {
@@ -35,6 +34,14 @@ class EQFragment : Fragment() {
             binding.eqBand1Db, binding.eqBand2Db, binding.eqBand3Db, binding.eqBand4Db,
             binding.eqBand5Db, binding.eqBand6Db, binding.eqBand7Db, binding.eqBand8Db,
             binding.eqBand9Db, binding.eqBand10Db
+        )
+    }
+    private val autoGainLabels: Array<TextView?> by lazy {
+        arrayOf(
+            binding.tvAutoGainBand0, binding.tvAutoGainBand1, binding.tvAutoGainBand2,
+            binding.tvAutoGainBand3, binding.tvAutoGainBand4, binding.tvAutoGainBand5,
+            binding.tvAutoGainBand6, binding.tvAutoGainBand7, binding.tvAutoGainBand8,
+            binding.tvAutoGainBand9
         )
     }
 
@@ -51,18 +58,21 @@ class EQFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupSeekBars()
         observeActiveProfile()
+        observeAutoEQGains()
         setupPresetButtons()
     }
 
     private fun setupSeekBars() {
         seekBars.forEachIndexed { index, seekBar ->
-            seekBar?.max = 240  // 0–240 maps to -12..+12 dB with 0.1 dB steps
+            // max=240: progress 0–240 maps to -12..+12 dB in 0.1 dB steps
+            seekBar?.max = 240
             seekBar?.progress = 120  // 0 dB default
             seekBar?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
                     if (!fromUser) return
                     val db = (progress - 120) / 10f  // -12.0 to +12.0 dB
                     viewModel.setBand(index, db)
+                    viewModel.setUserBandOffset(index, db)
                     dbLabels[index]?.text = "%+.1f".format(db)
                 }
                 override fun onStartTrackingTouch(sb: SeekBar?) {}
@@ -75,6 +85,18 @@ class EQFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.activeProfile.collect { profile ->
                 applyProfileToUI(profile)
+            }
+        }
+    }
+
+    private fun observeAutoEQGains() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.autoEQGains.collect { gains ->
+                gains.forEachIndexed { i, g ->
+                    if (i < autoGainLabels.size) {
+                        autoGainLabels[i]?.text = "auto: %+.1f".format(g)
+                    }
+                }
             }
         }
     }

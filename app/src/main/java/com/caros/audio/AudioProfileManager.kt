@@ -93,21 +93,17 @@ class AudioProfileManager @Inject constructor(
     }
 
     /**
-     * Persist a custom profile to the slot determined by its [AudioProfileType]
-     * (CUSTOM1 → slot 1, CUSTOM2 → slot 2, CUSTOM3 → slot 3).
+     * Persist a custom profile to a numbered slot (1-3) determined by the profile id
+     * convention "custom1", "custom2", "custom3".  Profiles whose id does not match
+     * that pattern are stored in slot 1 as a fallback.
      *
-     * @param profile Must have type [AudioProfileType.CUSTOM1], [AudioProfileType.CUSTOM2],
-     *                or [AudioProfileType.CUSTOM3].
+     * @param profile The custom [AudioProfile] to persist.
      */
     fun saveCustomProfile(profile: AudioProfile) {
-        val slot = when (profile.type) {
-            AudioProfileType.CUSTOM1 -> 1
-            AudioProfileType.CUSTOM2 -> 2
-            AudioProfileType.CUSTOM3 -> 3
-            else -> {
-                Timber.w("saveCustomProfile called on non-custom profile type %s", profile.type)
-                return
-            }
+        val slot = when {
+            profile.id.endsWith("2") -> 2
+            profile.id.endsWith("3") -> 3
+            else -> 1
         }
         try {
             prefs.edit().putString("custom_$slot", json.encodeToString(profile)).apply()
