@@ -54,10 +54,19 @@ class VoiceSetupFragment : Fragment() {
         val kc = steeringDetector.getSavedKeyCode()
         binding.tvCurrentKeyCode.text = if (kc != -1) "Nastaveno: KeyCode $kc" else "Není nastaveno"
         binding.btnCalibrateButton.setOnClickListener {
-            binding.tvCalibrateStatus.text = "Stiskni tlačítko na volantu..."
+            binding.tvCalibrateStatus.text = "Stiskni tlačítko na volantu do 10 sekund..."
+            binding.btnCalibrateButton.isEnabled = false
+            binding.countdownArc.startCountdown(10_000L, onExpired = {
+                binding.tvCalibrateStatus.text = "⏱ Vypršel čas — zkus znovu"
+                binding.tvCalibrateStatus.setTextColor(0xFFC62828.toInt())
+                binding.btnCalibrateButton.isEnabled = true
+            })
             steeringDetector.startCalibration { keyCode ->
+                binding.countdownArc.stopCountdown()
                 binding.tvCurrentKeyCode.text = "Nastaveno: KeyCode $keyCode"
                 binding.tvCalibrateStatus.text = "✅ Nastaveno"
+                binding.tvCalibrateStatus.setTextColor(0xFF2E7D32.toInt())
+                binding.btnCalibrateButton.isEnabled = true
             }
         }
     }

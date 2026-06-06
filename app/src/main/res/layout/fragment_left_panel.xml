@@ -342,6 +342,55 @@
         android:layout_height="1dp"
         android:background="#1E1E1E" />
 
+    <!-- Voice -->
+    <LinearLayout
+        android:id="@+id/btnVoice"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:minHeight="64dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:clickable="true"
+        android:focusable="true"
+        android:longClickable="true"
+        android:background="@drawable/quick_launch_btn_bg"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
+
+        <ImageView
+            android:id="@+id/voiceIcon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_android"
+            android:contentDescription="Hlas"
+            android:scaleType="fitCenter"
+            android:tint="#FFFFFF" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Hlas"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:fontFamily="sans-serif-condensed"
+            android:layout_marginStart="12dp" />
+
+        <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/ic_chevron_right"
+            android:tint="#757575"
+            android:contentDescription="Nastavení hlasu" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#1E1E1E" />
+
     <!-- Favorite Contacts -->
     <LinearLayout
         android:id="@+id/favoriteContactsSection"

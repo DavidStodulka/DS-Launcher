@@ -24,6 +24,18 @@ class ClimateViewModel @Inject constructor(
     val defrostEnabled = MutableStateFlow(false)
     val autoMode = MutableStateFlow(false)
 
+    private var canSyncDone = false
+
+    /** Sync initial state from live CAN data (called once on first valid frame). */
+    fun syncFromCAN(setTemp: Float?, fanSpd: Int?, ac: Boolean?, recirc: Boolean?) {
+        if (canSyncDone) return
+        canSyncDone = true
+        setTemp?.let { targetTemp.value = it.coerceIn(16f, 30f) }
+        fanSpd?.let { fanSpeed.value = it.coerceIn(0, 7) }
+        ac?.let { acEnabled.value = it }
+        recirc?.let { recircEnabled.value = it }
+    }
+
     fun tempUp() { targetTemp.value = (targetTemp.value + 0.5f).coerceAtMost(30f); sendCommand() }
     fun tempDown() { targetTemp.value = (targetTemp.value - 0.5f).coerceAtLeast(16f); sendCommand() }
     fun fanUp() { fanSpeed.value = (fanSpeed.value + 1).coerceAtMost(7); sendCommand() }

@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.caros.R
 import com.caros.databinding.FragmentLeftPanelBinding
@@ -20,6 +21,7 @@ class LeftPanelFragment : Fragment() {
     private val binding get() = _binding!!
 
     @Inject lateinit var quickLaunch: QuickLaunchManager
+    private val mainViewModel: MainViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -83,6 +85,15 @@ class LeftPanelFragment : Fragment() {
 
         binding.btnClimate.setOnClickListener {
             findNavController().navigate(R.id.climateFragment)
+        }
+
+        // Short press = toggle voice listening; long press = open voice setup
+        binding.btnVoice.setOnClickListener {
+            mainViewModel.toggleVoiceListening()
+        }
+        binding.btnVoice.setOnLongClickListener {
+            findNavController().navigate(R.id.voiceSetupFragment)
+            true
         }
     }
 

@@ -65,8 +65,13 @@ class GeminiCommandProcessor @Inject constructor(
             val body = buildRequestBody(spokenText)
             val request = Request.Builder().url(url).post(body).build()
             val response = client.newCall(request).execute()
-            val responseText = response.body?.string() ?: return@runCatching VoiceCommand.Unknown("empty response")
-            parseGeminiResponse(responseText)
+            val responseBody = response.body?.string() ?: ""
+            if (!response.isSuccessful) {
+                Timber.w("Gemini HTTP ${response.code}: $responseBody")
+                return@withContext VoiceCommand.Unknown("http_${response.code}")
+            }
+            if (responseBody.isBlank()) return@withContext VoiceCommand.Unknown("empty response")
+            parseGeminiResponse(responseBody)
         }.getOrElse { e ->
             Timber.e(e, "Gemini API error")
             VoiceCommand.Unknown(e.message ?: "error")
@@ -85,16 +90,26 @@ class GeminiCommandProcessor @Inject constructor(
     }
 
     private fun parseGeminiResponse(responseJson: String): VoiceCommand {
-        val root = JSONObject(responseJson)
-        val text = root.getJSONArray("candidates")
-            .getJSONObject(0)
-            .getJSONObject("content")
-            .getJSONArray("parts")
-            .getJSONObject(0)
-            .getString("text")
-            .trim()
-        Timber.d("Gemini response: $text")
-        return parseCommandJson(text)
+        return runCatching {
+            val root = JSONObject(responseJson)
+            val candidates = root.optJSONArray("candidates")
+            if (candidates == null || candidates.length() == 0) {
+                Timber.w("Gemini: no candidates in response")
+                return VoiceCommand.Unknown("no candidates")
+            }
+            val text = candidates
+                .getJSONObject(0)
+                .getJSONObject("content")
+                .getJSONArray("parts")
+                .getJSONObject(0)
+                .getString("text")
+                .trim()
+            Timber.d("Gemini response: $text")
+            parseCommandJson(text)
+        }.getOrElse { e ->
+            Timber.e(e, "Gemini parse error: $responseJson")
+            VoiceCommand.Unknown("parse_error")
+        }
     }
 
     private fun parseCommandJson(json: String): VoiceCommand {

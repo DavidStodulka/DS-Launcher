@@ -43,9 +43,19 @@
             <TextView android:id="@+id/tvCurrentKeyCode" android:layout_width="wrap_content"
                 android:layout_height="wrap_content" android:text="Není nastaveno"
                 android:textColor="#757575" android:textSize="13sp" android:layout_marginBottom="8dp"/>
-            <Button android:id="@+id/btnCalibrateButton" android:layout_width="match_parent"
-                android:layout_height="52dp" android:text="Kalibrovat tlačítko"
-                android:textColor="#FFFFFF" android:backgroundTint="#1565C0"/>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical">
+                <Button android:id="@+id/btnCalibrateButton" android:layout_width="0dp"
+                    android:layout_height="72dp" android:layout_weight="1"
+                    android:text="Kalibrovat tlačítko"
+                    android:textColor="#FFFFFF" android:backgroundTint="#1565C0"/>
+                <com.caros.views.CountdownArcView
+                    android:id="@+id/countdownArc"
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:layout_marginStart="12dp"
+                    android:visibility="gone" />
+            </LinearLayout>
             <TextView android:id="@+id/tvCalibrateStatus" android:layout_width="match_parent"
                 android:layout_height="wrap_content" android:text="" android:textColor="#2E7D32"
                 android:textSize="13sp" android:layout_marginTop="8dp"/>

@@ -51,11 +51,16 @@ class ClimateFragment : Fragment() {
             launch { viewModel.recircEnabled.collect { highlightBtn(binding.btnRecirc, it) } }
             launch { viewModel.defrostEnabled.collect { highlightBtn(binding.btnDefrost, it) } }
             launch { viewModel.autoMode.collect { highlightBtn(binding.btnAuto, it) } }
-            // Actual interior temp from CAN
+            // Interior temp + initial state sync from CAN
             launch {
                 mainViewModel.canFrame.collect { frame ->
-                    val interior = frame.climateData?.interiorTemp
-                    binding.tvInteriorTemp.text = if (interior != null) "%.1f°".format(interior) else "--°"
+                    val climate = frame.climateData
+                    binding.tvInteriorTemp.text =
+                        if (climate?.interiorTemp != null) "%.1f°".format(climate.interiorTemp) else "--°"
+                    // Sync once with car's actual state
+                    viewModel.syncFromCAN(
+                        climate?.setTemp, climate?.fanSpeed, climate?.acOn, climate?.recircOn
+                    )
                 }
             }
         }

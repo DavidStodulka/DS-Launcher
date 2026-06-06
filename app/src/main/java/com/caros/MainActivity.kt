@@ -23,6 +23,7 @@ import com.caros.ui.main.LeftPanelFragment
 import com.caros.ui.main.MainViewModel
 import com.caros.ui.main.RightPanelFragment
 import com.caros.voice.SteeringWheelButtonDetector
+import com.caros.voice.TextToSpeechManager
 import com.caros.voice.VoiceCommandExecutor
 import com.caros.voice.VoiceInputManager
 import dagger.hilt.android.AndroidEntryPoint
@@ -43,6 +44,7 @@ class MainActivity : AppCompatActivity() {
     @Inject lateinit var voiceCommandExecutor: VoiceCommandExecutor
     @Inject lateinit var steeringWheelButtonDetector: SteeringWheelButtonDetector
     @Inject lateinit var voiceInputManager: VoiceInputManager
+    @Inject lateinit var textToSpeechManager: TextToSpeechManager
 
     private val mainViewModel: MainViewModel by viewModels()
 
@@ -213,6 +215,7 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         voiceInputManager.destroy()
+        textToSpeechManager.shutdown()
         if (canServiceBound) {
             unbindService(serviceConnection)
             canServiceBound = false
