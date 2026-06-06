@@ -275,7 +275,6 @@
         <item name="android:textColor">@color/caros_text_primary</item>
         <item name="android:colorBackground">@color/caros_dialog_bg</item>
         <item name="android:windowTitleStyle">@style/CarOS.TextAppearance.Title</item>
-        <item name="android:buttonBarStyle">@android:style/Widget.ButtonBar</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
         <item name="android:windowMinWidthMajor">50%</item>
         <item name="android:windowMinWidthMinor">80%</item>
@@ -307,7 +306,7 @@
     <!--  SWITCH / TOGGLE STYLES                                              -->
     <!-- ================================================================== -->
 
-    <style name="CarOS.Switch" parent="@android:style/Widget.CompoundButton.Switch">
+    <style name="CarOS.Switch" parent="Widget.AppCompat.CompoundButton.Switch">
         <item name="android:minHeight">@dimen/touch_target_min</item>
     </style>
 
