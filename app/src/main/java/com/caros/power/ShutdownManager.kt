@@ -175,7 +175,3 @@ class ShutdownManager @Inject constructor(
     }
 }
 
-// Extension for GlobalScope usage without the import — keeps the file self-contained
-private fun kotlinx.coroutines.CoroutineScope.launch(
-    block: suspend kotlinx.coroutines.CoroutineScope.() -> Unit
-) = kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.IO, block = block)

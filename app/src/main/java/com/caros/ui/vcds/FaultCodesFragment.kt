@@ -99,14 +99,6 @@ class FaultCodesFragment : Fragment() {
                 .show()
         }
 
-        // Export button (if present in layout)
-        try {
-            binding.root.findViewById<View>(R.id.btnExportDtc)?.setOnClickListener {
-                exportDtcReport()
-            }
-        } catch (e: Exception) {
-            // Export button not in layout — silently skip
-        }
     }
 
     private fun exportDtcReport() {
@@ -149,7 +141,12 @@ class FaultCodesFragment : Fragment() {
     // ── DTCAdapter ────────────────────────────────────────────────────────────
 
     private inner class DTCAdapter :
-        ListAdapter<Pair<DTCCode, String>, DTCAdapter.DTCViewHolder>(DIFF_CALLBACK) {
+        ListAdapter<Pair<DTCCode, String>, DTCAdapter.DTCViewHolder>(
+            object : DiffUtil.ItemCallback<Pair<DTCCode, String>>() {
+                override fun areItemsTheSame(a: Pair<DTCCode, String>, b: Pair<DTCCode, String>) = a.first.code == b.first.code
+                override fun areContentsTheSame(a: Pair<DTCCode, String>, b: Pair<DTCCode, String>) = a == b
+            }
+        ) {
 
         inner class DTCViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val tvCode: TextView = view.findViewById(R.id.tvDTCCode)
@@ -176,12 +173,5 @@ class FaultCodesFragment : Fragment() {
             holder.tvStatus.setBackgroundColor(color)
         }
 
-        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<Pair<DTCCode, String>>() {
-            override fun areItemsTheSame(a: Pair<DTCCode, String>, b: Pair<DTCCode, String>) =
-                a.first.code == b.first.code
-
-            override fun areContentsTheSame(a: Pair<DTCCode, String>, b: Pair<DTCCode, String>) =
-                a == b
-        }
     }
 }

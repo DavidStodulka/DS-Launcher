@@ -411,7 +411,8 @@ class SettingsFragment : Fragment() {
         saved.lines().filter { it.isNotBlank() }.forEach { line ->
             val parts = line.split("\t")
             if (parts.size < 6) return@forEach
-            val (id, name, condKey, condVal, actionKey, actionVal) = parts
+            val id = parts[0]; val name = parts[1]; val condKey = parts[2]
+            val condVal = parts[3]; val actionKey = parts[4]; val actionVal = parts[5]
             val condition = buildCondition(condKey, condVal) ?: return@forEach
             val action = buildAction(actionKey, actionVal) ?: return@forEach
             automationEngine.addRule(AutomationRule(id, name, condition, action))

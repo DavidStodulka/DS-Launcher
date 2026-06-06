@@ -72,7 +72,12 @@ class CodingPresetsFragment : Fragment() {
     // ── PresetAdapter ─────────────────────────────────────────────────────────
 
     private inner class PresetAdapter :
-        ListAdapter<PresetState, PresetAdapter.PresetViewHolder>(DIFF_CALLBACK) {
+        ListAdapter<PresetState, PresetAdapter.PresetViewHolder>(
+            object : DiffUtil.ItemCallback<PresetState>() {
+                override fun areItemsTheSame(a: PresetState, b: PresetState) = a.preset.id == b.preset.id
+                override fun areContentsTheSame(a: PresetState, b: PresetState) = a == b
+            }
+        ) {
 
         inner class PresetViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val tvName: TextView = view.findViewById(R.id.tvPresetName)
@@ -104,12 +109,5 @@ class CodingPresetsFragment : Fragment() {
             }
         }
 
-        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<PresetState>() {
-            override fun areItemsTheSame(a: PresetState, b: PresetState) =
-                a.preset.id == b.preset.id
-
-            override fun areContentsTheSame(a: PresetState, b: PresetState) =
-                a == b
-        }
     }
 }

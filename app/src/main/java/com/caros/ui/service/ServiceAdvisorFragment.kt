@@ -47,7 +47,7 @@ class ServiceAdvisorFragment : Fragment() {
                 )
             }
         }
-        viewModel.loadItems(currentMileage = 0)
+        viewModel.loadItems(currentKm = 0)
     }
 
     override fun onDestroyView() { super.onDestroyView(); _binding = null }

@@ -41,13 +41,14 @@ class LeftPanelFragment : Fragment() {
     private fun refreshInstallStatus() {
         val status = quickLaunch.getInstallStatus()
 
-        fun applyStatus(btn: android.widget.TextView, pkg: String, label: String) {
+        fun applyStatus(btn: android.widget.LinearLayout, pkg: String, label: String) {
+            val tv = btn.getChildAt(1) as? android.widget.TextView
             if (status[pkg] == true) {
-                btn.text = label
+                tv?.text = label
                 btn.isEnabled = true
                 btn.alpha = 1.0f
             } else {
-                btn.text = "Není nainstalováno"
+                tv?.text = "Není nainstalováno"
                 btn.isEnabled = false
                 btn.alpha = 0.4f
             }

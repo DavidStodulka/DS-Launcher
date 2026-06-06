@@ -55,7 +55,7 @@ class AdaptiveEQEngine @Inject constructor(
     // auto-EQ target without user offset and without smoothing
     val autoGainsFlow: Flow<FloatArray> = flow {
         while (true) {
-            if (isEnabled) emit(computeTargetGains())
+            if (isEnabled.value) emit(computeTargetGains())
             delay(2000)
         }
     }

@@ -231,7 +231,9 @@ class DeepSleepManager @Inject constructor(
         if (result.isFailure) {
             Timber.w("$TAG: root keyevent 26 failed, trying PowerManager.goToSleep()")
             try {
-                powerManager.goToSleep(android.os.SystemClock.uptimeMillis())
+                @Suppress("DiscouragedPrivateApi")
+                val m = android.os.PowerManager::class.java.getMethod("goToSleep", Long::class.javaPrimitiveType)
+                m.invoke(powerManager, android.os.SystemClock.uptimeMillis())
             } catch (e: Exception) {
                 Timber.e(e, "$TAG: PowerManager.goToSleep() also failed")
             }

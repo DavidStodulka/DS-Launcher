@@ -45,8 +45,3 @@ private class VCDSPagerAdapter(fragment: Fragment) : FragmentStateAdapter(fragme
     }
 }
 
-// Extension to access lifecycleScope from Fragment
-private val Fragment.lifecycleScope get() = viewLifecycleOwner.lifecycleScope
-
-private val androidx.fragment.app.Fragment.lifecycleScope: kotlinx.coroutines.CoroutineScope
-    get() = viewLifecycleOwner.lifecycleScope

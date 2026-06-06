@@ -44,7 +44,7 @@ class AudioViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), FloatArray(10))
 
     /** Whether adaptive EQ is currently active. */
-    private val _autoEQEnabled = MutableStateFlow(adaptiveEQEngine.isEnabled)
+    private val _autoEQEnabled = MutableStateFlow(adaptiveEQEngine.isEnabled.value)
     val autoEQEnabled: StateFlow<Boolean> = _autoEQEnabled.asStateFlow()
 
     // ── Init ──────────────────────────────────────────────────────────────────
@@ -69,7 +69,7 @@ class AudioViewModel @Inject constructor(
             audioProfileManager.applyProfile(profile)
             engineManager.setProfile(profile)
             // Sync adaptive EQ enabled state from profile
-            adaptiveEQEngine.isEnabled = profile.autoEQEnabled
+            adaptiveEQEngine.setEnabled(profile.autoEQEnabled)
             _autoEQEnabled.value = profile.autoEQEnabled
         }
     }
@@ -82,8 +82,8 @@ class AudioViewModel @Inject constructor(
     }
 
     fun toggleAutoEQ() {
-        val newState = !adaptiveEQEngine.isEnabled
-        adaptiveEQEngine.isEnabled = newState
+        val newState = !adaptiveEQEngine.isEnabled.value
+        adaptiveEQEngine.setEnabled(newState)
         _autoEQEnabled.value = newState
     }
 

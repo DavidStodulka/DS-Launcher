@@ -29,7 +29,7 @@ class VoiceCommandExecutor @Inject constructor(
             is VoiceCommand.Media -> executeMedia(command.cmd)
             is VoiceCommand.AudioProfile -> executeAudioProfile(command.profile)
             is VoiceCommand.EQAdjust -> executeEQAdjust(command.param, command.value)
-            is VoiceCommand.AutoEQ -> { adaptiveEQ.isEnabled = command.enabled; if (command.enabled) "Auto EQ zapnuto" else "Auto EQ vypnuto" }
+            is VoiceCommand.AutoEQ -> { adaptiveEQ.setEnabled(command.enabled); if (command.enabled) "Auto EQ zapnuto" else "Auto EQ vypnuto" }
             is VoiceCommand.AppLaunch -> launchApp(command.app)
             is VoiceCommand.CarInfo -> getCarInfo(command.query)
             is VoiceCommand.Navigate -> { launchNavigation(command.destination); "Naviguju do ${command.destination}" }

@@ -39,7 +39,7 @@ class RightPanelFragment : Fragment() {
             mainViewModel.canFrame.collect { frame ->
                 // RPM gauge
                 frame.engineRpm?.let { rpm ->
-                    binding.rpmGaugeView.setRpm(rpm.rpm)
+                    (binding.rpmGaugeView as? com.caros.views.RPMGaugeView)?.setRpm(rpm.rpm)
                 }
 
                 // Speed numeric
