@@ -129,8 +129,10 @@ class FMRadioViewModel @Inject constructor(
     }
 
     private fun loadPresetsFromPrefs(): List<Float> {
+        val controllerPresets = fmController.getPresets()
         return List(FMController.PRESET_COUNT) { i ->
-            prefs.getFloat("preset_$i", 0f)
+            val saved = prefs.getFloat("preset_$i", 0f)
+            if (saved > 0f) saved else controllerPresets[i]
         }
     }
 

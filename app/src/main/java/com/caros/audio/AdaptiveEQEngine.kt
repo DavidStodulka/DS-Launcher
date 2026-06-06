@@ -4,6 +4,9 @@ import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.Serializable
 import java.util.Calendar
@@ -23,13 +26,17 @@ class AdaptiveEQEngine @Inject constructor(
 
     private val currentGains = FloatArray(10)  // smoothed current state
     private var userOffset = FloatArray(10)     // manual user additions
-    var isEnabled = true
+
+    private val _isEnabled = MutableStateFlow(true)
+    val isEnabled: StateFlow<Boolean> = _isEnabled.asStateFlow()
+    fun setEnabled(enabled: Boolean) { _isEnabled.value = enabled }
+
     var currentSource: AudioSource = AudioSource.UNKNOWN
 
     // Output flow: emits final 10-band float array every 2 seconds
     val eqFlow: Flow<FloatArray> = flow {
         while (true) {
-            if (isEnabled) {
+            if (_isEnabled.value) {
                 val target = computeTargetGains()
                 // Smooth: newGain = old * 0.85 + target * 0.15
                 for (i in 0..9) {

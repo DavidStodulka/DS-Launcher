@@ -64,7 +64,7 @@ class MainViewModel @Inject constructor(
 
     // ── Adaptive EQ enabled flag ──────────────────────────────────────────────
 
-    val adaptiveEQEnabled: StateFlow<Boolean> = MutableStateFlow(adaptiveEQEngine.isEnabled)
+    val adaptiveEQEnabled: StateFlow<Boolean> = adaptiveEQEngine.isEnabled
 
     init {
         startServicePolling()

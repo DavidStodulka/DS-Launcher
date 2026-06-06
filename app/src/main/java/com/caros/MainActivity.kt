@@ -24,6 +24,7 @@ import com.caros.ui.main.MainViewModel
 import com.caros.ui.main.RightPanelFragment
 import com.caros.voice.SteeringWheelButtonDetector
 import com.caros.voice.VoiceCommandExecutor
+import com.caros.voice.VoiceInputManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -41,6 +42,7 @@ class MainActivity : AppCompatActivity() {
     @Inject lateinit var profileManager: ProfileManager
     @Inject lateinit var voiceCommandExecutor: VoiceCommandExecutor
     @Inject lateinit var steeringWheelButtonDetector: SteeringWheelButtonDetector
+    @Inject lateinit var voiceInputManager: VoiceInputManager
 
     private val mainViewModel: MainViewModel by viewModels()
 
@@ -210,6 +212,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        voiceInputManager.destroy()
         if (canServiceBound) {
             unbindService(serviceConnection)
             canServiceBound = false
