@@ -84,7 +84,8 @@
                 <!-- SSH card -->
                 <LinearLayout
                     android:layout_width="0dp"
-                    android:layout_height="120dp"
+                    android:layout_height="wrap_content"
+                    android:minHeight="120dp"
                     android:layout_weight="1"
                     android:orientation="vertical"
                     android:background="#111111"
@@ -99,12 +100,23 @@
                     <TextView android:id="@+id/tvSSHAddress" android:layout_width="wrap_content"
                         android:layout_height="wrap_content" android:text="---"
                         android:textColor="#1565C0" android:textSize="12sp" android:fontFamily="monospace"/>
+                    <TextView android:id="@+id/tvSSHCommand" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:text=""
+                        android:textColor="#9E9E9E" android:textSize="10sp" android:fontFamily="monospace"
+                        android:layout_marginTop="4dp" android:singleLine="true" android:ellipsize="end"/>
+                    <Button android:id="@+id/btnCopySSH"
+                        android:layout_width="wrap_content" android:layout_height="28dp"
+                        android:text="Kopírovat SSH" android:textSize="10sp"
+                        android:backgroundTint="#1E3A5F" android:textColor="#1565C0"
+                        android:insetTop="0dp" android:insetBottom="0dp"
+                        android:layout_marginTop="6dp"/>
                 </LinearLayout>
 
                 <!-- MQTT card -->
                 <LinearLayout
                     android:layout_width="0dp"
-                    android:layout_height="120dp"
+                    android:layout_height="wrap_content"
+                    android:minHeight="120dp"
                     android:layout_weight="1"
                     android:orientation="vertical"
                     android:background="#111111"

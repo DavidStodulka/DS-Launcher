@@ -68,6 +68,13 @@
             </LinearLayout>
         </LinearLayout>
 
+        <!-- AUTOMATIZACE -->
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="AUTOMATIZACE" android:textColor="#1565C0" android:textSize="12sp" android:letterSpacing="0.1" android:paddingBottom="8dp"/>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:background="#111111" android:padding="12dp" android:layout_marginBottom="12dp">
+            <LinearLayout android:id="@+id/llAutomationRules" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical"/>
+            <Button android:id="@+id/btnAddAutomationRule" android:layout_width="match_parent" android:layout_height="48dp" android:text="+ Přidat pravidlo" android:textColor="#9E9E9E" android:textSize="13sp" android:backgroundTint="#1E1E1E" android:layout_marginTop="8dp"/>
+        </LinearLayout>
+
         <!-- VÝVOJÁŘ -->
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="VÝVOJÁŘ" android:textColor="#1565C0" android:textSize="12sp" android:letterSpacing="0.1" android:paddingBottom="8dp"/>
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:background="#111111" android:padding="12dp" android:layout_marginBottom="12dp">

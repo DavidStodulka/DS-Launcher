@@ -46,8 +46,21 @@
         android:layout_marginTop="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
         app:layout_constraintTop_toBottomOf="@id/tvSlope"
+        app:layout_constraintBottom_toTopOf="@id/tvFuelEstimate"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Fuel consumption estimate -->
+    <TextView
+        android:id="@+id/tvFuelEstimate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Spotřeba: —"
+        android:textColor="#4CAF50"
+        android:textSize="14sp"
+        android:fontFamily="sans-serif-condensed"
+        android:layout_marginBottom="4dp"
         app:layout_constraintBottom_toTopOf="@id/btnRecording"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

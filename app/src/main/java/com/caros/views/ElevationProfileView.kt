@@ -117,6 +117,40 @@ class ElevationProfileView @JvmOverloads constructor(
             if (x >= padL && x <= width - padR)
                 canvas.drawText("${String.format("%.1f", distKm)}km", x, height - 4f, labelPaint)
         }
+
+        // Legend (top-right corner)
+        drawLegend(canvas)
+    }
+
+    private fun drawLegend(canvas: Canvas) {
+        val legendEntries = listOf(
+            "≤2% Rovně" to slopeColors["FLAT"]!!,
+            "≤5% Mírně" to slopeColors["MILD"]!!,
+            "≤10% Prudce" to slopeColors["STEEP"]!!,
+            ">10% Extrémně" to slopeColors["EXTREME"]!!
+        )
+        val boxSize = 14f
+        val textSize = 20f
+        val itemH = 22f
+        val legendW = 170f
+        val padH = 8f
+        val totalH = legendEntries.size * itemH + padH * 2
+
+        val bgPaint2 = Paint().apply { color = 0xCC111111.toInt() }
+        val lx = width - legendW - 8f
+        val ly = 8f
+        canvas.drawRect(lx - 4f, ly, lx + legendW + 4f, ly + totalH, bgPaint2)
+
+        val boxPaint2 = Paint(Paint.ANTI_ALIAS_FLAG)
+        val txtPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFFCCCCCC.toInt(); this.textSize = textSize; textAlign = Paint.Align.LEFT
+        }
+        legendEntries.forEachIndexed { idx, (label, color) ->
+            val itemY = ly + padH + idx * itemH
+            boxPaint2.color = color
+            canvas.drawRect(lx, itemY, lx + boxSize, itemY + boxSize, boxPaint2)
+            canvas.drawText(label, lx + boxSize + 4f, itemY + boxSize - 1f, txtPaint)
+        }
     }
 
     private fun slopeColor(slope: Float): Int = when {

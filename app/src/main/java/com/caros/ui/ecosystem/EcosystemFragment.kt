@@ -97,8 +97,16 @@ class EcosystemFragment : Fragment() {
 
     private fun updateDashboard(s: ServiceStatus) {
         val ip = serviceMonitor.getLocalIP()
+        val sshCmd = "ssh user@$ip -p 8022"
         binding.tvSSHStatus.text = if (s.ssh) "● Aktivní" else "○ Neaktivní"
         binding.tvSSHAddress.text = "$ip:8022"
+        binding.tvSSHCommand.text = sshCmd
+        binding.btnCopySSH.setOnClickListener {
+            val cm = requireContext().getSystemService(android.content.Context.CLIPBOARD_SERVICE)
+                    as android.content.ClipboardManager
+            cm.setPrimaryClip(android.content.ClipData.newPlainText("SSH", sshCmd))
+            android.widget.Toast.makeText(context, "Zkopírováno: $sshCmd", android.widget.Toast.LENGTH_SHORT).show()
+        }
         binding.tvMQTTStatus.text = if (s.mqtt) "● Aktivní | ${s.mqttClients} klientů" else "○ Neaktivní"
         binding.tvInfluxStatus.text = if (s.influx) "● Nahrává" else "○ Zastaveno"
         binding.tvPythonStatus.text = if (s.pythonBridge) "● Aktivní" else "○ Zastaveno"
