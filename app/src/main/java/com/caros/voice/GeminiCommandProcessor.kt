@@ -16,7 +16,8 @@ import javax.inject.Singleton
 
 @Singleton
 class GeminiCommandProcessor @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val offlineMatcher: OfflineCommandMatcher
 ) {
     private val client = OkHttpClient.Builder()
         .connectTimeout(5, TimeUnit.SECONDS)
@@ -59,7 +60,7 @@ class GeminiCommandProcessor @Inject constructor(
     fun hasApiKey(): Boolean = apiKey.isNotBlank()
 
     suspend fun processCommand(spokenText: String): VoiceCommand = withContext(Dispatchers.IO) {
-        if (!hasApiKey()) return@withContext VoiceCommand.Unknown("no api key")
+        if (!hasApiKey()) return@withContext offlineMatcher.match(spokenText)
         runCatching {
             val url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$apiKey"
             val body = buildRequestBody(spokenText)
@@ -73,8 +74,8 @@ class GeminiCommandProcessor @Inject constructor(
             if (responseBody.isBlank()) return@withContext VoiceCommand.Unknown("empty response")
             parseGeminiResponse(responseBody)
         }.getOrElse { e ->
-            Timber.e(e, "Gemini API error")
-            VoiceCommand.Unknown(e.message ?: "error")
+            Timber.e(e, "Gemini API error — falling back to offline matcher")
+            offlineMatcher.match(spokenText)
         }
     }
 

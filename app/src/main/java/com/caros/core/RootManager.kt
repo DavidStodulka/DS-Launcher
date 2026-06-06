@@ -334,6 +334,59 @@ class RootManager @Inject constructor(
         }
     }
 
+    /**
+     * Execute [block] only if root is available, otherwise return [fallback].
+     *
+     * Use this for features that are enhanced by root but should still work
+     * without it.  The fallback is returned immediately — no `su` invocation
+     * is attempted — so callers never block or throw on non-rooted devices.
+     *
+     * Example:
+     * ```kotlin
+     * val brightness = rootManager.withRootFallback(defaultBrightness) {
+     *     shellExecutor.executeSuCommand("cat /sys/class/backlight/backlight/brightness")
+     *         .getOrNull()?.trim()?.toIntOrNull() ?: defaultBrightness
+     * }
+     * ```
+     */
+    suspend fun <T> withRootFallback(fallback: T, block: suspend () -> T): T {
+        if (_rootStatus.value == RootStatus.UNAVAILABLE ||
+            _rootStatus.value == RootStatus.DENIED
+        ) {
+            Timber.d("RootManager: root unavailable — returning fallback")
+            return fallback
+        }
+        return try {
+            block()
+        } catch (e: Exception) {
+            Timber.w(e, "RootManager: root operation failed — returning fallback")
+            fallback
+        }
+    }
+
+    /**
+     * Run [block] only if root is available; silently skip if not.
+     * Use for fire-and-forget root operations where failure is acceptable.
+     */
+    suspend fun ifRootAvailable(block: suspend () -> Unit) {
+        if (_rootStatus.value == RootStatus.UNAVAILABLE ||
+            _rootStatus.value == RootStatus.DENIED
+        ) return
+        try {
+            block()
+        } catch (e: Exception) {
+            Timber.w(e, "RootManager: optional root operation failed — continuing without root")
+        }
+    }
+
+    /** Human-readable summary of root status for Settings / diagnostic screens. */
+    fun rootStatusSummary(): String = when (_rootStatus.value) {
+        RootStatus.AVAILABLE   -> "Root dostupný — všechny funkce aktivní"
+        RootStatus.DENIED      -> "Root odepřen — omezená funkcionalita"
+        RootStatus.UNAVAILABLE -> "Zařízení není rootované — základní mód"
+        RootStatus.UNKNOWN     -> "Stav rootu se ověřuje…"
+    }
+
     // -------------------------------------------------------------------------
     //  Constants
     // -------------------------------------------------------------------------
