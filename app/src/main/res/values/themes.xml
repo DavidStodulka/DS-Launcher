@@ -24,17 +24,10 @@
         <item name="colorOnBackground">@color/caros_text_primary</item>
         <item name="colorSurface">@color/caros_surface</item>
         <item name="colorOnSurface">@color/caros_text_primary</item>
-        <item name="colorSurfaceVariant">@color/caros_surface_variant</item>
-        <item name="colorOnSurfaceVariant">@color/caros_text_secondary</item>
 
         <!-- === Error === -->
         <item name="colorError">@color/caros_error</item>
         <item name="colorOnError">@color/caros_text_primary</item>
-        <item name="colorErrorContainer">@color/caros_error_container</item>
-        <item name="colorOnErrorContainer">@color/caros_on_error_container</item>
-
-        <!-- === Outline === -->
-        <item name="colorOutline">@color/caros_outline</item>
 
         <!-- === Window chrome === -->
         <item name="android:windowBackground">@color/caros_bg</item>
@@ -166,17 +159,17 @@
     <!-- ================================================================== -->
     <!--  SHAPE APPEARANCES                                                   -->
     <!-- ================================================================== -->
-    <style name="CarOS.ShapeSmall" parent="ShapeAppearance.Material3.SmallComponent">
+    <style name="CarOS.ShapeSmall" parent="ShapeAppearance.MaterialComponents.SmallComponent">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">@dimen/card_corner_radius_small</item>
     </style>
 
-    <style name="CarOS.ShapeMedium" parent="ShapeAppearance.Material3.MediumComponent">
+    <style name="CarOS.ShapeMedium" parent="ShapeAppearance.MaterialComponents.MediumComponent">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">@dimen/card_corner_radius</item>
     </style>
 
-    <style name="CarOS.ShapeLarge" parent="ShapeAppearance.Material3.LargeComponent">
+    <style name="CarOS.ShapeLarge" parent="ShapeAppearance.MaterialComponents.LargeComponent">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">@dimen/card_corner_radius_large</item>
     </style>
