@@ -21,7 +21,6 @@
         <item name="colorOnSecondary">@color/caros_text_on_secondary</item>
 
         <!-- === Surfaces === -->
-        <item name="colorBackground">@color/caros_bg</item>
         <item name="colorOnBackground">@color/caros_text_primary</item>
         <item name="colorSurface">@color/caros_surface</item>
         <item name="colorOnSurface">@color/caros_text_primary</item>
