@@ -18,6 +18,8 @@ import com.caros.can.DTCCode
 import com.caros.databinding.FragmentVcdsFaultCodesBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -110,19 +112,15 @@ class FaultCodesFragment : Fragment() {
             .create()
         loadingDialog.show()
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.freezeFrame.collect { ff ->
-                if (ff != null) {
-                    loadingDialog.dismiss()
-                    val msg = if (ff.parameters.isEmpty()) "Žádná data" else
-                        ff.parameters.entries.joinToString("\n") { "${it.key}: ${it.value}" }
-                    androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                        .setTitle("Freeze Frame: ${dtc.code}")
-                        .setMessage(msg)
-                        .setPositiveButton("OK", null)
-                        .show()
-                    cancel()
-                }
-            }
+            val ff = viewModel.freezeFrame.filterNotNull().first()
+            loadingDialog.dismiss()
+            val msg = if (ff.parameters.isEmpty()) "Žádná data" else
+                ff.parameters.entries.joinToString("\n") { "${it.key}: ${it.value}" }
+            androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle("Freeze Frame: ${dtc.code}")
+                .setMessage(msg)
+                .setPositiveButton("OK", null)
+                .show()
         }
     }
 
