@@ -26,7 +26,7 @@ class GeminiCommandProcessor @Inject constructor(
 
     private val prefs = context.getSharedPreferences("caros_voice_prefs", Context.MODE_PRIVATE)
 
-    private var apiKey: String
+    private var __apiKey: String
         get() = prefs.getString("gemini_api_key", "") ?: ""
         set(v) { prefs.edit().putString("gemini_api_key", v).apply() }
 
@@ -56,13 +56,13 @@ class GeminiCommandProcessor @Inject constructor(
         "Naviguj do Prahy" -> {"action":"navigate","destination":"Praha"}
     """.trimIndent()
 
-    fun setApiKey(key: String) { apiKey = key }
-    fun hasApiKey(): Boolean = apiKey.isNotBlank()
+    fun setApiKey(key: String) { _apiKey = key }
+    fun hasApiKey(): Boolean = _apiKey.isNotBlank()
 
     suspend fun processCommand(spokenText: String): VoiceCommand = withContext(Dispatchers.IO) {
         if (!hasApiKey()) return@withContext offlineMatcher.match(spokenText)
         runCatching {
-            val url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$apiKey"
+            val url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$_apiKey"
             val body = buildRequestBody(spokenText)
             val request = Request.Builder().url(url).post(body).build()
             val response = client.newCall(request).execute()
@@ -134,10 +134,10 @@ class GeminiCommandProcessor @Inject constructor(
     }
 
     suspend fun testApiKey(key: String): Boolean = withContext(Dispatchers.IO) {
-        val oldKey = apiKey
-        apiKey = key
+        val oldKey = _apiKey
+        _apiKey = key
         val result = runCatching { processCommand("test") !is VoiceCommand.Unknown }.getOrDefault(false)
-        apiKey = oldKey
+        _apiKey = oldKey
         result
     }
 }

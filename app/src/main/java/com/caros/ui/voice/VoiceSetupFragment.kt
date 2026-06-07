@@ -51,7 +51,7 @@ class VoiceSetupFragment : Fragment() {
     }
 
     private fun setupSteeringButtonCard() {
-        val kc = steeringDetector.getSavedKeyCode()
+        val kc = steeringDetector.savedKeyCode
         binding.tvCurrentKeyCode.text = if (kc != -1) "Nastaveno: KeyCode $kc" else "Není nastaveno"
         binding.btnCalibrateButton.setOnClickListener {
             binding.tvCalibrateStatus.text = "Stiskni tlačítko na volantu do 10 sekund..."

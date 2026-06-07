@@ -34,9 +34,9 @@ class SteeringWheelButtonDetector @Inject constructor(
     var isCalibrating = false
         private set
 
-    private var savedKeyCode: Int
+    var savedKeyCode: Int
         get() = prefs.getInt("voice_keycode", -1)
-        set(v) { prefs.edit().putInt("voice_keycode", v).apply() }
+        private set(v) { prefs.edit().putInt("voice_keycode", v).apply() }
 
     val isConfigured: Boolean get() = savedKeyCode != -1
 
@@ -67,5 +67,4 @@ class SteeringWheelButtonDetector @Inject constructor(
     }
 
     fun clearCalibration() { savedKeyCode = -1 }
-    fun getSavedKeyCode(): Int = savedKeyCode
 }
