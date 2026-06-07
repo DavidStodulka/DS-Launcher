@@ -77,5 +77,51 @@
             <com.caros.views.GaugeWidgetView android:id="@+id/gaugeVoltage" android:layout_width="0dp" android:layout_weight="1" android:layout_height="120dp" android:layout_column="0" android:layout_row="1" android:layout_margin="4dp"/>
             <com.caros.views.GaugeWidgetView android:id="@+id/gaugeDPF" android:layout_width="0dp" android:layout_weight="1" android:layout_height="120dp" android:layout_column="1" android:layout_row="1" android:layout_margin="4dp"/>
         </GridLayout>
+
+        <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#1E1E1E" android:layout_marginTop="16dp" android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="DPF REGENERACE"
+            android:textColor="#1565C0"
+            android:textSize="12sp"
+            android:letterSpacing="0.1"
+            android:paddingBottom="8dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:background="#111111">
+
+            <TextView
+                android:id="@+id/tvDPFRegenStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Stav: Připraven"
+                android:textColor="#AAAAAA"
+                android:textSize="13sp"
+                android:paddingBottom="8dp"/>
+
+            <ProgressBar
+                android:id="@+id/progressDPFRegen"
+                style="@android:style/Widget.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="100"
+                android:progress="0"
+                android:visibility="gone"
+                android:layout_marginBottom="8dp"/>
+
+            <Button
+                android:id="@+id/btnStartDPFRegen"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="Spustit DPF regeneraci"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#1565C0"/>
+        </LinearLayout>
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

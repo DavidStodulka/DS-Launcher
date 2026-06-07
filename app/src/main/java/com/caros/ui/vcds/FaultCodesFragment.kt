@@ -101,6 +101,31 @@ class FaultCodesFragment : Fragment() {
 
     }
 
+    private fun showFreezeFrameDialog(dtc: com.caros.can.DTCCode, ecuAddress: Int) {
+        viewModel.loadFreezeFrame(ecuAddress, dtc)
+        val loadingDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle("Freeze Frame: ${dtc.code}")
+            .setMessage("Načítám data...")
+            .setCancelable(true)
+            .create()
+        loadingDialog.show()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.freezeFrame.collect { ff ->
+                if (ff != null) {
+                    loadingDialog.dismiss()
+                    val msg = if (ff.parameters.isEmpty()) "Žádná data" else
+                        ff.parameters.entries.joinToString("\n") { "${it.key}: ${it.value}" }
+                    androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                        .setTitle("Freeze Frame: ${dtc.code}")
+                        .setMessage(msg)
+                        .setPositiveButton("OK", null)
+                        .show()
+                    cancel()
+                }
+            }
+        }
+    }
+
     private fun exportDtcReport() {
         viewLifecycleOwner.lifecycleScope.launch {
             withContext(Dispatchers.IO) {
@@ -171,6 +196,13 @@ class FaultCodesFragment : Fragment() {
                 else      -> android.graphics.Color.parseColor("#757575")
             }
             holder.tvStatus.setBackgroundColor(color)
+            holder.itemView.setOnClickListener {
+                val (dtc, ecuName) = getItem(holder.adapterPosition)
+                // Find ECU address from name
+                val ecuAddress = com.caros.vcds.ECUDatabase.LEON_5F_ECUS
+                    .firstOrNull { it.name == ecuName }?.address ?: 0x01
+                showFreezeFrameDialog(dtc, ecuAddress)
+            }
         }
 
     }

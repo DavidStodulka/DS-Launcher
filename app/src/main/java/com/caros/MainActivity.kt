@@ -75,6 +75,7 @@ class MainActivity : AppCompatActivity() {
         bindCAN()
         startNightDimCoroutine()
         observeDrivingMode()
+        observeRootStatus()
     }
 
     private fun hideSystemUI() {
@@ -196,6 +197,12 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
+        }
+    }
+
+    private fun observeRootStatus() {
+        lifecycleScope.launch {
+            mainViewModel.rootStatus.collect { binding.statusBarView.setRootStatus(it) }
         }
     }
 

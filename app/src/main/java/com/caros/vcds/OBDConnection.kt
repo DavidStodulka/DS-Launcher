@@ -2,16 +2,19 @@ package com.caros.vcds
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  OBDConnection.kt — Manages the physical connection to an ELM327-compatible
-//  OBD-II adapter.  Supports three transport paths:
+//  OBD-II adapter.  Supports four transport paths:
 //
 //    1. /dev/ttyS1   — direct UART passthrough (VW-RZ-08-0041 CAN box)
 //    2. /dev/ttyUSB* — USB-connected ELM327
-//    3. Mock mode    — deterministic stub responses for development/testing
+//    3. Bluetooth    — paired RFCOMM ELM327/OBD device (SPP UUID)
+//    4. Mock mode    — deterministic stub responses for development/testing
 //
 //  Usage: call [connect] once, then call [sendCommand] for every UDS/OBD
 //  request.  Call [disconnect] when done.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothSocket
 import android.content.Context
 import com.caros.core.ShellExecutor
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -20,6 +23,7 @@ import kotlinx.coroutines.withContext
 import java.io.InputStream
 import java.io.OutputStream
 import java.io.RandomAccessFile
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -46,6 +50,7 @@ class OBDConnection @Inject constructor(
     private var outputStream: OutputStream? = null
     private var inputStream: InputStream? = null
     private var process: Process? = null
+    private var bluetoothSocket: BluetoothSocket? = null
 
     // ── Connection lifecycle ──────────────────────────────────────────────────
 
@@ -55,6 +60,7 @@ class OBDConnection @Inject constructor(
      * Priority order:
      * 1. `/dev/ttyS1` (direct UART on VW-RZ CAN box)
      * 2. Any `/dev/ttyUSB*` or `/dev/ttyACM*` device
+     * 3. Paired Bluetooth device whose name contains "ELM327", "OBD", or "OBDII"
      *
      * Falls back to [ConnectionType.DISCONNECTED] (mock mode) if nothing is found.
      *
@@ -76,7 +82,16 @@ class OBDConnection @Inject constructor(
             }
         }
 
-        // 3. Nothing found — remain in mock/disconnected mode
+        // 3. Try Bluetooth ELM327 (paired devices)
+        val btSocket = tryConnectBluetooth()
+        if (btSocket != null) {
+            outputStream = btSocket.outputStream
+            inputStream = btSocket.inputStream
+            connectionType = ConnectionType.BLUETOOTH_ELM327
+            return@withContext true
+        }
+
+        // 4. Nothing found — remain in mock/disconnected mode
         connectionType = ConnectionType.DISCONNECTED
         false
     }
@@ -86,9 +101,11 @@ class OBDConnection @Inject constructor(
         outputStream?.runCatching { close() }
         inputStream?.runCatching { close() }
         process?.runCatching { destroy() }
+        bluetoothSocket?.runCatching { close() }
         outputStream = null
         inputStream = null
         process = null
+        bluetoothSocket = null
         connectionType = ConnectionType.DISCONNECTED
     }
 
@@ -166,6 +183,33 @@ class OBDConnection @Inject constructor(
             ?.map { it.trim() }
             ?.filter { it.isNotBlank() && it.startsWith("/dev/") }
             ?: emptyList()
+    }
+
+    /**
+     * Scan paired Bluetooth devices for an ELM327/OBD adapter and attempt an
+     * RFCOMM connection using the standard Serial Port Profile UUID.
+     *
+     * @return an already-connected [BluetoothSocket], or null if no suitable
+     *         paired device is found or the connection fails.
+     */
+    private suspend fun tryConnectBluetooth(): BluetoothSocket? = withContext(Dispatchers.IO) {
+        try {
+            val adapter = BluetoothAdapter.getDefaultAdapter() ?: return@withContext null
+            if (!adapter.isEnabled) return@withContext null
+            val elm327 = adapter.bondedDevices?.firstOrNull { device ->
+                device.name?.contains("ELM327", ignoreCase = true) == true ||
+                device.name?.contains("OBD", ignoreCase = true) == true ||
+                device.name?.contains("OBDII", ignoreCase = true) == true
+            } ?: return@withContext null
+            val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB") // SPP
+            val socket = elm327.createRfcommSocketToServiceRecord(uuid)
+            adapter.cancelDiscovery()
+            socket.connect()
+            bluetoothSocket = socket
+            socket
+        } catch (e: Exception) {
+            null
+        }
     }
 
     // ── Mock responses ────────────────────────────────────────────────────────

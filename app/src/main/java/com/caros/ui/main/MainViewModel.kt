@@ -7,6 +7,8 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.caros.audio.AdaptiveEQEngine
 import com.caros.can.CANFrame
+import com.caros.core.RootManager
+import com.caros.core.RootStatus
 import com.caros.db.CarOSDatabase
 import com.caros.profiles.DrivingMode
 import com.caros.profiles.ProfileManager
@@ -35,7 +37,8 @@ class MainViewModel @Inject constructor(
     private val dpfMonitor: DPFMonitor,
     private val voiceInputManager: VoiceInputManager,
     private val voiceCommandExecutor: VoiceCommandExecutor,
-    private val adaptiveEQEngine: AdaptiveEQEngine
+    private val adaptiveEQEngine: AdaptiveEQEngine,
+    private val rootManager: RootManager
 ) : ViewModel() {
 
     // ── CAN frame ─────────────────────────────────────────────────────────────
@@ -66,8 +69,13 @@ class MainViewModel @Inject constructor(
 
     val adaptiveEQEnabled: StateFlow<Boolean> = adaptiveEQEngine.isEnabled
 
+    // ── Root status ───────────────────────────────────────────────────────────
+
+    val rootStatus: StateFlow<RootStatus> = rootManager.rootStatus
+
     init {
         startServicePolling()
+        viewModelScope.launch { rootManager.checkRootAvailability() }
     }
 
     // ── Public API ────────────────────────────────────────────────────────────

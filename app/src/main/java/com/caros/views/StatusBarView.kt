@@ -59,6 +59,7 @@ class StatusBarView @JvmOverloads constructor(
     private var gpsActive    = false
     private var voiceActive  = false
     private var mqttConnected = false
+    private var rootStatus: com.caros.core.RootStatus = com.caros.core.RootStatus.UNKNOWN
     private var slopeDeg     = 0f
     private var altitudeM    = 0f
 
@@ -140,6 +141,8 @@ class StatusBarView @JvmOverloads constructor(
         mqttConnected = connected
         invalidate()
     }
+
+    fun setRootStatus(status: com.caros.core.RootStatus) { rootStatus = status; invalidate() }
 
     /** Update road slope in degrees (positive = uphill). */
     fun setSlope(degrees: Float) {
@@ -280,6 +283,28 @@ class StatusBarView @JvmOverloads constructor(
         textSecPaint.textAlign = Paint.Align.LEFT
         textSecPaint.color = COLOR_TEXT_SEC
         rx -= dotR + pad * 2
+
+        // Root badge
+        if (rootStatus != com.caros.core.RootStatus.UNKNOWN) {
+            dotPaint.color = when (rootStatus) {
+                com.caros.core.RootStatus.AVAILABLE   -> COLOR_OK
+                com.caros.core.RootStatus.DENIED      -> COLOR_ERROR
+                com.caros.core.RootStatus.UNAVAILABLE -> COLOR_INACTIVE
+                com.caros.core.RootStatus.UNKNOWN     -> COLOR_INACTIVE
+            }
+            rx -= dotR
+            canvas.drawCircle(rx, dotY, dotR, dotPaint)
+            textSecPaint.textSize = smallTextSz * 0.55f
+            textSecPaint.textAlign = Paint.Align.CENTER
+            textSecPaint.color = when (rootStatus) {
+                com.caros.core.RootStatus.AVAILABLE -> COLOR_TEXT_PRI
+                else -> COLOR_TEXT_SEC
+            }
+            canvas.drawText("R", rx, dotY + smallTextSz * 0.20f, textSecPaint)
+            textSecPaint.textAlign = Paint.Align.LEFT
+            textSecPaint.color = COLOR_TEXT_SEC
+            rx -= dotR + pad * 2
+        }
 
         // Voice / mic indicator
         if (voiceActive) {

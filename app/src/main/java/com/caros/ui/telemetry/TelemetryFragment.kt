@@ -102,16 +102,36 @@ class TelemetryFragment : Fragment() {
     private fun setupExportButton() {
         binding.btnExport.setOnClickListener {
             if (currentSessionId < 0) return@setOnClickListener
-            viewLifecycleOwner.lifecycleScope.launch {
-                withContext(Dispatchers.IO) {
-                    try {
-                        val file = telemetryExporter.exportToCSV(currentSessionId)
-                        Timber.i("TelemetryFragment: exported to ${file.absolutePath}")
-                    } catch (e: Exception) {
-                        Timber.e(e, "TelemetryFragment: export failed")
+            androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle("Export telemetrie")
+                .setItems(arrayOf("CSV", "JSON")) { _, which ->
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        withContext(Dispatchers.IO) {
+                            try {
+                                val file = if (which == 0)
+                                    telemetryExporter.exportToCSV(currentSessionId)
+                                else
+                                    telemetryExporter.exportToJSON(currentSessionId)
+                                val uri = androidx.core.content.FileProvider.getUriForFile(
+                                    requireContext(),
+                                    "${requireContext().packageName}.provider",
+                                    file
+                                )
+                                withContext(Dispatchers.Main) {
+                                    val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                                        type = if (which == 0) "text/csv" else "application/json"
+                                        putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                                        addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                    }
+                                    startActivity(android.content.Intent.createChooser(intent, "Sdílet export"))
+                                }
+                            } catch (e: Exception) {
+                                timber.log.Timber.e(e, "TelemetryFragment: export failed")
+                            }
+                        }
                     }
                 }
-            }
+                .show()
         }
     }
 

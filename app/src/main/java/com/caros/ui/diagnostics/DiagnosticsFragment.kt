@@ -24,6 +24,7 @@ class DiagnosticsFragment : Fragment() {
     private val binding get() = _binding!!
 
     @Inject lateinit var db: CarOSDatabase
+    @Inject lateinit var dpfRegenManager: com.caros.vcds.DPFRegenManager
 
     private val mainViewModel: MainViewModel by activityViewModels()
 
@@ -40,6 +41,7 @@ class DiagnosticsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         loadTripStats()
         observeCANFrame()
+        setupDPFRegen()
     }
 
     private fun loadTripStats() {
@@ -96,6 +98,46 @@ class DiagnosticsFragment : Fragment() {
         // DPF Load gauge
         frame.dpfData?.let { dpf ->
             binding.gaugeDPF.setValue(dpf.loadPercent)
+        }
+    }
+
+    private fun setupDPFRegen() {
+        binding.btnStartDPFRegen.setOnClickListener {
+            binding.btnStartDPFRegen.isEnabled = false
+            binding.tvDPFRegenStatus.text = "Stav: Spouštím..."
+            binding.progressDPFRegen.visibility = android.view.View.VISIBLE
+            viewLifecycleOwner.lifecycleScope.launch {
+                dpfRegenManager.initiateRegen()
+            }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            dpfRegenManager.regenState.collect { state ->
+                when (state) {
+                    is com.caros.vcds.DPFRegenManager.RegenState.Idle -> {
+                        binding.tvDPFRegenStatus.text = "Stav: Připraven"
+                        binding.progressDPFRegen.visibility = android.view.View.GONE
+                        binding.btnStartDPFRegen.isEnabled = true
+                    }
+                    is com.caros.vcds.DPFRegenManager.RegenState.Starting -> {
+                        binding.tvDPFRegenStatus.text = "Stav: Navazuji spojení s ECU..."
+                        binding.progressDPFRegen.progress = 0
+                    }
+                    is com.caros.vcds.DPFRegenManager.RegenState.InProgress -> {
+                        binding.tvDPFRegenStatus.text = "Stav: Regenerace probíhá (${state.progressPct}%)"
+                        binding.progressDPFRegen.progress = state.progressPct
+                    }
+                    is com.caros.vcds.DPFRegenManager.RegenState.Completed -> {
+                        binding.tvDPFRegenStatus.text = "Stav: ✅ Regenerace dokončena"
+                        binding.progressDPFRegen.progress = 100
+                        binding.btnStartDPFRegen.isEnabled = true
+                    }
+                    is com.caros.vcds.DPFRegenManager.RegenState.Failed -> {
+                        binding.tvDPFRegenStatus.text = "Stav: ❌ Chyba: ${state.reason}"
+                        binding.progressDPFRegen.visibility = android.view.View.GONE
+                        binding.btnStartDPFRegen.isEnabled = true
+                    }
+                }
+            }
         }
     }
 
