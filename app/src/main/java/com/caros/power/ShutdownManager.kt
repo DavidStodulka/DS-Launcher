@@ -121,11 +121,8 @@ class ShutdownManager @Inject constructor(
         cancelScheduled()
         Timber.i("$TAG: scheduling shutdown in ${delayMs}ms")
         val runnable = Runnable {
-            // Fire-and-forget coroutine — this runs on the main handler
-            // so we spawn an IO coroutine to do the actual shutdown work
-            kotlinx.coroutines.GlobalScope.let { scope ->
-                scope.launch { shutdown() }
-            }
+            // Fire-and-forget: spawn a thread to run the suspend shutdown() sequencer
+            Thread { kotlinx.coroutines.runBlocking { shutdown() } }.start()
         }
         scheduledRunnable = runnable
         mainHandler.postDelayed(runnable, delayMs)
