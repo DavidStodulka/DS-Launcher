@@ -26,7 +26,7 @@ class GeminiCommandProcessor @Inject constructor(
 
     private val prefs = context.getSharedPreferences("caros_voice_prefs", Context.MODE_PRIVATE)
 
-    private var __apiKey: String
+    private var _apiKey: String
         get() = prefs.getString("gemini_api_key", "") ?: ""
         set(v) { prefs.edit().putString("gemini_api_key", v).apply() }
 
