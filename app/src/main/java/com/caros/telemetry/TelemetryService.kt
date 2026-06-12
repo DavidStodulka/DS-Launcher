@@ -102,6 +102,7 @@ class TelemetryService : Service() {
 
     /** Distance accumulated in the current session in km. */
     @Volatile private var sessionDistanceKm: Double = 0.0
+    @Volatile private var lastNotificationUpdateMs: Long = 0L
 
     /** Last GPS location used for distance/g-force calculation. */
     @Volatile private var lastLocation: Location? = null
@@ -513,7 +514,9 @@ class TelemetryService : Service() {
                 }
 
                 // Update notification with current distance periodically
-                if (System.currentTimeMillis() % NOTIFICATION_UPDATE_INTERVAL < RECORDING_INTERVAL_MS) {
+                val now2 = System.currentTimeMillis()
+                if (now2 - lastNotificationUpdateMs >= NOTIFICATION_UPDATE_INTERVAL) {
+                    lastNotificationUpdateMs = now2
                     updateNotification("Recording — %.1f km".format(sessionDistanceKm))
                 }
             }

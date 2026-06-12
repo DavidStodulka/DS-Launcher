@@ -94,6 +94,7 @@ class AggressiveDrivingDetector @Inject constructor(
         if (long > ACCEL_THRESHOLD && now - lastAccelMs > TTS_DEBOUNCE_MS) {
             val severity = ((long - 0.35f) / 0.65f).coerceIn(0f, 1f)
             record(AggressiveEvent(AggressionType.HARD_ACCELERATION, severity, now))
+            tts.speak("Tvrdé zrychlení")
             lastAccelMs = now
         }
 

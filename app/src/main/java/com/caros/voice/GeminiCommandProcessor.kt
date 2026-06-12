@@ -170,9 +170,11 @@ class GeminiCommandProcessor @Inject constructor(
 
     suspend fun testApiKey(key: String): Boolean = withContext(Dispatchers.IO) {
         val oldKey = _apiKey
-        _apiKey = key
-        val result = runCatching { processCommand("test") !is VoiceCommand.Unknown }.getOrDefault(false)
-        _apiKey = oldKey
-        result
+        try {
+            _apiKey = key
+            runCatching { processCommand("test") !is VoiceCommand.Unknown }.getOrDefault(false)
+        } finally {
+            _apiKey = oldKey
+        }
     }
 }

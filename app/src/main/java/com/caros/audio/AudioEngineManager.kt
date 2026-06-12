@@ -124,7 +124,7 @@ class AudioEngineManager @Inject constructor(
         val bandCount = minOf(eq.numberOfBands.toInt(), 10)
         for (i in 0 until bandCount) {
             val milliDb = (currentGains[i] * 100).toInt()
-            runCatching { eq.setBandLevel(i.toShort(), (milliDb + eq.getBandLevel(i.toShort())).toShort()) }
+            runCatching { eq.setBandLevel(i.toShort(), milliDb.toShort()) }
         }
     }
 

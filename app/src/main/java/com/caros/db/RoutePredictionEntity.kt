@@ -2,12 +2,16 @@ package com.caros.db
 
 import androidx.room.Dao
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
-@Entity(tableName = "route_predictions")
+@Entity(
+    tableName = "route_predictions",
+    indices = [Index(value = ["dayOfWeek", "hourOfDay"])]
+)
 data class RoutePredictionEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     /** Calendar.DAY_OF_WEEK: 1=Sun, 2=Mon … 7=Sat */

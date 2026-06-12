@@ -75,7 +75,7 @@ class BooleanConverter {
 // ─────────────────────────────────────────────────────────────────────────────
 
 private const val DB_NAME    = "caros_database"
-private const val DB_VERSION = 3
+private const val DB_VERSION = 4
 
 @Database(
     entities = [
@@ -183,7 +183,15 @@ abstract class CarOSDatabase : RoomDatabase() {
             }
         }
 
-        private val ALL_MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3)
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_route_predictions_dayOfWeek_hourOfDay` ON `route_predictions` (`dayOfWeek`, `hourOfDay`)"
+                )
+            }
+        }
+
+        private val ALL_MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
     }
 
     // ── Database lifecycle callback ───────────────────────────────────────────

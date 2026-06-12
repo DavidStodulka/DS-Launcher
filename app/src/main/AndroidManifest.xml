@@ -114,6 +114,7 @@
         android:theme="@style/Theme.CarOS"
         android:hardwareAccelerated="true"
         android:persistent="true"
+        android:requestLegacyExternalStorage="true"
         tools:targetApi="31">
 
         <!-- ================================================== -->

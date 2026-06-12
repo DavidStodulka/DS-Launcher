@@ -161,7 +161,7 @@ class RPMGaugeView @JvmOverloads constructor(
         fillPaint.shader = LinearGradient(
             cx - radius, cy, cx + radius, cy,
             intArrayOf(COLOR_GREEN, COLOR_YELLOW, COLOR_RED),
-            floatArrayOf(0f, (redlineRpm - minRpm).toFloat() / (maxRpm - minRpm), 1f),
+            floatArrayOf(0f, (redlineRpm - minRpm).toFloat() / (maxRpm - minRpm).coerceAtLeast(1), 1f),
             Shader.TileMode.CLAMP
         )
     }
@@ -178,7 +178,7 @@ class RPMGaugeView @JvmOverloads constructor(
         canvas.drawArc(arcRect, START_ANGLE, SWEEP_ANGLE, false, trackPaint)
 
         // Value fill arc
-        val fraction = (displayedRpm - minRpm) / (maxRpm - minRpm).toFloat()
+        val fraction = (displayedRpm - minRpm) / (maxRpm - minRpm).coerceAtLeast(1).toFloat()
         val sweep    = fraction * SWEEP_ANGLE
         if (sweep > 0f) {
             canvas.drawArc(arcRect, START_ANGLE, sweep, false, fillPaint)
@@ -197,7 +197,7 @@ class RPMGaugeView @JvmOverloads constructor(
     }
 
     private fun drawTicks(canvas: Canvas) {
-        val range = (maxRpm - minRpm).toFloat()
+        val range = (maxRpm - minRpm).coerceAtLeast(1).toFloat()
         var rpm = minRpm
         while (rpm <= maxRpm) {
             val fraction = (rpm - minRpm) / range
@@ -231,7 +231,7 @@ class RPMGaugeView @JvmOverloads constructor(
     }
 
     private fun drawRedlineMarker(canvas: Canvas) {
-        val fraction = (redlineRpm - minRpm).toFloat() / (maxRpm - minRpm).toFloat()
+        val fraction = (redlineRpm - minRpm).toFloat() / (maxRpm - minRpm).coerceAtLeast(1).toFloat()
         val angleDeg = START_ANGLE + fraction * SWEEP_ANGLE
         val angleRad = Math.toRadians(angleDeg.toDouble())
         val outerR   = radius + trackPaint.strokeWidth / 2f + 4f

@@ -13,7 +13,9 @@ import android.widget.Switch
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.caros.R
 import com.caros.databinding.FragmentSettingsBinding
@@ -426,9 +428,11 @@ class SettingsFragment : Fragment() {
 
     private fun startSystemInfoRefresh() {
         viewLifecycleOwner.lifecycleScope.launch {
-            while (isActive) {
-                refreshSystemInfo()
-                delay(5_000L)
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                while (isActive) {
+                    refreshSystemInfo()
+                    delay(5_000L)
+                }
             }
         }
     }

@@ -218,7 +218,7 @@ class OBDConnection @Inject constructor(
                             buffer.append(String(bytes))
                             if (buffer.contains('>')) break
                         } else {
-                            Thread.sleep(20)
+                            delay(20)
                         }
                     }
                     buffer.toString().trimEnd('>', ' ', '\r', '\n')
