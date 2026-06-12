@@ -94,7 +94,7 @@ class CANParserTest {
         val line = "ID:280 DATA:00 00 00 FF 00 00 00 00"
         val frame = parser.parseFrame(line)
         assertNotNull(frame)
-        val throttle = frame!!.throttlePosition?.positionPct ?: 0f
+        val throttle = frame!!.throttlePosition?.percent ?: 0f
         assertEquals(100.0f, throttle, 0.5f)
     }
 
