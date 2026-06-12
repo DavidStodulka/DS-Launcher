@@ -26,7 +26,7 @@ class CANWriter @Inject constructor(
             if (!proc.waitFor(5, TimeUnit.SECONDS)) {
                 Log.e(TAG, "Climate write timed out, killing su process")
                 proc.destroyForcibly()
-            }
+            } else Unit
         } catch (e: Exception) {
             Log.e(TAG, "Climate write failed: ${e.message}")
         } finally {
