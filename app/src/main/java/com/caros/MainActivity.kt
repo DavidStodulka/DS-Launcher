@@ -49,15 +49,25 @@ class MainActivity : AppCompatActivity() {
     private val mainViewModel: MainViewModel by viewModels()
 
     private var canServiceBound = false
+    private var canFrameJob: kotlinx.coroutines.Job? = null
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             canServiceBound = true
             Timber.d("MainActivity: CANService connected")
+            // Wire the service's frame stream into the shared ViewModel so every
+            // fragment observing mainViewModel.canFrame gets live data.
+            val canService = (service as? CANService.CANBinder)?.getService()
+            canFrameJob?.cancel()
+            canFrameJob = lifecycleScope.launch {
+                canService?.canFrame?.collect { mainViewModel.updateCANFrame(it) }
+            }
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
             canServiceBound = false
+            canFrameJob?.cancel()
+            canFrameJob = null
             Timber.d("MainActivity: CANService disconnected")
         }
     }
@@ -76,6 +86,7 @@ class MainActivity : AppCompatActivity() {
         startNightDimCoroutine()
         observeDrivingMode()
         observeRootStatus()
+        observeObdStatus()
     }
 
     private fun hideSystemUI() {
@@ -203,6 +214,16 @@ class MainActivity : AppCompatActivity() {
     private fun observeRootStatus() {
         lifecycleScope.launch {
             mainViewModel.rootStatus.collect { binding.statusBarView.setRootStatus(it) }
+        }
+    }
+
+    private fun observeObdStatus() {
+        lifecycleScope.launch {
+            mainViewModel.obdState.collect { type ->
+                binding.statusBarView.setObdConnected(
+                    type != com.caros.vcds.ConnectionType.DISCONNECTED
+                )
+            }
         }
     }
 

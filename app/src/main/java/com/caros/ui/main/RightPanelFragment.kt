@@ -7,7 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.caros.databinding.FragmentRightPanelBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -36,6 +38,7 @@ class RightPanelFragment : Fragment() {
 
     private fun observeCANFrame() {
         viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
             mainViewModel.canFrame.collect { frame ->
                 // RPM gauge
                 frame.engineRpm?.let { rpm ->
@@ -96,6 +99,7 @@ class RightPanelFragment : Fragment() {
                     binding.beltIndicatorRL.setBackgroundColor(if (belts.rearLeft)  onColor else offColor)
                     binding.beltIndicatorRR.setBackgroundColor(if (belts.rearRight) onColor else offColor)
                 }
+            }
             }
         }
     }

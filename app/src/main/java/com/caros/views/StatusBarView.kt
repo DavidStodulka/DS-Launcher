@@ -59,6 +59,7 @@ class StatusBarView @JvmOverloads constructor(
     private var gpsActive    = false
     private var voiceActive  = false
     private var mqttConnected = false
+    private var obdConnected  = false
     private var rootStatus: com.caros.core.RootStatus = com.caros.core.RootStatus.UNKNOWN
     private var slopeDeg     = 0f
     private var altitudeM    = 0f
@@ -143,6 +144,12 @@ class StatusBarView @JvmOverloads constructor(
     }
 
     fun setRootStatus(status: com.caros.core.RootStatus) { rootStatus = status; invalidate() }
+
+    /** Show the OBD adapter badge green when a real adapter is connected. */
+    fun setObdConnected(connected: Boolean) {
+        obdConnected = connected
+        invalidate()
+    }
 
     /** Update road slope in degrees (positive = uphill). */
     fun setSlope(degrees: Float) {
@@ -280,6 +287,18 @@ class StatusBarView @JvmOverloads constructor(
         textSecPaint.textAlign = Paint.Align.CENTER
         textSecPaint.color = if (mqttConnected) COLOR_TEXT_PRI else COLOR_TEXT_SEC
         canvas.drawText("MQ", rx, dotY + smallTextSz * 0.20f, textSecPaint)
+        textSecPaint.textAlign = Paint.Align.LEFT
+        textSecPaint.color = COLOR_TEXT_SEC
+        rx -= dotR + pad * 2
+
+        // OBD adapter badge
+        dotPaint.color = if (obdConnected) COLOR_OK else COLOR_INACTIVE
+        rx -= dotR
+        canvas.drawCircle(rx, dotY, dotR, dotPaint)
+        textSecPaint.textSize = smallTextSz * 0.45f
+        textSecPaint.textAlign = Paint.Align.CENTER
+        textSecPaint.color = if (obdConnected) COLOR_TEXT_PRI else COLOR_TEXT_SEC
+        canvas.drawText("OBD", rx, dotY + smallTextSz * 0.16f, textSecPaint)
         textSecPaint.textAlign = Paint.Align.LEFT
         textSecPaint.color = COLOR_TEXT_SEC
         rx -= dotR + pad * 2

@@ -6,7 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.caros.can.CANFrame
 import com.caros.databinding.FragmentDiagnosticsBinding
 import com.caros.ui.main.MainViewModel
@@ -73,8 +75,10 @@ class DiagnosticsFragment : Fragment() {
 
     private fun observeCANFrame() {
         viewLifecycleOwner.lifecycleScope.launch {
-            mainViewModel.canFrame.collect { frame ->
-                updateGauges(frame)
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mainViewModel.canFrame.collect { frame ->
+                    updateGauges(frame)
+                }
             }
         }
     }

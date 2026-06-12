@@ -19,9 +19,14 @@ import android.content.Context
 import com.caros.core.ShellExecutor
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import java.io.InputStream
 import java.io.OutputStream
 import java.io.RandomAccessFile
@@ -46,8 +51,14 @@ class OBDConnection @Inject constructor(
     @ApplicationContext private val context: Context,
     private val shellExecutor: ShellExecutor
 ) {
-    var connectionType: ConnectionType = ConnectionType.DISCONNECTED
-        private set
+    private val _connectionState = MutableStateFlow(ConnectionType.DISCONNECTED)
+
+    /** Observable connection state — drive status-bar indicators from this. */
+    val connectionState: StateFlow<ConnectionType> = _connectionState.asStateFlow()
+
+    var connectionType: ConnectionType
+        get() = _connectionState.value
+        private set(value) { _connectionState.value = value }
 
     private var outputStream: OutputStream? = null
     private var inputStream: InputStream? = null
@@ -102,6 +113,27 @@ class OBDConnection @Inject constructor(
         // 4. Nothing found — remain in mock/disconnected mode
         connectionType = ConnectionType.DISCONNECTED
         false
+    }
+
+    /**
+     * [connect] with exponential backoff. Useful for automatic reconnection
+     * after the adapter drops — waits 1 s, 2 s, 4 s, … (capped at 30 s)
+     * between attempts.
+     *
+     * @return `true` once a real device was opened, `false` after [maxAttempts] failures
+     */
+    suspend fun connectWithBackoff(maxAttempts: Int = 4, initialDelayMs: Long = 1_000L): Boolean {
+        var delayMs = initialDelayMs
+        repeat(maxAttempts) { attempt ->
+            if (connect()) return true
+            if (attempt < maxAttempts - 1) {
+                Timber.d("OBDConnection: attempt ${attempt + 1}/$maxAttempts failed — retrying in ${delayMs}ms")
+                delay(delayMs)
+                delayMs = (delayMs * 2).coerceAtMost(30_000L)
+            }
+        }
+        Timber.w("OBDConnection: no adapter found after $maxAttempts attempts — staying in mock mode")
+        return false
     }
 
     /** Close all open streams and reset connection state. */

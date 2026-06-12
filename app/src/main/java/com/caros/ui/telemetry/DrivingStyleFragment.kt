@@ -6,7 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.caros.databinding.FragmentDrivingStyleBinding
 import com.caros.ui.main.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -31,6 +33,7 @@ class DrivingStyleFragment : Fragment() {
 
     private fun observeData() {
         viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
             viewModel.canFrame.collect { frame ->
                 val rpm = frame.engineRpm?.rpm ?: 0
                 val throttle = frame.throttlePosition?.percent ?: 0f
@@ -48,6 +51,7 @@ class DrivingStyleFragment : Fragment() {
                 binding.tvRpmValue.text = "$rpm ot/min"
                 binding.tvThrottleValue.text = "%.0f%%".format(throttle)
                 binding.tvSpeedValue.text = "%.0f km/h".format(speed)
+            }
             }
         }
     }

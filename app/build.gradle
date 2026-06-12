@@ -80,6 +80,14 @@ android {
         abortOnError false
         checkReleaseBuilds false
     }
+
+    testOptions {
+        unitTests {
+            // Android framework calls (Intent, Uri, …) return defaults instead of
+            // throwing "not mocked" in plain JVM unit tests
+            returnDefaultValues = true
+        }
+    }
 }
 
 dependencies {

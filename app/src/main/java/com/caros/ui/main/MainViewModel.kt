@@ -14,6 +14,8 @@ import com.caros.profiles.DrivingMode
 import com.caros.profiles.ProfileManager
 import com.caros.service.DPFMonitor
 import com.caros.service.ServiceAdvisor
+import com.caros.vcds.ConnectionType
+import com.caros.vcds.OBDConnection
 import com.caros.voice.VoiceCommandExecutor
 import com.caros.voice.VoiceInputManager
 import com.caros.voice.VoiceListeningState
@@ -38,7 +40,8 @@ class MainViewModel @Inject constructor(
     private val voiceInputManager: VoiceInputManager,
     private val voiceCommandExecutor: VoiceCommandExecutor,
     private val adaptiveEQEngine: AdaptiveEQEngine,
-    private val rootManager: RootManager
+    private val rootManager: RootManager,
+    obdConnection: OBDConnection
 ) : ViewModel() {
 
     // ── CAN frame ─────────────────────────────────────────────────────────────
@@ -72,6 +75,10 @@ class MainViewModel @Inject constructor(
     // ── Root status ───────────────────────────────────────────────────────────
 
     val rootStatus: StateFlow<RootStatus> = rootManager.rootStatus
+
+    // ── OBD adapter status ────────────────────────────────────────────────────
+
+    val obdState: StateFlow<ConnectionType> = obdConnection.connectionState
 
     init {
         startServicePolling()

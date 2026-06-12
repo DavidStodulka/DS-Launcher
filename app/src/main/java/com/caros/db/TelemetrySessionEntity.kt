@@ -91,4 +91,8 @@ interface TelemetrySessionDao {
 
     @Query("DELETE FROM telemetry_sessions")
     suspend fun deleteAll()
+
+    /** Prune finished sessions that started before [beforeMs]. Returns rows deleted. */
+    @Query("DELETE FROM telemetry_sessions WHERE start_time < :beforeMs AND end_time IS NOT NULL")
+    suspend fun deleteOlderThan(beforeMs: Long): Int
 }

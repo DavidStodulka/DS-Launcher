@@ -1,6 +1,9 @@
 package com.caros.voice
 
 import android.content.Context
+import android.content.SharedPreferences
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -24,7 +27,38 @@ class GeminiCommandProcessor @Inject constructor(
         .readTimeout(10, TimeUnit.SECONDS)
         .build()
 
-    private val prefs = context.getSharedPreferences("caros_voice_prefs", Context.MODE_PRIVATE)
+    // API key lives in EncryptedSharedPreferences (same store as the steering-wheel
+    // calibration); falls back to plain prefs only if the keystore is unusable.
+    private val prefs: SharedPreferences by lazy { createSecurePrefs() }
+
+    private fun createSecurePrefs(): SharedPreferences = runCatching {
+        val masterKey = MasterKey.Builder(context)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
+        val secure = EncryptedSharedPreferences.create(
+            context, "caros_voice_prefs", masterKey,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+        migrateLegacyKey(secure)
+        secure as SharedPreferences
+    }.getOrElse { e ->
+        Timber.w(e, "EncryptedSharedPreferences unavailable — falling back to plain prefs")
+        context.getSharedPreferences("caros_voice_prefs", Context.MODE_PRIVATE)
+    }
+
+    /** One-time migration of a plaintext-stored API key into the encrypted store. */
+    private fun migrateLegacyKey(secure: SharedPreferences) {
+        runCatching {
+            val plain = context.getSharedPreferences("caros_voice_prefs", Context.MODE_PRIVATE)
+            val legacy = plain.getString("gemini_api_key", null)
+            if (!legacy.isNullOrBlank() && secure.getString("gemini_api_key", "").isNullOrEmpty()) {
+                secure.edit().putString("gemini_api_key", legacy).apply()
+                plain.edit().remove("gemini_api_key").apply()
+                Timber.i("Gemini API key migrated to encrypted storage")
+            }
+        }
+    }
 
     private var _apiKey: String
         get() = prefs.getString("gemini_api_key", "") ?: ""

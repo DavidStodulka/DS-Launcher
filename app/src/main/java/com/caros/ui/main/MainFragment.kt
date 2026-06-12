@@ -5,8 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.caros.databinding.FragmentMainCarStatusBinding
 import com.caros.profiles.DrivingMode
 import dagger.hilt.android.AndroidEntryPoint
@@ -19,7 +21,8 @@ class MainFragment : Fragment() {
     private var _binding: FragmentMainCarStatusBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: MainViewModel by viewModels()
+    // Activity-scoped — must be the same instance MainActivity feeds CAN frames into
+    private val viewModel: MainViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,6 +41,7 @@ class MainFragment : Fragment() {
 
     private fun observeCANFrame() {
         viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
             viewModel.canFrame.collect { frame ->
                 // Speed
                 val speedKmh = frame.vehicleSpeed?.kmh ?: 0f
@@ -72,6 +76,7 @@ class MainFragment : Fragment() {
                 } else {
                     binding.dtcBadgeRow.visibility = View.GONE
                 }
+            }
             }
         }
     }

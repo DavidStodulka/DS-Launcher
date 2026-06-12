@@ -7,7 +7,9 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.caros.databinding.FragmentClimateBinding
 import com.caros.ui.main.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -45,6 +47,7 @@ class ClimateFragment : Fragment() {
 
     private fun observeState() {
         viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
             launch { viewModel.targetTemp.collect { binding.tvTargetTemp.text = "%.1f°".format(it) } }
             launch { viewModel.fanSpeed.collect { binding.tvFanSpeed.text = it.toString() ; updateFanBars(it) } }
             launch { viewModel.acEnabled.collect { highlightBtn(binding.btnAC, it) } }
@@ -62,6 +65,7 @@ class ClimateFragment : Fragment() {
                         climate?.setTemp, climate?.fanSpeed, climate?.acOn, climate?.recircOn
                     )
                 }
+            }
             }
         }
     }

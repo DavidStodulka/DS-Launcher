@@ -6,6 +6,8 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.util.Log
+import androidx.hilt.work.HiltWorkerFactory
+import androidx.work.Configuration
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -17,7 +19,7 @@ import java.io.File
 import javax.inject.Inject
 
 @HiltAndroidApp
-class CarOSApplication : Application() {
+class CarOSApplication : Application(), Configuration.Provider {
 
     /** Application-level coroutine scope tied to the process lifetime. */
     val applicationScope = CoroutineScope(
@@ -27,14 +29,65 @@ class CarOSApplication : Application() {
     @Inject
     lateinit var rootManager: RootManager
 
+    @Inject
+    lateinit var workerFactory: HiltWorkerFactory
+
+    /** On-demand WorkManager init (the default initializer is removed in the manifest). */
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .setMinimumLoggingLevel(Log.INFO)
+            .build()
+
     override fun onCreate() {
         super.onCreate()
         instance = this
 
         initTimber()
+        initCrashHandler()
         initNotificationChannels()
         initCarOSDirectories()
         initRootAccess()
+        scheduleDbMaintenance()
+    }
+
+    // -------------------------------------------------------------------------
+    //  Fatal crash reporting — writes the stacktrace to /sdcard before dying
+    // -------------------------------------------------------------------------
+
+    private fun initCrashHandler() {
+        val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+            try {
+                val dir = File("/sdcard/CarOS/crashreports")
+                if (!dir.exists()) dir.mkdirs()
+                File(dir, "fatal_${System.currentTimeMillis()}.txt").writeText(
+                    buildString {
+                        appendLine("CarOS fatal crash")
+                        appendLine("Version: ${com.caros.BuildConfig.VERSION_NAME}")
+                        appendLine("Thread:  ${thread.name}")
+                        appendLine("Time:    ${java.util.Date()}")
+                        appendLine()
+                        appendLine(throwable.stackTraceToString())
+                    }
+                )
+            } catch (_: Exception) {
+                // Never let the crash reporter itself crash
+            }
+            defaultHandler?.uncaughtException(thread, throwable)
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    //  Periodic database maintenance (telemetry pruning)
+    // -------------------------------------------------------------------------
+
+    private fun scheduleDbMaintenance() {
+        try {
+            com.caros.db.DbMaintenanceWorker.schedule(this)
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to schedule DB maintenance worker")
+        }
     }
 
     // -------------------------------------------------------------------------
