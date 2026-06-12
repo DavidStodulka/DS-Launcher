@@ -122,10 +122,13 @@ class AutomationEngine @Inject constructor(
     //  State
     // -------------------------------------------------------------------------
 
-    private val rules = mutableListOf<AutomationRule>()
+    // Thread-safe: mutated from UI thread (addRule/removeRule) and read from
+    // the evaluation coroutine on Dispatchers.Default concurrently.
+    private val rules = java.util.concurrent.CopyOnWriteArrayList<AutomationRule>()
 
     /** Set of rule IDs whose condition is currently active (latched). */
-    private val triggeredRules = mutableSetOf<String>()
+    private val triggeredRules: MutableSet<String> =
+        java.util.concurrent.ConcurrentHashMap.newKeySet()
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 

@@ -19,6 +19,8 @@ import android.content.Context
 import com.caros.core.ShellExecutor
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.InputStream
 import java.io.OutputStream
@@ -52,6 +54,9 @@ class OBDConnection @Inject constructor(
     private var process: Process? = null
     private var bluetoothSocket: BluetoothSocket? = null
 
+    /** Serializes command/response cycles — ELM327 cannot interleave requests. */
+    private val ioMutex = Mutex()
+
     // ── Connection lifecycle ──────────────────────────────────────────────────
 
     /**
@@ -67,6 +72,9 @@ class OBDConnection @Inject constructor(
      * @return `true` if a real device was opened, `false` if running in mock mode
      */
     suspend fun connect(): Boolean = withContext(Dispatchers.IO) {
+        // Release any previous connection so repeated connect() calls don't leak
+        if (connectionType != ConnectionType.DISCONNECTED) disconnect()
+
         // 1. Try built-in UART passthrough
         if (tryOpenSerial("/dev/ttyS1")) {
             connectionType = ConnectionType.SERIAL_PASSTHROUGH
@@ -97,6 +105,7 @@ class OBDConnection @Inject constructor(
     }
 
     /** Close all open streams and reset connection state. */
+    @Synchronized
     fun disconnect() {
         outputStream?.runCatching { close() }
         inputStream?.runCatching { close() }
@@ -130,30 +139,32 @@ class OBDConnection @Inject constructor(
                 return@withContext mockResponse(cmd)
             }
 
-            val out = outputStream ?: return@withContext null
-            val inp = inputStream  ?: return@withContext null
+            ioMutex.withLock {
+                val out = outputStream ?: return@withContext null
+                val inp = inputStream  ?: return@withContext null
 
-            try {
-                val cmdBytes = if (cmd.endsWith("\r")) cmd.toByteArray() else "$cmd\r".toByteArray()
-                out.write(cmdBytes)
-                out.flush()
+                try {
+                    val cmdBytes = if (cmd.endsWith("\r")) cmd.toByteArray() else "$cmd\r".toByteArray()
+                    out.write(cmdBytes)
+                    out.flush()
 
-                val buffer = StringBuilder()
-                val deadline = System.currentTimeMillis() + timeoutMs
-                while (System.currentTimeMillis() < deadline) {
-                    val available = inp.available()
-                    if (available > 0) {
-                        val bytes = ByteArray(available)
-                        inp.read(bytes)
-                        buffer.append(String(bytes))
-                        if (buffer.contains('>')) break
-                    } else {
-                        Thread.sleep(20)
+                    val buffer = StringBuilder()
+                    val deadline = System.currentTimeMillis() + timeoutMs
+                    while (System.currentTimeMillis() < deadline) {
+                        val available = inp.available()
+                        if (available > 0) {
+                            val bytes = ByteArray(available)
+                            inp.read(bytes)
+                            buffer.append(String(bytes))
+                            if (buffer.contains('>')) break
+                        } else {
+                            Thread.sleep(20)
+                        }
                     }
+                    buffer.toString().trimEnd('>', ' ', '\r', '\n')
+                } catch (e: Exception) {
+                    null
                 }
-                buffer.toString().trimEnd('>', ' ', '\r', '\n')
-            } catch (e: Exception) {
-                null
             }
         }
 
@@ -193,6 +204,7 @@ class OBDConnection @Inject constructor(
      *         paired device is found or the connection fails.
      */
     private suspend fun tryConnectBluetooth(): BluetoothSocket? = withContext(Dispatchers.IO) {
+        var socket: BluetoothSocket? = null
         try {
             val adapter = BluetoothAdapter.getDefaultAdapter() ?: return@withContext null
             if (!adapter.isEnabled) return@withContext null
@@ -202,12 +214,13 @@ class OBDConnection @Inject constructor(
                 device.name?.contains("OBDII", ignoreCase = true) == true
             } ?: return@withContext null
             val uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB") // SPP
-            val socket = elm327.createRfcommSocketToServiceRecord(uuid)
+            socket = elm327.createRfcommSocketToServiceRecord(uuid)
             adapter.cancelDiscovery()
             socket.connect()
             bluetoothSocket = socket
             socket
         } catch (e: Exception) {
+            socket?.runCatching { close() }
             null
         }
     }

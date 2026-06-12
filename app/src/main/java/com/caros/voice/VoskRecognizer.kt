@@ -38,14 +38,17 @@ class VoskRecognizer @Inject constructor(
         }
         return@withContext try {
             val modelClass = Class.forName("org.vosk.Model")
-            model = modelClass.getConstructor(String::class.java).newInstance(modelPath)
+            val loadedModel = modelClass.getConstructor(String::class.java).newInstance(modelPath)
             val recClass = Class.forName("org.vosk.Recognizer")
-            recognizer = recClass.getConstructor(modelClass, Float::class.java)
-                .newInstance(model, 16000.0f)
+            val loadedRecognizer = recClass.getConstructor(modelClass, Float::class.java)
+                .newInstance(loadedModel, 16000.0f)
+            model = loadedModel
+            recognizer = loadedRecognizer
             Timber.i("VoskRecognizer: model loaded from $modelPath")
             true
         } catch (e: Exception) {
             Timber.e(e, "VoskRecognizer: failed to load model")
+            release()
             false
         }
     }

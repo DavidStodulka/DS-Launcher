@@ -65,14 +65,15 @@ class GeminiCommandProcessor @Inject constructor(
             val url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$_apiKey"
             val body = buildRequestBody(spokenText)
             val request = Request.Builder().url(url).post(body).build()
-            val response = client.newCall(request).execute()
-            val responseBody = response.body?.string() ?: ""
-            if (!response.isSuccessful) {
-                Timber.w("Gemini HTTP ${response.code}: $responseBody")
-                return@withContext VoiceCommand.Unknown("http_${response.code}")
+            client.newCall(request).execute().use { response ->
+                val responseBody = response.body?.string() ?: ""
+                if (!response.isSuccessful) {
+                    Timber.w("Gemini HTTP ${response.code}: $responseBody")
+                    return@withContext VoiceCommand.Unknown("http_${response.code}")
+                }
+                if (responseBody.isBlank()) return@withContext VoiceCommand.Unknown("empty response")
+                parseGeminiResponse(responseBody)
             }
-            if (responseBody.isBlank()) return@withContext VoiceCommand.Unknown("empty response")
-            parseGeminiResponse(responseBody)
         }.getOrElse { e ->
             Timber.e(e, "Gemini API error — falling back to offline matcher")
             offlineMatcher.match(spokenText)

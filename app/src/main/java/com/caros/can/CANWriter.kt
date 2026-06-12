@@ -5,6 +5,7 @@ import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -17,13 +18,23 @@ class CANWriter @Inject constructor(
 
     suspend fun sendClimateCommand(cmd: ClimateCommand) = withContext(Dispatchers.IO) {
         val frame = cmd.toCANFrame()
+        var proc: Process? = null
         try {
-            val proc = ProcessBuilder("su", "-c", "echo -n '${frame}' > $port")
+            proc = ProcessBuilder("su", "-c", "echo -n '${frame}' > $port")
                 .redirectErrorStream(true)
                 .start()
-            proc.waitFor()
+            if (!proc.waitFor(5, TimeUnit.SECONDS)) {
+                Log.e(TAG, "Climate write timed out, killing su process")
+                proc.destroyForcibly()
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Climate write failed: ${e.message}")
+        } finally {
+            proc?.let {
+                runCatching { it.inputStream.close() }
+                runCatching { it.outputStream.close() }
+                it.destroy()
+            }
         }
     }
 }

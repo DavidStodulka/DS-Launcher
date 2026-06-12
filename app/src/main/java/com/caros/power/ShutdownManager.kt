@@ -18,8 +18,11 @@ import android.os.Looper
 import android.os.PowerManager
 import com.caros.core.ShellExecutor
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
@@ -43,6 +46,7 @@ class ShutdownManager @Inject constructor(
     private val TAG = "ShutdownManager"
     private val mainHandler = Handler(Looper.getMainLooper())
     private var scheduledRunnable: Runnable? = null
+    private val shutdownScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     // ─────────────────────────────────────────────────────────────────────────
     //  Public API
@@ -121,8 +125,8 @@ class ShutdownManager @Inject constructor(
         cancelScheduled()
         Timber.i("$TAG: scheduling shutdown in ${delayMs}ms")
         val runnable = Runnable {
-            // Fire-and-forget: spawn a thread to run the suspend shutdown() sequencer
-            Thread { kotlinx.coroutines.runBlocking { shutdown() } }.start()
+            // Fire-and-forget on an IO-backed scope; never blocks the main thread
+            shutdownScope.launch { shutdown() }
         }
         scheduledRunnable = runnable
         mainHandler.postDelayed(runnable, delayMs)

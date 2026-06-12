@@ -29,14 +29,17 @@ class MQTTPublisher @Inject constructor(
     private fun postToBridge(json: String) {
         val url = java.net.URL(bridgeUrl)
         val conn = url.openConnection() as java.net.HttpURLConnection
-        conn.requestMethod = "POST"
-        conn.doOutput = true
-        conn.setRequestProperty("Content-Type", "application/json")
-        conn.connectTimeout = 500
-        conn.readTimeout = 500
-        conn.outputStream.use { it.write(json.toByteArray()) }
-        conn.responseCode  // trigger send
-        conn.disconnect()
+        try {
+            conn.requestMethod = "POST"
+            conn.doOutput = true
+            conn.setRequestProperty("Content-Type", "application/json")
+            conn.connectTimeout = 2000
+            conn.readTimeout = 2000
+            conn.outputStream.use { it.write(json.toByteArray()) }
+            conn.responseCode  // trigger send
+        } finally {
+            conn.disconnect()
+        }
     }
 
     private fun buildJsonString(map: Map<String, Any>): String {

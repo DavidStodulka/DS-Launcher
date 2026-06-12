@@ -73,4 +73,10 @@ class CountdownArcView @JvmOverloads constructor(
             override fun onAnimationEnd(animation: android.animation.Animator) = block()
         })
     }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        animator?.cancel()
+        animator = null
+    }
 }

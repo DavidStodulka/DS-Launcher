@@ -195,4 +195,8 @@ class GaugeWidgetView @JvmOverloads constructor(
         Timber.tag(LOG_TAG).d("GaugeWidgetView initialised")
         setLayerType(LAYER_TYPE_HARDWARE, null)
     }
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        animator.cancel()
+    }
 }

@@ -19,6 +19,7 @@ class TextToSpeechManager @Inject constructor(
     private var isReady = false
     private val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     private var focusRequest: AudioFocusRequest? = null
+    private var onDoneCallback: (() -> Unit)? = null
 
     init {
         tts = TextToSpeech(context) { status ->
@@ -28,6 +29,16 @@ class TextToSpeechManager @Inject constructor(
                     tts?.language = Locale.ENGLISH
                     Timber.w("Czech TTS not available, falling back to English")
                 }
+                tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+                    override fun onStart(utteranceId: String?) {}
+                    override fun onDone(utteranceId: String?) {
+                        abandonAudioFocus()
+                        onDoneCallback?.invoke()
+                        onDoneCallback = null
+                    }
+                    @Deprecated("Deprecated in Java")
+                    override fun onError(utteranceId: String?) { abandonAudioFocus(); onDoneCallback = null }
+                })
                 isReady = true
                 Timber.i("TTS initialized")
             }
@@ -37,15 +48,12 @@ class TextToSpeechManager @Inject constructor(
     fun speak(text: String, onDone: (() -> Unit)? = null) {
         if (!isReady) { Timber.w("TTS not ready"); return }
         requestAudioFocus()
-        tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
-            override fun onStart(utteranceId: String?) {}
-            override fun onDone(utteranceId: String?) { abandonAudioFocus(); onDone?.invoke() }
-            override fun onError(utteranceId: String?) { abandonAudioFocus() }
-        })
+        onDoneCallback = onDone
         tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "caros_tts")
     }
 
     private fun requestAudioFocus() {
+        if (focusRequest != null) return  // focus already held (QUEUE_FLUSH replaces utterance)
         val req = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
             .build()
         focusRequest = req
@@ -57,5 +65,9 @@ class TextToSpeechManager @Inject constructor(
         focusRequest = null
     }
 
-    fun shutdown() { tts?.shutdown(); tts = null; isReady = false }
+    fun shutdown() {
+        abandonAudioFocus()
+        onDoneCallback = null
+        tts?.shutdown(); tts = null; isReady = false
+    }
 }

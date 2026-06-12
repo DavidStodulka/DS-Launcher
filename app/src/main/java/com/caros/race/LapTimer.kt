@@ -129,7 +129,9 @@ class LapTimer @Inject constructor() {
     fun processLocation(lat: Double, lon: Double, speedKmh: Float, timestampMs: Long) {
         if (_state.value == LapTimerState.INACTIVE) return
 
-        // Accumulate speed samples for average calculation
+        // Accumulate speed samples for average calculation (bounded — extremely
+        // long laps would otherwise grow this list without limit)
+        if (speedSamples.size >= 100_000) speedSamples.removeAt(0)
         speedSamples.add(speedKmh)
         if (speedKmh > maxSpeed) maxSpeed = speedKmh
 
