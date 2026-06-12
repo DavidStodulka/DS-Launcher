@@ -15,7 +15,8 @@ Automotive launcher pro Seat Leon 5F ST 1.6 TDI, head unit Mekede MN X20 Pro (An
 7. [CAN bus — specifika](#can-bus--specifika)
 8. [Nasazení na head unit](#nasazení-na-head-unit)
 9. [Časté chyby](#časté-chyby)
-10. [Otevřené úkoly](#otevřené-úkoly)
+10. [Stav projektu](#stav-projektu-12-6-2026)
+11. [Otevřené úkoly](#otevřené-úkoly)
 
 ---
 
@@ -84,22 +85,25 @@ app/src/main/
 ├── java/com/caros/
 │   ├── audio/              # AudioEngineManager, AdaptiveEQEngine, JamesDSP/V4A bridge, AudioProfile
 │   ├── automation/         # Automatizační pravidla
-│   ├── can/                # CANFrame, CANParser, CANWriter, MockCANSource
+│   ├── can/                # CANFrame, CANParser, CANWriter, CANReader, MockCANSource
 │   ├── communication/      # NotificationOverlay (TYPE_APPLICATION_OVERLAY)
-│   ├── db/                 # Room databáze, entity, DAO
+│   ├── core/               # CarOSApplication, ShellExecutor, ServiceHealthMonitor, WatchdogService
+│   ├── db/                 # Room databáze (v4), entity, DAO
 │   ├── diagnostics/        # OBD/VCDS diagnostika
 │   ├── elevation/          # Nadmořská výška a sklon
+│   ├── fuel/               # InstantFuelComputer (MAF → L/100km)
 │   ├── multimedia/         # FMController, FMRadioViewModel, AndroidAutoManager, UsbConnectionReceiver
-│   ├── power/              # Správa napájení
+│   ├── power/              # ACCPowerManager, DeepSleepManager, ShutdownManager
 │   ├── profiles/           # Profily (jízdní režimy)
-│   ├── race/               # Měření 0–100, 0–200, brzdění
-│   ├── service/            # MediaPlaybackService (Media3)
-│   ├── system/             # Systémové utility
-│   ├── telemetry/          # Telemetrie, jízdní styl
+│   ├── race/               # Měření 0–100, AggressiveDrivingDetector, GForceCalculator
+│   ├── service/            # MediaPlaybackService, DPFPredictorEngine, OilLifeCalculator
+│   ├── system/             # SystemSettings(Manager), AutomationEngine, AppManager, OTA
+│   ├── telemetry/          # TelemetryService, DrivingStyleAnalyzer, RoutePredictorEngine
 │   ├── termux/             # Termux bridge, MQTT publisher, TermuxServiceMonitor
 │   ├── ui/
 │   │   ├── audio/          # AudioFragment, EQFragment, ViperFragment
 │   │   ├── climate/        # ClimateFragment, ClimateViewModel
+│   │   ├── health/         # SystemHealthFragment — self-diagnostika CarOS
 │   │   ├── main/           # MainActivity, MainViewModel, LeftPanelFragment, RightPanelFragment
 │   │   ├── media/          # MediaFragment, FMRadioFragment
 │   │   ├── race/           # RaceFragment
@@ -144,6 +148,7 @@ magisk_modules/
 | `ecosystemFragment` | EcosystemFragment | Termux / MQTT status |
 | `voiceSetupFragment` | VoiceSetupFragment | Hlasové ovládání — nastavení |
 | `settingsFragment` | SettingsFragment | Nastavení aplikace |
+| `systemHealthFragment` | SystemHealthFragment | Zdraví systému — CPU/RAM/pády/watchdog/moduly |
 
 ---
 
@@ -198,6 +203,31 @@ viewLifecycleOwner.lifecycleScope.launch {
 `VoiceInputManager` → `GeminiCommandProcessor` (gemini-1.5-flash, temp=0.1) → `VoiceCommand` sealed class → `VoiceCommandExecutor`
 
 API klíč se ukládá do `EncryptedSharedPreferences`. Bez klíče hlas nefunguje — UI na to upozorní.
+
+### Reliability vrstva (heartbeat + watchdog)
+
+Každý kritický modul hlásí životnost do `ServiceHealthMonitor` (`core/`):
+
+```kotlin
+// V service.onCreate(): registrace restart akce + heartbeat loop (5 s)
+healthMonitor.registerRestartAction(HealthModules.CAN) { start(appContext) }
+scope.launch { while (true) { healthMonitor.heartbeat(HealthModules.CAN); delay(5_000) } }
+
+// V onDestroy() — DŮLEŽITÉ: odregistrovat, jinak watchdog službu vzkřísí
+healthMonitor.unregister(HealthModules.CAN)
+```
+
+`WatchdogService` kontroluje každých 10 s stale moduly (>30 s bez heartbeatu) a restartuje je.
+`CarOSApplication` po fatálním pádu naplánuje restart přes AlarmManager (ochrana proti crash-loop: max 1 restart za 60 s).
+Stav všeho vidíš v UI: **Nastavení → Zdraví systému**.
+
+### Výkonnostní konvence
+
+- **Žádné alokace v `onDraw()`** — Paint/Path předalokuj jako fieldy, používej `path.reset()`
+- **CAN → UI přes `sample(200ms)`** — UI se překresluje max 5 Hz (viz MainActivity)
+- **Telemetrie zapisuje dávkově** — 10 snímků na jeden `insertAll()` (šetří eMMC)
+- **Sériové čtení CAN má vlastní vlákno** — `CANReader` používá dedikovaný single-thread dispatcher, ne `Dispatchers.IO`
+- **Custom views mají `LAYER_TYPE_HARDWARE`** a guard proti zbytečnému `invalidate()`
 
 ---
 
@@ -281,9 +311,20 @@ canWriter.sendClimateCommand(ClimateCommand(
 
 ## Nasazení na head unit
 
+### ⚡ One-click USB deploy (doporučeno)
+
+Připoj head unit USB kabelem a spusť:
+
+```
+deploy-usb.bat      # Windows — stačí dvojklik
+./deploy-usb.sh     # Linux / macOS
+```
+
+Skript počká na zařízení, **stáhne nejnovější zelenou APK z GitHub Actions** (vyžaduje přihlášené `gh` CLI), nainstaluje s `-r -d` a spustí CarOS. Pokud vedle skriptu leží `app-debug.apk`, použije se ten (offline režim, `gh` není potřeba).
+
 ### Automatický build (GitHub Actions)
 
-Každý push na `main` nebo `claude/magical-lovelace-k3nrY` spustí build.  
+Každý push na `main` nebo `claude/magical-lovelace-k3nrY` spustí build (testy + APK + lint).  
 Artifact `caros-debug-<sha>.apk` je dostupný na:  
 **GitHub → Actions → Build APK → Artifacts**
 
@@ -292,11 +333,11 @@ Artifact `caros-debug-<sha>.apk` je dostupný na:
 ```bash
 # připojení přes USB
 adb devices
-adb install -r app-debug.apk
+adb install -r -d app-debug.apk
 
 # nebo přes Wi-Fi (head unit a PC ve stejné síti)
 adb connect 192.168.1.XXX:5555
-adb install -r app-debug.apk
+adb install -r -d app-debug.apk
 ```
 
 ### Nastavit jako výchozí launcher
@@ -370,15 +411,34 @@ CANFrame fieldy jsou nullable. Vždy `?.` nebo `?: default`. Nikdy `!!`.
 
 Zkontroluj že fragment má záznam v `nav_graph.xml` s odpovídajícím `android:id`.
 
+### Zápisy na /sdcard nefungují
+
+Aplikace používá `/sdcard/CarOS/` (crash reporty, CAN logy, GPX, Vosk model). Funguje to díky `android:requestLegacyExternalStorage="true"` v manifestu — **neodstraňuj ho**, dokud `targetSdk` zůstává 29.
+
+### Watchdog mi pořád restartuje službu
+
+Při záměrném zastavení služby zavolej `healthMonitor.unregister(HealthModules.XXX)` v `onDestroy()` — jinak ji watchdog do 30 s vzkřísí.
+
 ---
+
+## Stav projektu (12. 6. 2026)
+
+- ✅ **CI zelené** — testy + assembleDebug + lint procházejí na každý push
+- ✅ **Funkční audit dokončen** — 4-vrstvý audit (služby / UI / data+DI / enginy), všechny nálezy opraveny v commitu `b8907f3`:
+  scoped storage fix, nativní EQ (kumulace zisků), NaN guardy v gauge views, coroutine lifecycle opravy, DB index + migrace 3→4
+- ✅ **Reliability vrstva** — heartbeaty, WatchdogService, crash-restart, health dashboard
+- ✅ **One-click USB deploy** — `deploy-usb.bat` / `deploy-usb.sh`
+- 📄 Kompletní seznam funkcí všech 22+ modulů: viz `FEATURES.md`
 
 ## Otevřené úkoly
 
 - [ ] Release build — podpis keystorem, ProGuard pravidla
 - [ ] Fyzický CAN test — ověřit dekodér na reálném autě
+- [ ] Fyzický test scoped storage na head unitu (zápis do /sdcard/CarOS po instalaci)
+- [ ] Detekce natankování v `InstantFuelComputer` (reset trip počítadel po refuelu)
 - [ ] Přidat `btnVoice` do levého panelu + long-press → VoiceSetupFragment
 - [ ] `AdaptiveEQEngine.isEnabled` — předělat na `StateFlow<Boolean>` pro reaktivní UI
 - [ ] Semenovat FM preset UI z `FMController.getPresets()` při startu
 - [ ] OTA update mechanismus (stáhnout APK z GitHub Releases, nainstalovat přes PackageInstaller)
-- [ ] Testy — přidat unit testy pro `CANParser`, `AdaptiveEQEngine`, `VoiceCommandExecutor`
+- [ ] Rozšířit unit testy — `AdaptiveEQEngine`, `VoiceCommandExecutor` (CANParser už testy má)
 - [ ] Wireless ADB přes Wi-Fi hotspot pro snazší iteraci bez kabelu
