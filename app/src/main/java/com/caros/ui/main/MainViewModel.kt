@@ -10,10 +10,16 @@ import com.caros.can.CANFrame
 import com.caros.core.RootManager
 import com.caros.core.RootStatus
 import com.caros.db.CarOSDatabase
+import com.caros.fuel.FuelStats
+import com.caros.fuel.InstantFuelComputer
 import com.caros.profiles.DrivingMode
 import com.caros.profiles.ProfileManager
-import com.caros.service.DPFMonitor
+import com.caros.race.AggressiveDrivingDetector
+import com.caros.service.DPFPrediction
+import com.caros.service.DPFPredictorEngine
 import com.caros.service.ServiceAdvisor
+import com.caros.telemetry.RoutePredictorEngine
+import com.caros.telemetry.RouteSuggestion
 import com.caros.vcds.ConnectionType
 import com.caros.vcds.OBDConnection
 import com.caros.voice.VoiceCommandExecutor
@@ -36,11 +42,14 @@ class MainViewModel @Inject constructor(
     private val db: CarOSDatabase,
     private val profileManager: ProfileManager,
     private val serviceAdvisor: ServiceAdvisor,
-    private val dpfMonitor: DPFMonitor,
     private val voiceInputManager: VoiceInputManager,
     private val voiceCommandExecutor: VoiceCommandExecutor,
     private val adaptiveEQEngine: AdaptiveEQEngine,
     private val rootManager: RootManager,
+    private val fuelComputer: InstantFuelComputer,
+    private val dpfPredictorEngine: DPFPredictorEngine,
+    private val routePredictorEngine: RoutePredictorEngine,
+    val aggressiveDetector: AggressiveDrivingDetector,
     obdConnection: OBDConnection
 ) : ViewModel() {
 
@@ -80,8 +89,24 @@ class MainViewModel @Inject constructor(
 
     val obdState: StateFlow<ConnectionType> = obdConnection.connectionState
 
+    // ── Fuel computer ─────────────────────────────────────────────────────────
+
+    val fuelStats: StateFlow<FuelStats> = fuelComputer.stats
+
+    // ── DPF prediction ────────────────────────────────────────────────────────
+
+    private val _dpfPrediction = MutableStateFlow<DPFPrediction?>(null)
+    val dpfPrediction: StateFlow<DPFPrediction?> = _dpfPrediction.asStateFlow()
+
+    // ── Route suggestion (predictive navigation) ──────────────────────────────
+
+    private val _routeSuggestion = MutableStateFlow<RouteSuggestion?>(null)
+    val routeSuggestion: StateFlow<RouteSuggestion?> = _routeSuggestion.asStateFlow()
+
     init {
         startServicePolling()
+        startDPFPolling()
+        checkRouteSuggestion()
         viewModelScope.launch { rootManager.checkRootAvailability() }
     }
 
@@ -94,7 +119,11 @@ class MainViewModel @Inject constructor(
         _canFrame.value = frame
         val speedKmh = frame.vehicleSpeed?.kmh ?: 0f
         profileManager.setDrivingMode(speedKmh)
+        fuelComputer.update(frame)
     }
+
+    /** Dismiss a route suggestion after the user acts on it (or declines). */
+    fun clearRouteSuggestion() { _routeSuggestion.value = null }
 
     /**
      * Toggle voice listening on/off. If IDLE, starts listening; otherwise stops.
@@ -146,6 +175,29 @@ class MainViewModel @Inject constructor(
                     Timber.w(e, "MainViewModel: service polling error")
                 }
                 delay(30_000L)
+            }
+        }
+    }
+
+    private fun startDPFPolling() {
+        viewModelScope.launch {
+            while (isActive) {
+                try {
+                    _dpfPrediction.value = dpfPredictorEngine.getPrediction()
+                } catch (e: Exception) {
+                    Timber.w(e, "MainViewModel: DPF prediction error")
+                }
+                delay(60_000L)
+            }
+        }
+    }
+
+    private fun checkRouteSuggestion() {
+        viewModelScope.launch {
+            try {
+                _routeSuggestion.value = routePredictorEngine.getSuggestion()
+            } catch (e: Exception) {
+                Timber.w(e, "MainViewModel: route suggestion check failed")
             }
         }
     }

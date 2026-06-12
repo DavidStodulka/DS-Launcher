@@ -42,6 +42,8 @@ enum class ConnectionType {
     USB_ELM327,
     /** Bluetooth ELM327 (paired, RFCOMM socket). */
     BLUETOOTH_ELM327,
+    /** Replaying a previously recorded OBD session (no hardware needed). */
+    REPLAY,
     /** Not connected — commands return mock stub responses. */
     DISCONNECTED
 }
@@ -49,7 +51,8 @@ enum class ConnectionType {
 @Singleton
 class OBDConnection @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val shellExecutor: ShellExecutor
+    private val shellExecutor: ShellExecutor,
+    private val sessionPlayer: OBDSessionPlayer
 ) {
     private val _connectionState = MutableStateFlow(ConnectionType.DISCONNECTED)
 
@@ -67,6 +70,28 @@ class OBDConnection @Inject constructor(
 
     /** Serializes command/response cycles — ELM327 cannot interleave requests. */
     private val ioMutex = Mutex()
+
+    // ── Connection lifecycle ──────────────────────────────────────────────────
+
+    // ── Replay mode ───────────────────────────────────────────────────────────
+
+    /**
+     * Switch to replay mode.  The [OBDSessionPlayer] must already have a session
+     * loaded via [OBDSessionPlayer.load].  Calling this disconnects any live adapter.
+     */
+    fun startReplay() {
+        disconnect()
+        if (!sessionPlayer.isPlaying) sessionPlayer.start()
+        connectionType = ConnectionType.REPLAY
+        Timber.i("OBDConnection: replay mode active — %s", sessionPlayer.loadedFileName)
+    }
+
+    /** Stop replay and return to disconnected (mock) mode. */
+    fun stopReplay() {
+        sessionPlayer.stop()
+        connectionType = ConnectionType.DISCONNECTED
+        Timber.i("OBDConnection: replay mode stopped")
+    }
 
     // ── Connection lifecycle ──────────────────────────────────────────────────
 
@@ -167,6 +192,9 @@ class OBDConnection @Inject constructor(
      */
     suspend fun sendCommand(cmd: String, timeoutMs: Long = 3_000L): String? =
         withContext(Dispatchers.IO) {
+            if (connectionType == ConnectionType.REPLAY) {
+                return@withContext sessionPlayer.respond(cmd) ?: mockResponse(cmd)
+            }
             if (connectionType == ConnectionType.DISCONNECTED) {
                 return@withContext mockResponse(cmd)
             }

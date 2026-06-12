@@ -75,7 +75,7 @@ class BooleanConverter {
 // ─────────────────────────────────────────────────────────────────────────────
 
 private const val DB_NAME    = "caros_database"
-private const val DB_VERSION = 2
+private const val DB_VERSION = 3
 
 @Database(
     entities = [
@@ -87,7 +87,8 @@ private const val DB_VERSION = 2
         RouteEntity::class,
         ProfileEntity::class,
         TripEntity::class,
-        AudioProfileEntity::class
+        AudioProfileEntity::class,
+        RoutePredictionEntity::class
     ],
     version      = DB_VERSION,
     exportSchema = true
@@ -109,7 +110,8 @@ abstract class CarOSDatabase : RoomDatabase() {
     abstract fun routeDao():            RouteDao
     abstract fun profileDao():          ProfileDao
     abstract fun tripDao():             TripDao
-    abstract fun audioProfileDao():     AudioProfileDao
+    abstract fun audioProfileDao():        AudioProfileDao
+    abstract fun routePredictionDao():     RoutePredictionDao
 
     // ── Companion / singleton factory ─────────────────────────────────────────
 
@@ -164,7 +166,24 @@ abstract class CarOSDatabase : RoomDatabase() {
             }
         }
 
-        private val ALL_MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_1_2)
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """CREATE TABLE IF NOT EXISTS `route_predictions` (
+                        `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                        `dayOfWeek` INTEGER NOT NULL,
+                        `hourOfDay` INTEGER NOT NULL,
+                        `destLat` REAL NOT NULL,
+                        `destLon` REAL NOT NULL,
+                        `destLabel` TEXT NOT NULL,
+                        `tripCount` INTEGER NOT NULL DEFAULT 1,
+                        `lastUsedMs` INTEGER NOT NULL
+                    )"""
+                )
+            }
+        }
+
+        private val ALL_MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3)
     }
 
     // ── Database lifecycle callback ───────────────────────────────────────────
@@ -238,6 +257,10 @@ object DatabaseModule {
     @Provides
     fun provideAudioProfileDao(db: CarOSDatabase): AudioProfileDao =
         db.audioProfileDao()
+
+    @Provides
+    fun provideRoutePredictionDao(db: CarOSDatabase): RoutePredictionDao =
+        db.routePredictionDao()
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

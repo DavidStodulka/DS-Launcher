@@ -180,6 +180,21 @@
             android:configChanges="orientation|screenSize" />
 
         <!-- ================================================== -->
+        <!--  OFFLINE MAP ACTIVITY                               -->
+        <!-- ================================================== -->
+        <activity
+            android:name=".ui.map.MapActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.CarOS"
+            android:configChanges="orientation|screenSize|keyboardHidden">
+            <intent-filter>
+                <action android:name="com.caros.action.OPEN_MAP" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!-- ================================================== -->
         <!--  CAN BUS SERVICE (Foreground)                       -->
         <!-- ================================================== -->
         <service

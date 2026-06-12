@@ -44,6 +44,8 @@ import com.caros.can.EXTRA_RPM
 import com.caros.can.EXTRA_SPEED_KMH
 import com.caros.core.CarOSApplication
 import com.caros.db.CarOSDatabase
+import com.caros.race.AggressiveDrivingDetector
+import com.caros.race.GForce
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -69,6 +71,8 @@ class TelemetryService : Service() {
 
     @Inject lateinit var db: CarOSDatabase
     @Inject lateinit var drivingStyleAnalyzer: DrivingStyleAnalyzer
+    @Inject lateinit var routePredictorEngine: RoutePredictorEngine
+    @Inject lateinit var aggressiveDrivingDetector: AggressiveDrivingDetector
 
     // ── Coroutine scope ───────────────────────────────────────────────────────
 
@@ -300,6 +304,11 @@ class TelemetryService : Service() {
         val bearingDelta = bearingDelta(lastBearing, newLocation.bearing)
         val bearingRateRad = Math.toRadians(bearingDelta.toDouble()).toFloat() / dtSec
         lateralG = (newSpeedMs * bearingRateRad) / 9.81f
+
+        // Feed live G-force to aggression detector (only while a session is active)
+        if (currentSessionId != 0L) {
+            aggressiveDrivingDetector.processGForce(GForce(lateralG, longitudinalG, nowMs))
+        }
     }
 
     /** Returns the shortest signed bearing difference in degrees [-180, 180]. */
@@ -364,6 +373,7 @@ class TelemetryService : Service() {
         currentSessionId   = db.telemetrySessionDao().insert(entity)
         sessionDistanceKm  = 0.0
         lastLocation       = null
+        aggressiveDrivingDetector.resetSession()
 
         Timber.i("TelemetryService: session started, id=$currentSessionId")
         updateNotification("Recording session #$currentSessionId")
@@ -382,7 +392,7 @@ class TelemetryService : Service() {
 
         updateNotification("Waiting for motion…")
 
-        // Launch post-session analysis without blocking the service
+        // Launch post-session analysis and route learning without blocking the service
         serviceScope.launch(Dispatchers.IO) {
             try {
                 Timber.d("TelemetryService: analysing session $sid")
@@ -390,6 +400,18 @@ class TelemetryService : Service() {
                 Timber.d("TelemetryService: analysis complete for session $sid")
             } catch (e: Exception) {
                 Timber.e(e, "TelemetryService: analysis failed for session $sid")
+            }
+        }
+
+        // Record destination for predictive navigation
+        val finalGps = latestLocation.get()
+        if (finalGps != null) {
+            serviceScope.launch(Dispatchers.IO) {
+                try {
+                    routePredictorEngine.recordTrip(finalGps.latitude, finalGps.longitude)
+                } catch (e: Exception) {
+                    Timber.w(e, "TelemetryService: route prediction record failed")
+                }
             }
         }
     }

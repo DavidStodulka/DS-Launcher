@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -11,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.caros.databinding.FragmentMainCarStatusBinding
 import com.caros.profiles.DrivingMode
+import com.caros.ui.map.MapActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -37,6 +39,8 @@ class MainFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         observeCANFrame()
         observeDrivingMode()
+        observeRouteSuggestion()
+        observeAggressionScore()
     }
 
     private fun observeCANFrame() {
@@ -97,6 +101,38 @@ class MainFragment : Fragment() {
                         binding.dpfSection.visibility = View.VISIBLE
                         binding.seatbeltRow.visibility = View.VISIBLE
                     }
+                }
+            }
+        }
+    }
+
+    /** Show a dialog offering to navigate to the predicted destination. */
+    private fun observeRouteSuggestion() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.routeSuggestion.collect { suggestion ->
+                    if (suggestion == null) return@collect
+                    AlertDialog.Builder(requireContext())
+                        .setTitle("Navigovat?")
+                        .setMessage("Obvykle jezdíš do: ${suggestion.label}\n(${suggestion.confidence}× navštíveno)")
+                        .setPositiveButton("Ano") { _, _ ->
+                            // Launch navigation — trigger voice command or intent
+                            viewModel.clearRouteSuggestion()
+                            Timber.i("MainFragment: user accepted route suggestion to ${suggestion.label}")
+                        }
+                        .setNegativeButton("Ne") { _, _ -> viewModel.clearRouteSuggestion() }
+                        .show()
+                }
+            }
+        }
+    }
+
+    private fun observeAggressionScore() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.aggressiveDetector.sessionScore.collect { score ->
+                    Timber.d("MainFragment: aggression score=$score")
+                    // Score can be surfaced in a ScoreBar or DrivingStyleFragment
                 }
             }
         }
