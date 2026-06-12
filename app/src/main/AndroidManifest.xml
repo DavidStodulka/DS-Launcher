@@ -237,6 +237,14 @@
         </service>
 
         <!-- ================================================== -->
+        <!--  WATCHDOG SERVICE (heartbeat supervisor)            -->
+        <!-- ================================================== -->
+        <service
+            android:name=".core.WatchdogService"
+            android:exported="false"
+            android:stopWithTask="false" />
+
+        <!-- ================================================== -->
         <!--  BOOT RECEIVER                                      -->
         <!-- ================================================== -->
         <receiver

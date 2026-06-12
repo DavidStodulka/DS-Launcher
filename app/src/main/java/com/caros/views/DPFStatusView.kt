@@ -58,6 +58,10 @@ class DPFStatusView @JvmOverloads constructor(
     private var prediction: DPFPrediction? = null
     private var animator: ValueAnimator? = null
 
+    init {
+        setLayerType(LAYER_TYPE_HARDWARE, null)
+    }
+
     fun update(pred: DPFPrediction) {
         prediction = pred
         animateTo(pred.currentLoadPct)

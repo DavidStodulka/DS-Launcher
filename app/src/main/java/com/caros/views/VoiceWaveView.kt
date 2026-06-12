@@ -25,6 +25,13 @@ class VoiceWaveView @JvmOverloads constructor(
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = 0xFF757575.toInt(); textSize = 28f; textAlign = Paint.Align.CENTER
     }
+    private val arcPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE; strokeWidth = 5f; color = 0xFF1565C0.toInt()
+    }
+    private val pulsePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE; strokeWidth = 3f; color = 0xFF2E7D32.toInt()
+    }
+    private val wavePath = Path()
 
     // rmsLevel 0..1 from microphone
     var rmsLevel = 0f
@@ -57,34 +64,27 @@ class VoiceWaveView @JvmOverloads constructor(
             val freq = 2f + i * 0.5f
             val alpha = 255 - i * 60
             wavePaint.color = Color.argb(alpha, 21, 101, 192)
-            val path = Path()
+            wavePath.reset()
             val steps = 100
             for (step in 0..steps) {
                 val x = cx - r + step * (2 * r / steps)
                 val y = cy + amp * sin((step.toFloat() / steps * Math.PI * freq + phase + i * 0.5f).toFloat())
-                if (step == 0) path.moveTo(x, y.toFloat()) else path.lineTo(x, y.toFloat())
+                if (step == 0) wavePath.moveTo(x, y.toFloat()) else wavePath.lineTo(x, y.toFloat())
             }
-            canvas.drawPath(path, wavePaint)
+            canvas.drawPath(wavePath, wavePaint)
         }
     }
 
     private fun drawRotatingArc(canvas: Canvas, cx: Float, cy: Float, r: Float) {
-        val sweep = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.STROKE; strokeWidth = 5f
-            color = 0xFF1565C0.toInt()
-        }
-        canvas.drawArc(cx - r, cy - r, cx + r, cy + r, phase * 360f, 270f, false, sweep)
+        canvas.drawArc(cx - r, cy - r, cx + r, cy + r, phase * 360f, 270f, false, arcPaint)
         textPaint.color = 0xFF757575.toInt()
         canvas.drawText("Zpracovávám...", cx, cy + 12f, textPaint)
     }
 
     private fun drawSpeakerPulse(canvas: Canvas, cx: Float, cy: Float, r: Float) {
-        val pulse = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.STROKE; strokeWidth = 3f; color = 0xFF2E7D32.toInt()
-        }
         val scale = 0.7f + 0.3f * sin(phase * Math.PI.toFloat() * 4)
-        canvas.drawCircle(cx, cy, r * scale, pulse)
-        canvas.drawCircle(cx, cy, r * scale * 0.6f, pulse)
+        canvas.drawCircle(cx, cy, r * scale, pulsePaint)
+        canvas.drawCircle(cx, cy, r * scale * 0.6f, pulsePaint)
     }
 
     private fun drawMicIcon(canvas: Canvas, cx: Float, cy: Float) {

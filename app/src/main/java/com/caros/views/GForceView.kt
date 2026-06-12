@@ -44,6 +44,10 @@ class GForceView @JvmOverloads constructor(
 
     private val SCALE = 1.5f // max G shown
 
+    init {
+        setLayerType(LAYER_TYPE_HARDWARE, null)
+    }
+
     override fun onDraw(canvas: Canvas) {
         val cx = width / 2f
         val cy = height / 2f
@@ -77,13 +81,23 @@ class GForceView @JvmOverloads constructor(
     }
 
     fun update(lateral: Float, longitudinal: Float) {
-        lateralG = lateral.coerceIn(-SCALE, SCALE)
-        longitudinalG = longitudinal.coerceIn(-SCALE, SCALE)
+        val newLat  = lateral.coerceIn(-SCALE, SCALE)
+        val newLong = longitudinal.coerceIn(-SCALE, SCALE)
+        // Skip the redraw entirely when the bubble would not visibly move
+        if (kotlin.math.abs(newLat - lateralG) < CHANGE_EPSILON_G &&
+            kotlin.math.abs(newLong - longitudinalG) < CHANGE_EPSILON_G
+        ) return
+        lateralG = newLat
+        longitudinalG = newLong
         if (trailPoints.size >= 20) trailPoints.removeFirst()
         trailPoints.addLast(Pair(lateralG, longitudinalG))
         if (kotlin.math.abs(lateral) > kotlin.math.abs(maxLateral)) maxLateral = lateral
         if (kotlin.math.abs(longitudinal) > kotlin.math.abs(maxLongitudinal)) maxLongitudinal = longitudinal
         invalidate()
+    }
+
+    private companion object {
+        const val CHANGE_EPSILON_G = 0.005f
     }
 
     fun resetSession() { maxLateral = 0f; maxLongitudinal = 0f; trailPoints.clear(); invalidate() }

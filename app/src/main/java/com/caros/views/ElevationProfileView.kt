@@ -34,6 +34,21 @@ class ElevationProfileView @JvmOverloads constructor(
     private val linePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = 0xFF1565C0.toInt(); strokeWidth = 3f; style = Paint.Style.STROKE; strokeJoin = Paint.Join.ROUND
     }
+    private val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; alpha = 160 }
+    private val legendBgPaint = Paint().apply { color = 0xCC111111.toInt() }
+    private val legendBoxPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val legendTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = 0xFFCCCCCC.toInt(); textSize = 20f; textAlign = Paint.Align.LEFT
+    }
+    private val emptyTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = 0xFF444444.toInt(); textSize = 32f; textAlign = Paint.Align.CENTER
+    }
+    private val segmentPath = Path()
+    private val linePath = Path()
+
+    init {
+        setLayerType(LAYER_TYPE_HARDWARE, null)
+    }
 
     private val slopeColors = mapOf(
         "FLAT" to 0xFF2E7D32.toInt(),
@@ -75,11 +90,8 @@ class ElevationProfileView @JvmOverloads constructor(
         canvas.drawLine(padL, height - padB, width.toFloat() - padR, height - padB, axisPaint)
 
         // Fill segments by slope color
-        val fillPath = Path()
-        var first = true
         val baseLine = height - padB
 
-        val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; alpha = 160 }
         for (i in 0 until points.size - 1) {
             val p1 = points[i]; val p2 = points[i + 1]
             val x1 = padL + scrollOffsetX + (p1.distanceKm / totalDistKm) * chartW
@@ -87,13 +99,15 @@ class ElevationProfileView @JvmOverloads constructor(
             val y1 = padT + (1f - (p1.altitudeM - minAlt) / (maxAlt - minAlt).coerceAtLeast(1f)) * chartH
             val y2 = padT + (1f - (p2.altitudeM - minAlt) / (maxAlt - minAlt).coerceAtLeast(1f)) * chartH
             fillPaint.color = slopeColor(p1.slopePct)
-            val path = Path()
-            path.moveTo(x1, baseLine); path.lineTo(x1, y1); path.lineTo(x2, y2); path.lineTo(x2, baseLine); path.close()
-            canvas.drawPath(path, fillPaint)
+            fillPaint.alpha = 160
+            segmentPath.reset()
+            segmentPath.moveTo(x1, baseLine); segmentPath.lineTo(x1, y1)
+            segmentPath.lineTo(x2, y2); segmentPath.lineTo(x2, baseLine); segmentPath.close()
+            canvas.drawPath(segmentPath, fillPaint)
         }
 
         // Profile line
-        val linePath = Path()
+        linePath.reset()
         var pathStarted = false
         for (pt in points) {
             val x = padL + scrollOffsetX + (pt.distanceKm / totalDistKm) * chartW
@@ -136,20 +150,16 @@ class ElevationProfileView @JvmOverloads constructor(
         val padH = 8f
         val totalH = legendEntries.size * itemH + padH * 2
 
-        val bgPaint2 = Paint().apply { color = 0xCC111111.toInt() }
         val lx = width - legendW - 8f
         val ly = 8f
-        canvas.drawRect(lx - 4f, ly, lx + legendW + 4f, ly + totalH, bgPaint2)
+        canvas.drawRect(lx - 4f, ly, lx + legendW + 4f, ly + totalH, legendBgPaint)
 
-        val boxPaint2 = Paint(Paint.ANTI_ALIAS_FLAG)
-        val txtPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = 0xFFCCCCCC.toInt(); this.textSize = textSize; textAlign = Paint.Align.LEFT
-        }
+        legendTextPaint.textSize = textSize
         legendEntries.forEachIndexed { idx, (label, color) ->
             val itemY = ly + padH + idx * itemH
-            boxPaint2.color = color
-            canvas.drawRect(lx, itemY, lx + boxSize, itemY + boxSize, boxPaint2)
-            canvas.drawText(label, lx + boxSize + 4f, itemY + boxSize - 1f, txtPaint)
+            legendBoxPaint.color = color
+            canvas.drawRect(lx, itemY, lx + boxSize, itemY + boxSize, legendBoxPaint)
+            canvas.drawText(label, lx + boxSize + 4f, itemY + boxSize - 1f, legendTextPaint)
         }
     }
 
@@ -162,8 +172,7 @@ class ElevationProfileView @JvmOverloads constructor(
 
     private fun drawEmpty(canvas: Canvas) {
         canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), bgPaint)
-        val p = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF444444.toInt(); textSize = 32f; textAlign = Paint.Align.CENTER }
-        canvas.drawText("Žádná data", width / 2f, height / 2f, p)
+        canvas.drawText("Žádná data", width / 2f, height / 2f, emptyTextPaint)
     }
 
     fun setData(pts: List<ElevationViewPoint>) {

@@ -27,7 +27,9 @@ import com.caros.voice.TextToSpeechManager
 import com.caros.voice.VoiceCommandExecutor
 import com.caros.voice.VoiceInputManager
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -51,16 +53,26 @@ class MainActivity : AppCompatActivity() {
     private var canServiceBound = false
     private var canFrameJob: kotlinx.coroutines.Job? = null
 
+    private companion object {
+        /** Max rate at which CAN frames propagate to the UI layer (200 ms = 5 Hz). */
+        const val UI_FRAME_SAMPLE_MS = 200L
+    }
+
     private val serviceConnection = object : ServiceConnection {
+        @OptIn(FlowPreview::class)
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             canServiceBound = true
             Timber.d("MainActivity: CANService connected")
             // Wire the service's frame stream into the shared ViewModel so every
             // fragment observing mainViewModel.canFrame gets live data.
+            // sample() caps UI updates at 5 Hz — real CAN hardware can emit
+            // hundreds of frames per second and redrawing each one is wasted work.
             val canService = (service as? CANService.CANBinder)?.getService()
             canFrameJob?.cancel()
             canFrameJob = lifecycleScope.launch {
-                canService?.canFrame?.collect { mainViewModel.updateCANFrame(it) }
+                canService?.canFrame
+                    ?.sample(UI_FRAME_SAMPLE_MS)
+                    ?.collect { mainViewModel.updateCANFrame(it) }
             }
         }
 

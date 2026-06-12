@@ -24,6 +24,8 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.caros.BuildConfig
 import com.caros.R
 import com.caros.core.CarOSApplication
+import com.caros.core.HealthModules
+import com.caros.core.ServiceHealthMonitor
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -54,6 +56,7 @@ const val EXTRA_IS_ACC_ON          = "is_acc_on"
 
 private const val NOTIFICATION_ID  = 1001
 private const val FOREGROUND_STOP_ACTION = "com.caros.can.STOP"
+private const val HEARTBEAT_INTERVAL_MS  = 5_000L
 
 @AndroidEntryPoint
 class CANService : Service() {
@@ -64,6 +67,7 @@ class CANService : Service() {
     @Inject lateinit var canParser:   CANParser
     @Inject lateinit var canLogger:   CANLogger
     @Inject lateinit var mockSource:  MockCANSource
+    @Inject lateinit var healthMonitor: ServiceHealthMonitor
 
     // ── Coroutine scope tied to service lifetime ──────────────────────────────
 
@@ -101,6 +105,18 @@ class CANService : Service() {
         canParser.reset()
         canLogger.start()
         startForeground(NOTIFICATION_ID, buildNotification("Connecting…"))
+        startHeartbeat()
+    }
+
+    private fun startHeartbeat() {
+        val appContext = applicationContext
+        healthMonitor.registerRestartAction(HealthModules.CAN) { start(appContext) }
+        serviceScope.launch {
+            while (true) {
+                healthMonitor.heartbeat(HealthModules.CAN)
+                kotlinx.coroutines.delay(HEARTBEAT_INTERVAL_MS)
+            }
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -115,6 +131,8 @@ class CANService : Service() {
 
     override fun onDestroy() {
         Timber.i("CANService: onDestroy")
+        // Intentional stop — stop watchdog monitoring so it doesn't resurrect us
+        healthMonitor.unregister(HealthModules.CAN)
         readerJob?.cancel()
         canLogger.stop()
         serviceScope.cancel()

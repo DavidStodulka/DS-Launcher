@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- SYSTÉMOVÉ ZDROJE -->
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="SYSTÉMOVÉ ZDROJE" android:textColor="#1565C0" android:textSize="12sp" android:letterSpacing="0.1" android:paddingBottom="8dp"/>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:background="#111111" android:padding="12dp" android:layout_marginBottom="12dp">
+            <TextView android:id="@+id/tvHealthCPU" android:text="CPU: --" android:textColor="#FFFFFF" android:textSize="13sp" android:fontFamily="monospace" android:layout_width="wrap_content" android:layout_height="wrap_content" android:paddingBottom="4dp"/>
+            <TextView android:id="@+id/tvHealthRAM" android:text="RAM systém: --" android:textColor="#FFFFFF" android:textSize="13sp" android:fontFamily="monospace" android:layout_width="wrap_content" android:layout_height="wrap_content" android:paddingBottom="4dp"/>
+            <TextView android:id="@+id/tvHealthAppRAM" android:text="RAM aplikace: --" android:textColor="#FFFFFF" android:textSize="13sp" android:fontFamily="monospace" android:layout_width="wrap_content" android:layout_height="wrap_content" android:paddingBottom="4dp"/>
+            <TextView android:id="@+id/tvHealthDiskWrites" android:text="Zápisy na disk: --" android:textColor="#FFFFFF" android:textSize="13sp" android:fontFamily="monospace" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- STABILITA -->
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="STABILITA" android:textColor="#1565C0" android:textSize="12sp" android:letterSpacing="0.1" android:paddingBottom="8dp"/>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:background="#111111" android:padding="12dp" android:layout_marginBottom="12dp">
+            <TextView android:id="@+id/tvHealthCrashes" android:text="Pády za 7 dní: --" android:textColor="#FFFFFF" android:textSize="13sp" android:fontFamily="monospace" android:layout_width="wrap_content" android:layout_height="wrap_content" android:paddingBottom="4dp"/>
+            <TextView android:id="@+id/tvHealthWatchdog" android:text="Watchdog restarty: --" android:textColor="#FFFFFF" android:textSize="13sp" android:fontFamily="monospace" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- MODULY -->
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="MODULY" android:textColor="#1565C0" android:textSize="12sp" android:letterSpacing="0.1" android:paddingBottom="8dp"/>
+        <LinearLayout
+            android:id="@+id/moduleContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#111111"
+            android:padding="12dp">
+            <TextView android:id="@+id/tvNoModules" android:text="Žádné moduly zatím nehlásí stav…" android:textColor="#757575" android:textSize="13sp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

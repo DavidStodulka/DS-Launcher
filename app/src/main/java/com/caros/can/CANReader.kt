@@ -12,7 +12,7 @@ package com.caros.can
 //  If the device file cannot be opened at all, it falls back to MockCANSource.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -23,6 +23,7 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStreamReader
+import java.util.concurrent.Executors
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.coroutineContext
@@ -50,6 +51,15 @@ class CANReader @Inject constructor(
     private val mockSource: MockCANSource
 ) {
 
+    /**
+     * Dedicated single thread for the blocking serial read loop. Keeps CAN I/O
+     * off the shared Dispatchers.IO pool so a stalled read can never starve
+     * other I/O work (DB writes, file logging, OBD polling).
+     */
+    private val readerDispatcher = Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "CANReaderThread").apply { isDaemon = true }
+    }.asCoroutineDispatcher()
+
     // ── Public API ────────────────────────────────────────────────────────────
 
     /**
@@ -59,7 +69,7 @@ class CANReader @Inject constructor(
      * raw-line emission (the mock generates lines in the same format so
      * [CANParser] can decode them identically).
      *
-     * The flow runs on [Dispatchers.IO].
+     * The flow runs on a dedicated single-thread dispatcher.
      */
     fun lines(): Flow<String> = flow {
         val deviceFile = resolveDevice()
@@ -115,7 +125,7 @@ class CANReader @Inject constructor(
             delay(backoffMs)
             backoffMs = (backoffMs * BACKOFF_FACTOR).toLong().coerceAtMost(MAX_BACKOFF)
         }
-    }.flowOn(Dispatchers.IO)
+    }.flowOn(readerDispatcher)
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 

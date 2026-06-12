@@ -4,6 +4,8 @@ import android.content.Context
 import android.media.audiofx.BassBoost
 import android.media.audiofx.Equalizer
 import android.media.audiofx.Virtualizer
+import com.caros.core.HealthModules
+import com.caros.core.ServiceHealthMonitor
 import dagger.hilt.android.qualifiers.ApplicationContext
 import timber.log.Timber
 import javax.inject.Inject
@@ -13,7 +15,8 @@ enum class AudioBackend { JAMESDSP, VIPER4ANDROID, NATIVE }
 
 @Singleton
 class AudioEngineManager @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val healthMonitor: ServiceHealthMonitor
 ) {
     val activeBackend: AudioBackend = detectBackend()
 
@@ -47,6 +50,8 @@ class AudioEngineManager @Inject constructor(
     }
 
     fun applyFullEQ(gains: FloatArray) {
+        // Called every 2 s by AdaptiveEQEngine — doubles as the audio liveness signal
+        healthMonitor.heartbeat(HealthModules.AUDIO)
         gains.forEachIndexed { i, g -> if (i < 10) currentGains[i] = g.coerceIn(-12f, 12f) }
         when (activeBackend) {
             AudioBackend.JAMESDSP -> JamesDSPBridge.applyEQ(context, currentGains)

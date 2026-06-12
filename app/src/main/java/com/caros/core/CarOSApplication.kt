@@ -1,9 +1,12 @@
 package com.caros.core
 
+import android.app.AlarmManager
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.hilt.work.HiltWorkerFactory
@@ -49,6 +52,7 @@ class CarOSApplication : Application(), Configuration.Provider {
         initCarOSDirectories()
         initRootAccess()
         scheduleDbMaintenance()
+        WatchdogService.start(this)
     }
 
     // -------------------------------------------------------------------------
@@ -74,7 +78,41 @@ class CarOSApplication : Application(), Configuration.Provider {
             } catch (_: Exception) {
                 // Never let the crash reporter itself crash
             }
+            scheduleRestartAfterCrash()
             defaultHandler?.uncaughtException(thread, throwable)
+        }
+    }
+
+    /**
+     * Schedule the launcher to relaunch ~2 s after a fatal crash so the head
+     * unit never sits on a black screen. Two crashes within 60 s are treated
+     * as a crash loop and the process is allowed to stay dead.
+     */
+    private fun scheduleRestartAfterCrash() {
+        try {
+            val prefs = getSharedPreferences("caros_crash_guard", Context.MODE_PRIVATE)
+            val now = System.currentTimeMillis()
+            val lastCrash = prefs.getLong("last_crash_ms", 0L)
+            prefs.edit().putLong("last_crash_ms", now).commit()
+            if (now - lastCrash < CRASH_LOOP_WINDOW_MS) {
+                Log.w("CarOS", "Crash loop detected — not scheduling restart")
+                return
+            }
+
+            val launchIntent = packageManager.getLaunchIntentForPackage(packageName) ?: return
+            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            val pi = PendingIntent.getActivity(
+                this, RESTART_REQUEST_CODE, launchIntent,
+                PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                now + RESTART_DELAY_MS,
+                pi
+            )
+        } catch (_: Exception) {
+            // Restart scheduling must never block the crash handler
         }
     }
 
@@ -298,6 +336,11 @@ class CarOSApplication : Application(), Configuration.Provider {
         const val CHANNEL_MEDIA       = "caros_media"
         const val CHANNEL_CALLS       = "caros_calls"
         const val CHANNEL_ALERTS      = "caros_alerts"
+
+        // Crash-restart firewall
+        private const val CRASH_LOOP_WINDOW_MS = 60_000L
+        private const val RESTART_DELAY_MS     = 2_000L
+        private const val RESTART_REQUEST_CODE = 9001
 
         @Volatile
         private var instance: CarOSApplication? = null

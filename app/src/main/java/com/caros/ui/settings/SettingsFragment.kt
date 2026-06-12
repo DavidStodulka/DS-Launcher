@@ -14,6 +14,8 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import com.caros.R
 import com.caros.databinding.FragmentSettingsBinding
 import com.caros.multimedia.AndroidAutoManager
 import com.caros.profiles.ProfileManager
@@ -65,6 +67,7 @@ class SettingsFragment : Fragment() {
         loadCustomRules()
         setupAutomation()
         startSystemInfoRefresh()
+        binding.btnSystemHealth.setOnClickListener { findNavController().navigate(R.id.systemHealthFragment) }
     }
 
     override fun onResume() {

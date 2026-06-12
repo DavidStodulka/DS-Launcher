@@ -85,4 +85,10 @@
         android:name="com.caros.ui.climate.ClimateFragment"
         android:label="Klimatizace"
         tools:layout="@layout/fragment_climate" />
+
+    <fragment
+        android:id="@+id/systemHealthFragment"
+        android:name="com.caros.ui.health.SystemHealthFragment"
+        android:label="Zdraví systému"
+        tools:layout="@layout/fragment_system_health" />
 </navigation>

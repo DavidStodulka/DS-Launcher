@@ -89,6 +89,7 @@
             <TextView android:id="@+id/tvCPUUsage" android:text="CPU: --%  Teplota: --°C" android:textColor="#FFFFFF" android:textSize="13sp" android:fontFamily="monospace" android:layout_width="wrap_content" android:layout_height="wrap_content" android:paddingBottom="4dp"/>
             <TextView android:id="@+id/tvRAMUsage" android:text="RAM: -- / -- MB" android:textColor="#FFFFFF" android:textSize="13sp" android:fontFamily="monospace" android:layout_width="wrap_content" android:layout_height="wrap_content" android:paddingBottom="4dp"/>
             <TextView android:id="@+id/tvBuildInfo" android:text="Build: CarOS" android:textColor="#757575" android:textSize="12sp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+            <Button android:id="@+id/btnSystemHealth" android:layout_width="match_parent" android:layout_height="52dp" android:text="Zdraví systému →" android:background="#1565C0" android:textColor="#FFFFFF" android:layout_marginTop="12dp"/>
         </LinearLayout>
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

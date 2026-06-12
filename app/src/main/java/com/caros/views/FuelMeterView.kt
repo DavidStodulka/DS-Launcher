@@ -52,7 +52,12 @@ class FuelMeterView @JvmOverloads constructor(
     private var stats: FuelStats = FuelStats(0f, 0f, 0f, 0f, 0)
     private val arcRect = RectF()
 
+    init {
+        setLayerType(LAYER_TYPE_HARDWARE, null)
+    }
+
     fun update(fuelStats: FuelStats) {
+        if (fuelStats == stats) return  // FuelStats is a data class — skip no-op redraws
         stats = fuelStats
         invalidate()
     }
