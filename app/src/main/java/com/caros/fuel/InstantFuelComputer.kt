@@ -49,6 +49,7 @@ class InstantFuelComputer @Inject constructor() {
     @Volatile private var tripFuelLitres  = 0f
     @Volatile private var tripDistanceKm  = 0f
     @Volatile private var lastTimestampMs = 0L
+    @Volatile private var actualTankLitres: Float? = null
 
     private val _stats = MutableStateFlow(
         FuelStats(0f, 0f, 0f, 0f, (TANK_LITRES / 6f * 100f).toInt())
@@ -56,11 +57,22 @@ class InstantFuelComputer @Inject constructor() {
     val stats: StateFlow<FuelStats> = _stats.asStateFlow()
 
     /**
+     * Update fuel level from OBD Mode 01 PID 0x2F (vLinker MC+ polling).
+     * When set, range estimate uses actual tank content instead of a trip-depletion model.
+     */
+    @Synchronized
+    fun updateFuelLevel(level: com.caros.can.FuelLevel) {
+        actualTankLitres = level.estimatedLitres
+    }
+
+    /**
      * Update the fuel computer from a decoded CAN frame.
+     * Also updates fuel level if [CANFrame.fuelLevel] is present.
      * Should be called once per frame (≈ 2 Hz from CAN, 500 ms intervals).
      */
     @Synchronized
     fun update(frame: CANFrame) {
+        frame.fuelLevel?.let { actualTankLitres = it.estimatedLitres }
         val speedKmh = frame.vehicleSpeed?.kmh ?: return
         val now      = frame.timestamp
         val dtSec    = if (lastTimestampMs > 0L) ((now - lastTimestampMs) / 1000f) else 0f
@@ -78,9 +90,10 @@ class InstantFuelComputer @Inject constructor() {
         val avgL100     = if (tripDistanceKm > 0.1f) (tripFuelLitres / tripDistanceKm) * 100f
                           else instantL100.coerceAtMost(30f)
 
-        val usedFraction = tripFuelLitres / TANK_LITRES
-        val remaining    = max(0f, TANK_LITRES * (1f - usedFraction))
-        val rangeKm      = if (avgL100 > 0f) (remaining / avgL100 * 100f).toInt() else 0
+        // Prefer OBD-reported tank level; fall back to trip-depletion model
+        val remaining = actualTankLitres
+            ?: max(0f, TANK_LITRES * (1f - tripFuelLitres / TANK_LITRES))
+        val rangeKm = if (avgL100 > 0f) (remaining / avgL100 * 100f).toInt() else 0
 
         _stats.value = FuelStats(
             instantLper100km = instantL100.coerceIn(0f, 99f),
@@ -97,6 +110,7 @@ class InstantFuelComputer @Inject constructor() {
         tripFuelLitres  = 0f
         tripDistanceKm  = 0f
         lastTimestampMs = 0L
+        // Do NOT reset actualTankLitres — it's from OBD, not derived from trip
     }
 
     // ── Private ───────────────────────────────────────────────────────────────

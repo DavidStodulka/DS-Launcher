@@ -22,6 +22,8 @@ import com.caros.telemetry.RoutePredictorEngine
 import com.caros.telemetry.RouteSuggestion
 import com.caros.vcds.ConnectionType
 import com.caros.vcds.OBDConnection
+import com.caros.vcds.TDIDiagnostics
+import com.caros.vcds.VAGExtendedPIDEngine
 import com.caros.voice.VoiceCommandExecutor
 import com.caros.voice.VoiceInputManager
 import com.caros.voice.VoiceListeningState
@@ -50,6 +52,7 @@ class MainViewModel @Inject constructor(
     private val dpfPredictorEngine: DPFPredictorEngine,
     private val routePredictorEngine: RoutePredictorEngine,
     val aggressiveDetector: AggressiveDrivingDetector,
+    private val vagExtendedPIDEngine: VAGExtendedPIDEngine,
     obdConnection: OBDConnection
 ) : ViewModel() {
 
@@ -103,9 +106,14 @@ class MainViewModel @Inject constructor(
     private val _routeSuggestion = MutableStateFlow<RouteSuggestion?>(null)
     val routeSuggestion: StateFlow<RouteSuggestion?> = _routeSuggestion.asStateFlow()
 
+    // ── TDI extended OBD diagnostics ──────────────────────────────────────────
+
+    val tdiDiagnostics: StateFlow<TDIDiagnostics> = vagExtendedPIDEngine.diagnostics
+
     init {
         startServicePolling()
         startDPFPolling()
+        startExtendedPIDPolling()
         checkRouteSuggestion()
         viewModelScope.launch { rootManager.checkRootAvailability() }
     }
@@ -198,6 +206,21 @@ class MainViewModel @Inject constructor(
                 _routeSuggestion.value = routePredictorEngine.getSuggestion()
             } catch (e: Exception) {
                 Timber.w(e, "MainViewModel: route suggestion check failed")
+            }
+        }
+    }
+
+    private fun startExtendedPIDPolling() {
+        viewModelScope.launch {
+            while (isActive) {
+                try {
+                    vagExtendedPIDEngine.pollCycle()
+                    // Update fuel computer with OBD-reported tank level
+                    vagExtendedPIDEngine.fuelLevel.value?.let { fuelComputer.updateFuelLevel(it) }
+                } catch (e: Exception) {
+                    Timber.w(e, "MainViewModel: extended PID polling error")
+                }
+                delay(10_000L)  // 10 s — fast enough for live diagnostics display
             }
         }
     }

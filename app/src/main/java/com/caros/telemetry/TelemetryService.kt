@@ -37,6 +37,7 @@ import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.caros.can.ACTION_ACC_STATE_CHANGED
 import com.caros.can.ACTION_CAN_FRAME
+import com.caros.can.CANParser
 import com.caros.can.EXTRA_ACC_ON
 import com.caros.can.EXTRA_COOLANT_CELSIUS
 import com.caros.can.EXTRA_IS_ACC_ON
@@ -73,6 +74,7 @@ class TelemetryService : Service() {
     @Inject lateinit var drivingStyleAnalyzer: DrivingStyleAnalyzer
     @Inject lateinit var routePredictorEngine: RoutePredictorEngine
     @Inject lateinit var aggressiveDrivingDetector: AggressiveDrivingDetector
+    @Inject lateinit var canParser: CANParser
 
     // ── Coroutine scope ───────────────────────────────────────────────────────
 
@@ -305,9 +307,13 @@ class TelemetryService : Service() {
         val bearingRateRad = Math.toRadians(bearingDelta.toDouble()).toFloat() / dtSec
         lateralG = (newSpeedMs * bearingRateRad) / 9.81f
 
-        // Feed live G-force to aggression detector (only while a session is active)
+        // Feed live G-force to aggression detector (only while a session is active).
+        // Prefers ESP hardware G-force from CANParser when available.
         if (currentSessionId != 0L) {
-            aggressiveDrivingDetector.processGForce(GForce(lateralG, longitudinalG, nowMs))
+            aggressiveDrivingDetector.updateFromCANFrame(
+                frame    = canParser.currentFrame(),
+                fallback = GForce(lateralG, longitudinalG, nowMs)
+            )
         }
     }
 

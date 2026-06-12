@@ -14,6 +14,7 @@ package com.caros.race
 //  Score starts at 100; each event subtracts 1–5 points proportional to severity.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import com.caros.can.CANFrame
 import com.caros.voice.TextToSpeechManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -59,6 +60,20 @@ class AggressiveDrivingDetector @Inject constructor(
     private var lastBrakingMs   = 0L
     private var lastAccelMs     = 0L
     private var lastCorneringMs = 0L
+
+    /**
+     * Convenience method — prefers hardware ESP G-force from [frame.espAcceleration]
+     * when available, falls back to GPS-derived [GForce] via [processGForce].
+     * Call this from TelemetryService instead of processGForce() directly.
+     */
+    fun updateFromCANFrame(frame: CANFrame, fallback: GForce) {
+        val esp = frame.espAcceleration
+        if (esp != null) {
+            processGForce(GForce(esp.lateralG, esp.longitudinalG, frame.timestamp))
+        } else {
+            processGForce(fallback)
+        }
+    }
 
     /**
      * Process a [GForce] sample.  Called at the CAN frame rate (~2 Hz from

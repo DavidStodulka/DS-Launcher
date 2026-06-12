@@ -302,6 +302,36 @@ class OBDConnection @Inject constructor(
         cmd.contains("010D", ignoreCase = true)       -> "41 0D 64"
         // OBD-II coolant temperature (90 °C → byte = 90+40=130 = 0x82)
         cmd.contains("0105", ignoreCase = true)       -> "41 05 82"
+        // Mode 22 VAG injector correction (±0 mg/stroke = healthy)
+        cmd.contains("22F43C", ignoreCase = true) || cmd.contains("22 F4 3C", ignoreCase = true) -> "62 F4 3C 00"
+        cmd.contains("22F43D", ignoreCase = true) || cmd.contains("22 F4 3D", ignoreCase = true) -> "62 F4 3D 01"
+        cmd.contains("22F43E", ignoreCase = true) || cmd.contains("22 F4 3E", ignoreCase = true) -> "62 F4 3E FF"  // -1
+        cmd.contains("22F43F", ignoreCase = true) || cmd.contains("22 F4 3F", ignoreCase = true) -> "62 F4 3F 00"
+        // EGT sensors (mock ~400 °C = 0x0190)
+        cmd.contains("22F447", ignoreCase = true) || cmd.contains("22 F4 47", ignoreCase = true) -> "62 F4 47 01 90"
+        cmd.contains("22F448", ignoreCase = true) || cmd.contains("22 F4 48", ignoreCase = true) -> "62 F4 48 01 A0"
+        cmd.contains("22F44F", ignoreCase = true) || cmd.contains("22 F4 4F", ignoreCase = true) -> "NO DATA"
+        cmd.contains("22F450", ignoreCase = true) || cmd.contains("22 F4 50", ignoreCase = true) -> "NO DATA"
+        // VNT position (actual=target=50%)
+        cmd.contains("22F409", ignoreCase = true) || cmd.contains("22 F4 09", ignoreCase = true) -> "62 F4 09 80"
+        cmd.contains("22F40A", ignoreCase = true) || cmd.contains("22 F4 0A", ignoreCase = true) -> "62 F4 0A 80"
+        // EGR position (0%)
+        cmd.contains("22F412", ignoreCase = true) || cmd.contains("22 F4 12", ignoreCase = true) -> "62 F4 12 00"
+        cmd.contains("22F413", ignoreCase = true) || cmd.contains("22 F4 13", ignoreCase = true) -> "62 F4 13 00"
+        // Swirl (100% open)
+        cmd.contains("22F41B", ignoreCase = true) || cmd.contains("22 F4 1B", ignoreCase = true) -> "62 F4 1B FF"
+        // DPF thermal (mock 320°C up / 350°C down = 0x0140 / 0x015E)
+        cmd.contains("22F460", ignoreCase = true) || cmd.contains("22 F4 60", ignoreCase = true) -> "62 F4 60 01 40"
+        cmd.contains("22F461", ignoreCase = true) || cmd.contains("22 F4 61", ignoreCase = true) -> "62 F4 61 01 5E"
+        // Rail pressure (mock 350 bar = 35000 = 0x88B8, /100 = 350)
+        cmd.contains("22F402", ignoreCase = true) || cmd.contains("22 F4 02", ignoreCase = true) -> "62 F4 02 88 B8"
+        // Glow plugs (~300 mΩ = raw 30)
+        cmd.contains("22F4C0", ignoreCase = true) || cmd.contains("22 F4 C0", ignoreCase = true) -> "62 F4 C0 1E"
+        cmd.contains("22F4C1", ignoreCase = true) || cmd.contains("22 F4 C1", ignoreCase = true) -> "62 F4 C1 1E"
+        cmd.contains("22F4C2", ignoreCase = true) || cmd.contains("22 F4 C2", ignoreCase = true) -> "62 F4 C2 1F"
+        cmd.contains("22F4C3", ignoreCase = true) || cmd.contains("22 F4 C3", ignoreCase = true) -> "62 F4 C3 1E"
+        // Mode 01 fuel level (50% = 0x7F → 0x7F/2.55 ≈ 50%)
+        cmd.contains("012F", ignoreCase = true) || cmd.contains("01 2F", ignoreCase = true)      -> "41 2F 7F"
         // UDS ReadDataByIdentifier — generic positive response
         cmd.contains("22", ignoreCase = true)         -> "62 00 00 00"
         // UDS WriteDataByIdentifier — positive response (0x68 = 0x40 | 0x28)
