@@ -18,6 +18,17 @@ class OfflineCommandMatcher @Inject constructor() {
     private data class Rule(val keywords: List<String>, val builder: () -> VoiceCommand)
 
     private val rules: List<Rule> = listOf(
+        // ── App launch (before media — "spusť spotify" contains "pusť") ──────
+        Rule(listOf("spotify")) {
+            VoiceCommand.AppLaunch("spotify")
+        },
+        Rule(listOf("youtube")) {
+            VoiceCommand.AppLaunch("youtube")
+        },
+        Rule(listOf("waze", "naviguj", "navigate")) {
+            VoiceCommand.AppLaunch("waze")
+        },
+
         // ── Media controls ────────────────────────────────────────────────────
         Rule(listOf("zastav", "stop", "pause", "pauza")) {
             VoiceCommand.Media("pause")
@@ -67,17 +78,6 @@ class OfflineCommandMatcher @Inject constructor() {
         },
         Rule(listOf("auto eq", "automatické eq", "adaptivní")) {
             VoiceCommand.AutoEQ(true)
-        },
-
-        // ── App launch ────────────────────────────────────────────────────────
-        Rule(listOf("spotify")) {
-            VoiceCommand.AppLaunch("spotify")
-        },
-        Rule(listOf("youtube")) {
-            VoiceCommand.AppLaunch("youtube")
-        },
-        Rule(listOf("waze", "naviguj", "navigate")) {
-            VoiceCommand.AppLaunch("waze")
         },
 
         // ── Car info ──────────────────────────────────────────────────────────
