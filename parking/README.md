@@ -22,6 +22,10 @@ zařízení použij v menu **Export** a na druhém telefonu **Import**.
 
 ## Spuštění
 
+- **Jeden soubor (nejjednodušší):** `parkoviste.html` je kompletní appka v jednom
+  souboru — styl, logika, data i ikona uvnitř. Stačí ho otevřít v prohlížeči
+  (i v telefonu), poslat e-mailem nebo nahrát kamkoli. Žádný server, žádné další
+  soubory. *(Generuje se z ostatních souborů příkazem `node build-single.js`.)*
 - **Lokálně:** otevři `index.html` v prohlížeči. (Pro plnou funkci PWA a service
   workeru spusť přes jednoduchý server, např. `python3 -m http.server` a otevři
   `http://localhost:8000/`.)

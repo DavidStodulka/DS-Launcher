@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+<meta name="theme-color" content="#0f1729" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Parkoviště" />
+<link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiUGFya292acWhdMSbIOKAlCBzcHLDoXZhIHZvemlkZWwiLCJzaG9ydF9uYW1lIjoiUGFya292acWhdMSbIiwiZGVzY3JpcHRpb24iOiJTcHLDoXZhIHBhcmtvdsOhbsOtIHZvemlkZWwgdiDFmWFkw6FjaC4iLCJzdGFydF91cmwiOiIuIiwic2NvcGUiOiIuIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJvcmllbnRhdGlvbiI6InBvcnRyYWl0IiwiYmFja2dyb3VuZF9jb2xvciI6IiMwZjE3MjkiLCJ0aGVtZV9jb2xvciI6IiMwZjE3MjkiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUhacFpYZENiM2c5SWpBZ01DQTFNVElnTlRFeUlqNEtJQ0E4WkdWbWN6NEtJQ0FnSUR4c2FXNWxZWEpIY21Ga2FXVnVkQ0JwWkQwaVp5SWdlREU5SWpBaUlIa3hQU0l3SWlCNE1qMGlNU0lnZVRJOUlqRWlQZ29nSUNBZ0lDQThjM1J2Y0NCdlptWnpaWFE5SWpBaUlITjBiM0F0WTI5c2IzSTlJaU0wWmpsa1ptWWlMejRLSUNBZ0lDQWdQSE4wYjNBZ2IyWm1jMlYwUFNJeElpQnpkRzl3TFdOdmJHOXlQU0lqTjJNMVkyWm1JaTgrQ2lBZ0lDQThMMnhwYm1WaGNrZHlZV1JwWlc1MFBnb2dJRHd2WkdWbWN6NEtJQ0E4Y21WamRDQjNhV1IwYUQwaU5URXlJaUJvWldsbmFIUTlJalV4TWlJZ2NuZzlJakV4TWlJZ1ptbHNiRDBpZFhKc0tDTm5LU0l2UGdvZ0lEeDBaWGgwSUhnOUlqSTFOaUlnZVQwaU16VTJJaUJtYjI1MExXWmhiV2xzZVQwaVFYSnBZV3dzSUhOaGJuTXRjMlZ5YVdZaUlHWnZiblF0YzJsNlpUMGlNekF3SWlCbWIyNTBMWGRsYVdkb2REMGlPREF3SWdvZ0lDQWdJQ0FnSUhSbGVIUXRZVzVqYUc5eVBTSnRhV1JrYkdVaUlHWnBiR3c5SWlObVptWm1abVlpUGxBOEwzUmxlSFErQ2p3dmMzWm5QZ289Iiwic2l6ZXMiOiI1MTJ4NTEyIiwidHlwZSI6ImltYWdlL3N2Zyt4bWwiLCJwdXJwb3NlIjoiYW55IG1hc2thYmxlIn1dfQ==" />
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiM0ZjlkZmYiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjN2M1Y2ZmIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMiIgZmlsbD0idXJsKCNnKSIvPgogIDx0ZXh0IHg9IjI1NiIgeT0iMzU2IiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMzAwIiBmb250LXdlaWdodD0iODAwIgogICAgICAgIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmZmZmZmYiPlA8L3RleHQ+Cjwvc3ZnPgo=" />
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiM0ZjlkZmYiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjN2M1Y2ZmIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMiIgZmlsbD0idXJsKCNnKSIvPgogIDx0ZXh0IHg9IjI1NiIgeT0iMzU2IiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMzAwIiBmb250LXdlaWdodD0iODAwIgogICAgICAgIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmZmZmZmYiPlA8L3RleHQ+Cjwvc3ZnPgo=" type="image/svg+xml" />
+<title>Parkoviště — správa vozidel</title>
+<style>
+  :root {
+    --bg: #0f1729;
+    --bg2: #16203a;
+    --panel: #1c2945;
+    --panel2: #243355;
+    --line: #2e3f63;
+    --text: #e8edf7;
+    --muted: #93a1c0;
+    --accent: #4f9dff;
+    --parked: #3a4a6b;
+    --workshop: #f2a33c;
+    --received: #36c98d;
+    --danger: #ef5d6b;
+    --radius: 14px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+    background: linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    font-size: 15px;
+  }
+
+  /* ---------- Header ---------- */
+  header {
+    position: sticky; top: 0; z-index: 30;
+    padding: calc(var(--safe-top) + 10px) 14px 10px;
+    background: rgba(15,23,41,.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .titlebar { display: flex; align-items: center; gap: 10px; }
+  .titlebar h1 { font-size: 18px; margin: 0; flex: 1; font-weight: 700; letter-spacing: .2px; }
+  .logo {
+    width: 34px; height: 34px; border-radius: 9px;
+    background: linear-gradient(135deg, var(--accent), #7c5cff);
+    display: grid; place-items: center; font-size: 18px;
+    box-shadow: 0 4px 14px rgba(79,157,255,.35);
+  }
+  .icon-btn {
+    width: 40px; height: 40px; border-radius: 11px; border: 1px solid var(--line);
+    background: var(--panel); color: var(--text); font-size: 18px;
+    display: grid; place-items: center; cursor: pointer;
+  }
+  .icon-btn:active { transform: scale(.94); }
+
+  .search {
+    margin-top: 10px; display: flex; align-items: center; gap: 8px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 9px 12px;
+  }
+  .search input {
+    border: 0; outline: 0; background: transparent; color: var(--text);
+    width: 100%; font-size: 16px;
+  }
+  .search span { color: var(--muted); font-size: 16px; }
+
+  /* ---------- Stats / filters ---------- */
+  .stats {
+    display: flex; gap: 8px; margin-top: 10px; overflow-x: auto;
+    scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  }
+  .stats::-webkit-scrollbar { display: none; }
+  .chip {
+    flex: 0 0 auto; padding: 7px 12px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--panel);
+    color: var(--muted); font-size: 13px; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; gap: 6px; white-space: nowrap;
+  }
+  .chip .dot { width: 9px; height: 9px; border-radius: 50%; }
+  .chip b { color: var(--text); }
+  .chip.active { border-color: var(--accent); background: var(--panel2); color: var(--text); }
+
+  /* ---------- Content ---------- */
+  main { padding: 14px 12px 120px; max-width: 1100px; margin: 0 auto; }
+
+  .side-tabs {
+    display: flex; gap: 8px; margin-bottom: 14px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 4px;
+  }
+  .side-tabs button {
+    flex: 1; padding: 10px; border: 0; border-radius: 9px; background: transparent;
+    color: var(--muted); font-size: 14px; font-weight: 700; cursor: pointer;
+  }
+  .side-tabs button.active { background: var(--accent); color: #fff; box-shadow: 0 3px 10px rgba(79,157,255,.4); }
+
+  .row-card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: var(--radius); margin-bottom: 14px; overflow: hidden;
+  }
+  .row-head {
+    display: flex; align-items: center; gap: 10px; padding: 11px 14px;
+    border-bottom: 1px solid var(--line); background: var(--bg2);
+  }
+  .row-head .rnum {
+    min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px;
+    background: var(--panel2); color: var(--text); font-weight: 800; font-size: 14px;
+    display: grid; place-items: center;
+  }
+  .row-head .rtitle { flex: 1; font-weight: 700; font-size: 15px; }
+  .row-head .rcount { color: var(--muted); font-size: 12px; font-weight: 600; }
+  .row-head .row-del {
+    border: 0; background: transparent; color: var(--muted); font-size: 17px; cursor: pointer;
+    width: 30px; height: 30px; border-radius: 8px;
+  }
+  .row-head .row-del:active { background: var(--panel2); }
+
+  .tiles {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+    gap: 9px; padding: 12px;
+  }
+  @media (min-width: 520px) {
+    .tiles { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+  }
+
+  .tile {
+    position: relative; aspect-ratio: 1 / 1; border-radius: 12px; cursor: pointer;
+    background: var(--parked); border: 1px solid rgba(255,255,255,.08);
+    padding: 9px; display: flex; flex-direction: column; justify-content: space-between;
+    overflow: hidden; transition: transform .08s;
+  }
+  .tile:active { transform: scale(.96); }
+  .tile.workshop { background: linear-gradient(150deg, #6b4a16, #b9802a); }
+  .tile.received { background: linear-gradient(150deg, #145c43, #1f9468); }
+  .tile .stat-badge {
+    position: absolute; top: 7px; right: 7px; font-size: 10px; font-weight: 800;
+    padding: 2px 6px; border-radius: 6px; background: rgba(0,0,0,.35); letter-spacing: .3px;
+  }
+  .tile .model { font-size: 12.5px; font-weight: 700; line-height: 1.15; padding-right: 30px;
+    overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .tile .vin { font-size: 19px; font-weight: 800; letter-spacing: .5px; }
+  .tile .key { font-size: 11px; color: rgba(255,255,255,.85); font-weight: 600; }
+  .tile .key.nokey { color: #ffd0d0; }
+  .tile .flags { position: absolute; bottom: 7px; right: 8px; font-size: 13px; }
+  .tile .brand-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
+
+  .add-tile {
+    aspect-ratio: 1 / 1; border-radius: 12px; cursor: pointer;
+    border: 2px dashed var(--line); background: transparent; color: var(--muted);
+    display: grid; place-items: center; font-size: 30px; font-weight: 300;
+  }
+  .add-tile:active { background: var(--panel2); }
+
+  .add-row {
+    width: 100%; padding: 14px; border: 2px dashed var(--line); border-radius: var(--radius);
+    background: transparent; color: var(--muted); font-size: 15px; font-weight: 700; cursor: pointer;
+  }
+  .add-row:active { background: var(--panel); }
+
+  .empty { text-align: center; color: var(--muted); padding: 40px 20px; }
+
+  /* ---------- Modal / sheet ---------- */
+  .overlay {
+    position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.55);
+    backdrop-filter: blur(3px); display: none; align-items: flex-end; justify-content: center;
+  }
+  .overlay.open { display: flex; }
+  .sheet {
+    width: 100%; max-width: 560px; background: var(--bg2);
+    border-radius: 20px 20px 0 0; border: 1px solid var(--line); border-bottom: 0;
+    padding: 10px 18px calc(20px + var(--safe-bottom));
+    max-height: 92vh; overflow-y: auto; animation: slideUp .22s ease;
+  }
+  @media (min-width: 560px) {
+    .overlay { align-items: center; }
+    .sheet { border-radius: 20px; margin: 20px; }
+  }
+  @keyframes slideUp { from { transform: translateY(40px); opacity: .4; } to { transform: translateY(0); opacity: 1; } }
+  .grabber { width: 42px; height: 5px; background: var(--line); border-radius: 99px; margin: 4px auto 14px; }
+  .sheet h2 { margin: 0 0 4px; font-size: 19px; }
+  .sheet .sub { color: var(--muted); font-size: 13px; margin-bottom: 16px; }
+
+  .field { margin-bottom: 13px; }
+  .field label { display: block; font-size: 12px; color: var(--muted); font-weight: 700;
+    text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+  .field input, .field select, .field textarea {
+    width: 100%; padding: 12px 13px; font-size: 16px; color: var(--text);
+    background: var(--panel); border: 1px solid var(--line); border-radius: 11px; outline: 0;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); }
+  .field textarea { resize: vertical; min-height: 56px; }
+  .row2 { display: flex; gap: 10px; }
+  .row2 .field { flex: 1; }
+
+  .status-btns { display: flex; gap: 9px; margin: 6px 0 16px; }
+  .status-btns button {
+    flex: 1; padding: 14px 8px; border-radius: 12px; border: 2px solid var(--line);
+    background: var(--panel); color: var(--text); font-weight: 800; font-size: 14px; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+  }
+  .status-btns button .ic { font-size: 20px; }
+  .status-btns button:active { transform: scale(.96); }
+  .status-btns button.sel-workshop { border-color: var(--workshop); background: rgba(242,163,60,.16); }
+  .status-btns button.sel-received { border-color: var(--received); background: rgba(54,201,141,.16); }
+  .status-btns button.sel-parked { border-color: var(--accent); background: rgba(79,157,255,.16); }
+
+  .sheet-actions { display: flex; gap: 10px; margin-top: 4px; }
+  .btn {
+    flex: 1; padding: 14px; border-radius: 12px; border: 0; font-size: 15px; font-weight: 800;
+    cursor: pointer; color: #fff;
+  }
+  .btn-primary { background: var(--accent); }
+  .btn-ghost { background: var(--panel); border: 1px solid var(--line); color: var(--text); }
+  .btn-danger { background: transparent; border: 1px solid var(--danger); color: var(--danger); flex: 0 0 auto; width: 52px; }
+  .btn:active { transform: scale(.97); }
+
+  /* menu sheet */
+  .menu-item {
+    display: flex; align-items: center; gap: 14px; padding: 15px 6px; cursor: pointer;
+    border-bottom: 1px solid var(--line); font-size: 16px;
+  }
+  .menu-item:last-child { border-bottom: 0; }
+  .menu-item .mi-ic { font-size: 22px; width: 26px; text-align: center; }
+  .menu-item .mi-sub { color: var(--muted); font-size: 12px; }
+  .menu-item.danger { color: var(--danger); }
+
+  /* toast */
+  .toast {
+    position: fixed; left: 50%; bottom: calc(24px + var(--safe-bottom)); transform: translateX(-50%) translateY(20px);
+    background: #fff; color: #111; padding: 11px 18px; border-radius: 12px; font-weight: 700; font-size: 14px;
+    box-shadow: 0 8px 30px rgba(0,0,0,.4); opacity: 0; pointer-events: none; transition: .25s; z-index: 100;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .legend { display: flex; gap: 14px; justify-content: center; margin: 2px 0 16px; flex-wrap: wrap; }
+  .legend span { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+  .legend i { width: 12px; height: 12px; border-radius: 4px; display: inline-block; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="titlebar">
+    <div class="logo">🅿️</div>
+    <h1>Parkoviště</h1>
+    <button class="icon-btn" id="btnSide" title="Strana">⇄</button>
+    <button class="icon-btn" id="btnMenu" title="Menu">☰</button>
+  </div>
+  <div class="search">
+    <span>🔎</span>
+    <input id="search" placeholder="Hledat model, VIN, klíč…" autocomplete="off" />
+  </div>
+  <div class="stats" id="stats"></div>
+</header>
+
+<main>
+  <div class="side-tabs" id="sideTabs">
+    <button data-side="left" class="active">◀ Levá strana</button>
+    <button data-side="right">Pravá strana ▶</button>
+  </div>
+  <div id="rows"></div>
+</main>
+
+<!-- Vehicle detail sheet -->
+<div class="overlay" id="vehOverlay">
+  <div class="sheet" id="vehSheet">
+    <div class="grabber"></div>
+    <h2 id="vehTitle">Vozidlo</h2>
+    <div class="sub" id="vehSub"></div>
+
+    <div class="status-btns" id="statusBtns">
+      <button data-status="parked"><span class="ic">🅿️</span>Zaparkováno</button>
+      <button data-status="workshop"><span class="ic">🔧</span>Dílna</button>
+      <button data-status="received"><span class="ic">🆕</span>Nově přijato</button>
+    </div>
+
+    <div class="field">
+      <label>Model</label>
+      <input id="fModel" placeholder="např. Kodiaq sportline" />
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>VIN / č. vozu</label>
+        <input id="fVin" inputmode="numeric" placeholder="45853" />
+      </div>
+      <div class="field">
+        <label>Číslo klíče</label>
+        <input id="fKey" placeholder="22" />
+      </div>
+    </div>
+    <div class="field">
+      <label>Poznámka</label>
+      <textarea id="fNote" placeholder="Poznámka, např. chybí klíč, focení…"></textarea>
+    </div>
+
+    <div class="sheet-actions">
+      <button class="btn btn-danger" id="vehDelete" title="Smazat">🗑</button>
+      <button class="btn btn-ghost" id="vehCancel">Zavřít</button>
+      <button class="btn btn-primary" id="vehSave">Uložit</button>
+    </div>
+  </div>
+</div>
+
+<!-- Menu sheet -->
+<div class="overlay" id="menuOverlay">
+  <div class="sheet">
+    <div class="grabber"></div>
+    <h2>Menu</h2>
+    <div class="sub">Data jsou uložena v tomto telefonu. Pro zálohu nebo přenos použij Export.</div>
+    <div class="legend">
+      <span><i style="background:var(--parked)"></i> Zaparkováno</span>
+      <span><i style="background:var(--workshop)"></i> Dílna</span>
+      <span><i style="background:var(--received)"></i> Nově přijato</span>
+    </div>
+    <div class="menu-item" id="miExport"><span class="mi-ic">📤</span><div><div>Exportovat data</div><div class="mi-sub">Stáhne zálohu (.json)</div></div></div>
+    <div class="menu-item" id="miImport"><span class="mi-ic">📥</span><div><div>Importovat data</div><div class="mi-sub">Načte zálohu z .json souboru</div></div></div>
+    <div class="menu-item" id="miShare"><span class="mi-ic">🔗</span><div><div>Sdílet / zálohovat</div><div class="mi-sub">Odeslat data přes telefon</div></div></div>
+    <div class="menu-item danger" id="miReset"><span class="mi-ic">♻️</span><div><div>Obnovit původní seznam</div><div class="mi-sub">Vrátí vozy z původního TXT</div></div></div>
+    <input type="file" id="importFile" accept="application/json,.json" hidden />
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/*
+ * Výchozí seznam vozidel — vygenerováno ze souboru "Seznam aut.txt".
+ * side: 'left' = Levá strana, 'right' = Pravá strana
+ * row: číslo řady, model, vin (č. vozu), key (číslo klíče), note (poznámka)
+ * Vlaječky z TXT: 📸 = focení, ❗️/! = pozor — uloženo do poznámky.
+ */
+window.SEED_DATA = [
+  // ───────────── LEVÁ STRANA ─────────────
+  { side:'left', row:1,  model:'Scala',                vin:'45853', key:'',    note:'' },
+  { side:'left', row:1,  model:'Karoq sportline',      vin:'20818', key:'',    note:'' },
+
+  { side:'left', row:2,  model:'Kodiaq sportline',     vin:'20181', key:'22',  note:'' },
+  { side:'left', row:2,  model:'Kodiaq sportline',     vin:'11768', key:'',    note:'Chybí číslo klíče' },
+
+  { side:'left', row:3,  model:'Scala dynamic',        vin:'43026', key:'',    note:'' },
+  { side:'left', row:3,  model:'Kodiaq ex',            vin:'27869', key:'',    note:'' },
+
+  { side:'left', row:8,  model:'Scala dynamic',        vin:'45864', key:'',    note:'' },
+
+  { side:'left', row:9,  model:'Scala monte carlo',    vin:'45808', key:'',    note:'' },
+
+  { side:'left', row:10, model:'Kodiaq sportline',     vin:'27772', key:'112', note:'' },
+  { side:'left', row:10, model:'Kodiaq ex',            vin:'28067', key:'123', note:'' },
+  { side:'left', row:10, model:'Kodiaq rs',            vin:'27961', key:'110', note:'' },
+  { side:'left', row:10, model:'Kodiaq ex',            vin:'27803', key:'101', note:'' },
+
+  // ───────────── PRAVÁ STRANA ─────────────
+  { side:'right', row:1,  model:'Scala',               vin:'44404', key:'63',  note:'' },
+  { side:'right', row:1,  model:'Fabia',               vin:'24817', key:'6',   note:'' },
+  { side:'right', row:1,  model:'Karoq bílý',          vin:'76926', key:'56',  note:'' },
+  { side:'right', row:1,  model:'Fabia',               vin:'10179', key:'75',  note:'📸 Focení' },
+
+  { side:'right', row:2,  model:'Kodiaq ex',           vin:'27843', key:'102', note:'' },
+  { side:'right', row:2,  model:'Kodiaq ex',           vin:'27857', key:'111', note:'' },
+  { side:'right', row:2,  model:'Kamiq monte carlo',   vin:'44921', key:'26',  note:'' },
+  { side:'right', row:2,  model:'Kamiq monte carlo',   vin:'44686', key:'62',  note:'' },
+
+  { side:'right', row:3,  model:'Kamiq monte carlo',   vin:'44728', key:'120', note:'' },
+  { side:'right', row:3,  model:'Kamiq monte carlo',   vin:'44771', key:'92',  note:'' },
+  { side:'right', row:3,  model:'Fabia',               vin:'29033', key:'7',   note:'' },
+  { side:'right', row:3,  model:'Karoq sportline',     vin:'75797', key:'37',  note:'' },
+
+  { side:'right', row:4,  model:'Kodiaq sportline',    vin:'11313', key:'34',  note:'' },
+  { side:'right', row:4,  model:'Karoq sportline',     vin:'76398', key:'55',  note:'' },
+  { side:'right', row:4,  model:'Karoq sportline',     vin:'79901', key:'97',  note:'' },
+  { side:'right', row:4,  model:'Karoq sportline',     vin:'78809', key:'74',  note:'' },
+
+  { side:'right', row:5,  model:'Fabia monte carlo',   vin:'29319', key:'42',  note:'' },
+  { side:'right', row:5,  model:'Karoq sportline',     vin:'67303', key:'48',  note:'' },
+  { side:'right', row:5,  model:'Karoq sportline',     vin:'67838', key:'78',  note:'' },
+  { side:'right', row:5,  model:'Karoq sportline',     vin:'77808', key:'50',  note:'' },
+
+  { side:'right', row:6,  model:'Fabia monte carlo',   vin:'11735', key:'79',  note:'' },
+  { side:'right', row:6,  model:'Scala',               vin:'39737', key:'43',  note:'' },
+  { side:'right', row:6,  model:'Fabia',               vin:'33002', key:'119', note:'' },
+  { side:'right', row:6,  model:'Fabia',               vin:'27982', key:'',    note:'❗️ Pozor' },
+
+  { side:'right', row:7,  model:'Kamiq dynamic',       vin:'45366', key:'67',  note:'' },
+  { side:'right', row:7,  model:'Kamiq',               vin:'45527', key:'35',  note:'' },
+  { side:'right', row:7,  model:'Kamiq',               vin:'40737', key:'43',  note:'📸 Focení' },
+  { side:'right', row:7,  model:'Kamiq',               vin:'40097', key:'14',  note:'📸 Focení' },
+
+  { side:'right', row:8,  model:'Kamiq',               vin:'41399', key:'72',  note:'❗️ Pozor' },
+  { side:'right', row:8,  model:'Fabia monte carlo',   vin:'29974', key:'70',  note:'' },
+  { side:'right', row:8,  model:'Kamiq',               vin:'40031', key:'65',  note:'📸 Focení' },
+  { side:'right', row:8,  model:'Fabia monte carlo',   vin:'12091', key:'33',  note:'' },
+
+  { side:'right', row:9,  model:'Fabia monte carlo',   vin:'30221', key:'51',  note:'' },
+  { side:'right', row:9,  model:'Fabia monte carlo',   vin:'29690', key:'45',  note:'' },
+  { side:'right', row:9,  model:'Karoq sportline',     vin:'78310', key:'40',  note:'' },
+  { side:'right', row:9,  model:'Karoq sportline',     vin:'68351', key:'10',  note:'' },
+
+  { side:'right', row:10, model:'Kamiq monte carlo',   vin:'44715', key:'132', note:'' },
+  { side:'right', row:10, model:'Kamiq monte carlo',   vin:'42262', key:'87',  note:'' },
+  { side:'right', row:10, model:'Kodiaq sportline',    vin:'10883', key:'16',  note:'' },
+  { side:'right', row:10, model:'Kodiaq ex',           vin:'12074', key:'28',  note:'' },
+
+  { side:'right', row:11, model:'Kamiq monte carlo',   vin:'44899', key:'137', note:'' },
+  { side:'right', row:11, model:'Kamiq monte carlo',   vin:'44748', key:'116', note:'' },
+  { side:'right', row:11, model:'Octavia',             vin:'20910', key:'20',  note:'' },
+  { side:'right', row:11, model:'Fabia monte carlo',   vin:'30078', key:'52',  note:'' },
+
+  { side:'right', row:12, model:'Fabia monte carlo',   vin:'29890', key:'13',  note:'' },
+  { side:'right', row:12, model:'Fabia monte carlo',   vin:'29851', key:'3',   note:'' },
+  { side:'right', row:12, model:'Enyaq',               vin:'20373', key:'8',   note:'' },
+
+  { side:'right', row:13, model:'Kamiq monte carlo',   vin:'43796', key:'9',   note:'' },
+  { side:'right', row:13, model:'Kamiq monte carlo',   vin:'43866', key:'5',   note:'' },
+
+  { side:'right', row:14, model:'Kodiaq sportline',    vin:'27488', key:'6',   note:'' },
+  { side:'right', row:14, model:'Kodiaq ex',           vin:'27806', key:'94',  note:'' },
+  { side:'right', row:14, model:'Kodiaq sportline',    vin:'11928', key:'117', note:'' },
+];
+
+</script>
+<script>
+/* Parkoviště — správa vozidel. Čistý JS, bez frameworků. Data v localStorage. */
+(function () {
+  'use strict';
+
+  var STORAGE_KEY = 'parking-app-v1';
+  var BRAND_COLORS = {
+    scala: '#4f9dff', kodiaq: '#7c5cff', kamiq: '#36c98d',
+    karoq: '#f2a33c', fabia: '#ef5d6b', octavia: '#23c4d6', enyaq: '#a0e84f'
+  };
+  var STATUS_LABEL = { parked: '', workshop: 'DÍLNA', received: 'NOVÝ' };
+
+  var state = { vehicles: [], side: 'left', filter: 'all', query: '' };
+  var editingId = null;
+
+  // ---------- Persistence ----------
+  function uid() { return 'v' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) { state.vehicles = JSON.parse(raw); return; }
+    } catch (e) {}
+    seedFromDefault();
+  }
+
+  function seedFromDefault() {
+    state.vehicles = (window.SEED_DATA || []).map(function (v) {
+      return { id: uid(), side: v.side, row: v.row, model: v.model, vin: v.vin,
+               key: v.key || '', note: v.note || '', status: 'parked' };
+    });
+    save();
+  }
+
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.vehicles)); } catch (e) {}
+  }
+
+  // ---------- Helpers ----------
+  function brandColor(model) {
+    var m = (model || '').toLowerCase();
+    for (var k in BRAND_COLORS) { if (m.indexOf(k) === 0 || m.indexOf(k) > -1) return BRAND_COLORS[k]; }
+    return '#5a6b8c';
+  }
+  function rowsForSide(side) {
+    var nums = {};
+    state.vehicles.forEach(function (v) { if (v.side === side) nums[v.row] = true; });
+    return Object.keys(nums).map(Number).sort(function (a, b) { return a - b; });
+  }
+  function matchesFilter(v) {
+    if (state.filter !== 'all' && v.status !== state.filter) return false;
+    if (state.query) {
+      var q = state.query.toLowerCase();
+      var hay = (v.model + ' ' + v.vin + ' ' + v.key + ' ' + v.note).toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  }
+  function flagsFor(v) {
+    var s = (v.note || '');
+    var out = '';
+    if (s.indexOf('📸') > -1) out += '📸';
+    if (s.indexOf('❗') > -1 || s.indexOf('!') > -1) out += '⚠️';
+    return out;
+  }
+
+  // ---------- Rendering ----------
+  function render() {
+    renderStats();
+    renderRows();
+  }
+
+  function renderStats() {
+    var c = { all: 0, parked: 0, workshop: 0, received: 0 };
+    state.vehicles.forEach(function (v) { c.all++; c[v.status]++; });
+    var defs = [
+      { key: 'all', label: 'Vše', color: '#8ea2c8' },
+      { key: 'parked', label: 'Zaparkováno', color: getCss('--parked') },
+      { key: 'workshop', label: 'Dílna', color: getCss('--workshop') },
+      { key: 'received', label: 'Nově přijato', color: getCss('--received') }
+    ];
+    var html = defs.map(function (d) {
+      return '<div class="chip ' + (state.filter === d.key ? 'active' : '') + '" data-filter="' + d.key + '">' +
+        '<span class="dot" style="background:' + d.color + '"></span>' + d.label + ' <b>' + c[d.key] + '</b></div>';
+    }).join('');
+    document.getElementById('stats').innerHTML = html;
+  }
+
+  function getCss(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#888';
+  }
+
+  function renderRows() {
+    var container = document.getElementById('rows');
+    var rows = rowsForSide(state.side);
+    var html = '';
+
+    rows.forEach(function (rn) {
+      var all = state.vehicles.filter(function (v) { return v.side === state.side && v.row === rn; });
+      var vis = all.filter(matchesFilter);
+      if ((state.query || state.filter !== 'all') && vis.length === 0) return; // skip empty rows when filtering
+
+      html += '<div class="row-card">';
+      html += '<div class="row-head">' +
+        '<span class="rnum">' + rn + '</span>' +
+        '<span class="rtitle">Řada ' + rn + '</span>' +
+        '<span class="rcount">' + all.length + ' voz' + plur(all.length) + '</span>' +
+        '<button class="row-del" data-delrow="' + rn + '" title="Smazat řadu">🗑</button>' +
+      '</div>';
+      html += '<div class="tiles">';
+      vis.forEach(function (v) { html += tileHTML(v); });
+      html += '<button class="add-tile" data-addto="' + rn + '" title="Přidat vozidlo">+</button>';
+      html += '</div></div>';
+    });
+
+    if (rows.length === 0) {
+      html += '<div class="empty">Žádné řady na této straně.<br>Přidej první řadu níže.</div>';
+    }
+    html += '<button class="add-row" id="addRow">+ Přidat řadu</button>';
+    container.innerHTML = html;
+  }
+
+  function plur(n) { return n === 1 ? '' : (n >= 2 && n <= 4 ? 'y' : 'ů'); }
+
+  function tileHTML(v) {
+    var cls = 'tile ' + v.status;
+    var keyHtml = v.key
+      ? '<div class="key">🔑 ' + esc(v.key) + '</div>'
+      : '<div class="key nokey">🔑 —</div>';
+    var badge = STATUS_LABEL[v.status] ? '<div class="stat-badge">' + STATUS_LABEL[v.status] + '</div>' : '';
+    var fl = flagsFor(v);
+    return '<div class="' + cls + '" data-id="' + v.id + '">' +
+      '<div class="brand-bar" style="background:' + brandColor(v.model) + '"></div>' +
+      badge +
+      '<div class="model">' + esc(v.model || '—') + '</div>' +
+      '<div>' +
+        '<div class="vin">' + esc(v.vin || '—') + '</div>' +
+        keyHtml +
+      '</div>' +
+      (fl ? '<div class="flags">' + fl + '</div>' : '') +
+    '</div>';
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+
+  // ---------- Vehicle sheet ----------
+  function openVehicle(id) {
+    var v = state.vehicles.find(function (x) { return x.id === id; });
+    if (!v) return;
+    editingId = id;
+    document.getElementById('vehTitle').textContent = v.model || 'Vozidlo';
+    document.getElementById('vehSub').textContent =
+      (state.side === 'left' ? 'Levá strana' : 'Pravá strana') + ' · Řada ' + v.row;
+    document.getElementById('fModel').value = v.model || '';
+    document.getElementById('fVin').value = v.vin || '';
+    document.getElementById('fKey').value = v.key || '';
+    document.getElementById('fNote').value = v.note || '';
+    setStatusButtons(v.status);
+    document.getElementById('vehDelete').style.display = '';
+    openOverlay('vehOverlay');
+  }
+
+  function openNew(rn) {
+    editingId = null;
+    document.getElementById('vehTitle').textContent = 'Nové vozidlo';
+    document.getElementById('vehSub').textContent =
+      (state.side === 'left' ? 'Levá strana' : 'Pravá strana') + ' · Řada ' + rn;
+    document.getElementById('fModel').value = '';
+    document.getElementById('fVin').value = '';
+    document.getElementById('fKey').value = '';
+    document.getElementById('fNote').value = '';
+    setStatusButtons('received'); // nový vůz typicky "nově přijato"
+    document.getElementById('vehDelete').style.display = 'none';
+    document.getElementById('vehSheet').dataset.newrow = rn;
+    openOverlay('vehOverlay');
+  }
+
+  var currentStatus = 'parked';
+  function setStatusButtons(status) {
+    currentStatus = status;
+    var btns = document.querySelectorAll('#statusBtns button');
+    btns.forEach(function (b) {
+      var s = b.getAttribute('data-status');
+      b.className = (s === status) ? 'sel-' + s : '';
+    });
+  }
+
+  function saveVehicle() {
+    var model = document.getElementById('fModel').value.trim();
+    var vin = document.getElementById('fVin').value.trim();
+    var key = document.getElementById('fKey').value.trim();
+    var note = document.getElementById('fNote').value.trim();
+    if (!model && !vin) { toast('Vyplň model nebo VIN'); return; }
+
+    if (editingId) {
+      var v = state.vehicles.find(function (x) { return x.id === editingId; });
+      if (v) { v.model = model; v.vin = vin; v.key = key; v.note = note; v.status = currentStatus; }
+    } else {
+      var rn = parseInt(document.getElementById('vehSheet').dataset.newrow, 10);
+      state.vehicles.push({ id: uid(), side: state.side, row: rn, model: model, vin: vin,
+                            key: key, note: note, status: currentStatus });
+    }
+    save(); render(); closeOverlay('vehOverlay');
+    toast('Uloženo ✓');
+  }
+
+  function deleteVehicle() {
+    if (!editingId) return;
+    if (!confirm('Smazat toto vozidlo?')) return;
+    state.vehicles = state.vehicles.filter(function (x) { return x.id !== editingId; });
+    save(); render(); closeOverlay('vehOverlay');
+    toast('Smazáno');
+  }
+
+  // ---------- Rows ----------
+  function addRow() {
+    var rows = rowsForSide(state.side);
+    var next = rows.length ? Math.max.apply(null, rows) + 1 : 1;
+    var input = prompt('Číslo nové řady:', String(next));
+    if (input === null) return;
+    var rn = parseInt(input, 10);
+    if (isNaN(rn) || rn < 1) { toast('Neplatné číslo řady'); return; }
+    if (rows.indexOf(rn) > -1) { toast('Řada ' + rn + ' už existuje'); return; }
+    openNew(rn); // založíme řadu přidáním prvního vozu
+  }
+
+  function deleteRow(rn) {
+    var inRow = state.vehicles.filter(function (v) { return v.side === state.side && v.row === rn; });
+    if (inRow.length && !confirm('Smazat řadu ' + rn + ' včetně ' + inRow.length + ' vozidel?')) return;
+    state.vehicles = state.vehicles.filter(function (v) { return !(v.side === state.side && v.row === rn); });
+    save(); render(); toast('Řada ' + rn + ' smazána');
+  }
+
+  // ---------- Import / Export ----------
+  function exportData() {
+    var blob = new Blob([JSON.stringify(state.vehicles, null, 2)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'parkoviste-' + new Date().toISOString().slice(0, 10) + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    closeOverlay('menuOverlay'); toast('Záloha stažena');
+  }
+
+  function importData(file) {
+    var reader = new FileReader();
+    reader.onload = function () {
+      try {
+        var data = JSON.parse(reader.result);
+        if (!Array.isArray(data)) throw new Error('bad');
+        state.vehicles = data.map(function (v) {
+          return { id: v.id || uid(), side: v.side === 'left' ? 'left' : 'right',
+                   row: Number(v.row) || 1, model: v.model || '', vin: v.vin || '',
+                   key: v.key || '', note: v.note || '',
+                   status: ['parked', 'workshop', 'received'].indexOf(v.status) > -1 ? v.status : 'parked' };
+        });
+        save(); render(); closeOverlay('menuOverlay'); toast('Data importována ✓');
+      } catch (e) { toast('Soubor se nepodařilo načíst'); }
+    };
+    reader.readAsText(file);
+  }
+
+  function shareData() {
+    var text = JSON.stringify(state.vehicles);
+    if (navigator.share) {
+      var file;
+      try {
+        file = new File([JSON.stringify(state.vehicles, null, 2)],
+          'parkoviste.json', { type: 'application/json' });
+      } catch (e) {}
+      if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], title: 'Parkoviště — záloha' }).catch(function () {});
+      } else {
+        navigator.share({ title: 'Parkoviště', text: text }).catch(function () {});
+      }
+    } else {
+      exportData();
+    }
+    closeOverlay('menuOverlay');
+  }
+
+  function resetData() {
+    if (!confirm('Obnovit původní seznam z TXT? Tím se přepíšou všechny úpravy.')) return;
+    seedFromDefault(); render(); closeOverlay('menuOverlay'); toast('Obnoveno');
+  }
+
+  // ---------- Overlays / toast ----------
+  function openOverlay(id) { document.getElementById(id).classList.add('open'); }
+  function closeOverlay(id) { document.getElementById(id).classList.remove('open'); }
+
+  var toastTimer;
+  function toast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 1800);
+  }
+
+  // ---------- Events ----------
+  function bind() {
+    // side tabs
+    document.getElementById('sideTabs').addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      state.side = b.getAttribute('data-side');
+      document.querySelectorAll('#sideTabs button').forEach(function (x) { x.classList.remove('active'); });
+      b.classList.add('active');
+      renderRows();
+    });
+    document.getElementById('btnSide').addEventListener('click', function () {
+      state.side = state.side === 'left' ? 'right' : 'left';
+      document.querySelectorAll('#sideTabs button').forEach(function (x) {
+        x.classList.toggle('active', x.getAttribute('data-side') === state.side);
+      });
+      renderRows();
+    });
+
+    // stats filter
+    document.getElementById('stats').addEventListener('click', function (e) {
+      var c = e.target.closest('.chip'); if (!c) return;
+      state.filter = c.getAttribute('data-filter');
+      render();
+    });
+
+    // search
+    document.getElementById('search').addEventListener('input', function (e) {
+      state.query = e.target.value.trim();
+      renderRows();
+    });
+
+    // rows container (delegation)
+    document.getElementById('rows').addEventListener('click', function (e) {
+      var tile = e.target.closest('.tile');
+      if (tile) { openVehicle(tile.getAttribute('data-id')); return; }
+      var add = e.target.closest('.add-tile');
+      if (add) { openNew(parseInt(add.getAttribute('data-addto'), 10)); return; }
+      var delr = e.target.closest('[data-delrow]');
+      if (delr) { deleteRow(parseInt(delr.getAttribute('data-delrow'), 10)); return; }
+      if (e.target.closest('#addRow')) { addRow(); return; }
+    });
+
+    // status buttons
+    document.getElementById('statusBtns').addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      setStatusButtons(b.getAttribute('data-status'));
+    });
+
+    // vehicle sheet actions
+    document.getElementById('vehSave').addEventListener('click', saveVehicle);
+    document.getElementById('vehDelete').addEventListener('click', deleteVehicle);
+    document.getElementById('vehCancel').addEventListener('click', function () { closeOverlay('vehOverlay'); });
+
+    // menu
+    document.getElementById('btnMenu').addEventListener('click', function () { openOverlay('menuOverlay'); });
+    document.getElementById('miExport').addEventListener('click', exportData);
+    document.getElementById('miShare').addEventListener('click', shareData);
+    document.getElementById('miReset').addEventListener('click', resetData);
+    document.getElementById('miImport').addEventListener('click', function () {
+      document.getElementById('importFile').click();
+    });
+    document.getElementById('importFile').addEventListener('change', function (e) {
+      if (e.target.files && e.target.files[0]) importData(e.target.files[0]);
+      e.target.value = '';
+    });
+
+    // close overlays on backdrop tap
+    ['vehOverlay', 'menuOverlay'].forEach(function (id) {
+      document.getElementById(id).addEventListener('click', function (e) {
+        if (e.target === this) closeOverlay(id);
+      });
+    });
+  }
+
+  // ---------- Init ----------
+  load();
+  bind();
+  render();
+})();
+
+</script>
+<script>
+  /* single-file build: service worker vynechán */
+</script>
+</body>
+</html>
