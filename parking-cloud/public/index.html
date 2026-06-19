@@ -223,6 +223,8 @@
   .field textarea { resize: vertical; min-height: 56px; }
   .row2 { display: flex; gap: 10px; }
   .row2 .field { flex: 1; }
+  .move-label { font-size: 12px; color: var(--muted); font-weight: 700; text-transform: uppercase;
+    letter-spacing: .5px; margin: 2px 0 10px; border-top: 1px solid var(--line); padding-top: 14px; }
 
   .status-btns { display: flex; flex-wrap: wrap; gap: 9px; margin: 6px 0 16px; }
   .status-btns button {
@@ -294,7 +296,7 @@
     <button data-side="left" class="active">◀ Levá strana</button>
     <button data-side="right">Pravá strana ▶</button>
   </div>
-  <div class="drag-hint" id="dragHint">✋ Podrž a táhni dlaždici pro přesun mezi pozicemi i řadami.</div>
+  <div class="drag-hint" id="dragHint">✋ Podrž a táhni dlaždici pro přesun mezi pozicemi i řadami (u kraje stránka sama roluje). Na druhou stranu přesuneš vůz v jeho detailu.</div>
   <div id="rows"></div>
 </main>
 
@@ -329,6 +331,23 @@
     <div class="field">
       <label>Poznámka</label>
       <textarea id="fNote" placeholder="Poznámka, např. chybí klíč, focení…"></textarea>
+    </div>
+
+    <div id="moveSection">
+      <div class="move-label">↔ Přesunout vůz</div>
+      <div class="row2">
+        <div class="field">
+          <label>Strana</label>
+          <select id="fSide">
+            <option value="left">Levá strana</option>
+            <option value="right">Pravá strana</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Řada</label>
+          <select id="fRow"></select>
+        </div>
+      </div>
     </div>
 
     <div class="sheet-actions">

@@ -157,12 +157,15 @@
     if (!v) return;
     editingId = id;
     document.getElementById('vehTitle').textContent = v.model || 'Vozidlo';
-    document.getElementById('vehSub').textContent = (state.side === 'left' ? 'Levá strana' : 'Pravá strana') + ' · Řada ' + v.row;
+    document.getElementById('vehSub').textContent = (v.side === 'left' ? 'Levá strana' : 'Pravá strana') + ' · Řada ' + v.row;
     document.getElementById('fModel').value = v.model || '';
     document.getElementById('fVin').value = v.vin || '';
     document.getElementById('fKey').value = v.key || '';
     document.getElementById('fNote').value = v.note || '';
     setStatusButtons(v.status);
+    document.getElementById('fSide').value = v.side;
+    populateRowSelect(v.side, v.row);
+    document.getElementById('moveSection').style.display = '';
     document.getElementById('vehDelete').style.display = '';
     openOverlay('vehOverlay');
   }
@@ -176,9 +179,30 @@
     document.getElementById('fKey').value = '';
     document.getElementById('fNote').value = '';
     setStatusButtons('received');
+    document.getElementById('moveSection').style.display = 'none';
     document.getElementById('vehDelete').style.display = 'none';
     document.getElementById('vehSheet').dataset.newrow = rn;
     openOverlay('vehOverlay');
+  }
+
+  // Naplní výběr řady pro danou stranu (existující řady + možnost nové).
+  function populateRowSelect(side, selected) {
+    var rows = rowsForSide(side);
+    var html = rows.map(function (rn) { return '<option value="' + rn + '">Řada ' + rn + '</option>'; }).join('');
+    html += '<option value="__new">+ Nová řada…</option>';
+    var sel = document.getElementById('fRow');
+    sel.innerHTML = html;
+    if (selected != null && rows.indexOf(Number(selected)) > -1) sel.value = String(selected);
+  }
+
+  // Pořadí cílové řady s vozem přidaným na konec (pro /api/move).
+  function destinationOrder(side, row, movedId) {
+    var ids = state.vehicles
+      .filter(function (v) { return v.side === side && v.row === row && v.id !== movedId; })
+      .sort(function (a, b) { return a.pos - b.pos; })
+      .map(function (v) { return v.id; });
+    ids.push(movedId);
+    return ids;
   }
 
   function setStatusButtons(status) {
@@ -198,9 +222,33 @@
       status: currentStatus
     };
     if (!payload.model && !payload.vin) { toast('Vyplň model nebo VIN'); return; }
+
     var req;
     if (editingId) {
-      req = api('/vehicles/' + encodeURIComponent(editingId), { method: 'PUT', body: JSON.stringify(payload) });
+      var id = editingId;
+      var v = state.vehicles.find(function (x) { return x.id === id; });
+      // cíl přesunu z výběru Strana/Řada
+      var destSide = document.getElementById('fSide').value === 'right' ? 'right' : 'left';
+      var rowVal = document.getElementById('fRow').value;
+      var destRow;
+      if (rowVal === '__new') {
+        var rowsThere = rowsForSide(destSide);
+        var next = rowsThere.length ? Math.max.apply(null, rowsThere) + 1 : 1;
+        var input = prompt('Číslo nové řady:', String(next));
+        if (input === null) return;
+        destRow = parseInt(input, 10);
+        if (isNaN(destRow) || destRow < 1) { toast('Neplatné číslo řady'); return; }
+      } else {
+        destRow = parseInt(rowVal, 10);
+      }
+      var needMove = v && (destSide !== v.side || destRow !== v.row);
+      req = api('/vehicles/' + encodeURIComponent(id), { method: 'PUT', body: JSON.stringify(payload) })
+        .then(function () {
+          if (needMove) {
+            var order = destinationOrder(destSide, destRow, id);
+            return api('/move', { method: 'POST', body: JSON.stringify({ side: destSide, row: destRow, order: order }) });
+          }
+        });
     } else {
       payload.side = state.side;
       payload.row = parseInt(document.getElementById('vehSheet').dataset.newrow, 10);
@@ -298,6 +346,8 @@
   function startDrag() {
     if (!drag) return;
     drag.active = true; isDragging = true;
+    drag.lastX = drag.startX; drag.lastY = drag.startY;
+    drag.scrollDir = 0; drag.scrollRaf = null;
     var tile = drag.el, rect = tile.getBoundingClientRect();
     drag.offX = drag.startX - rect.left; drag.offY = drag.startY - rect.top;
     var clone = tile.cloneNode(true);
@@ -331,9 +381,17 @@
     }
     e.preventDefault();
     drag.moved = true;
+    drag.lastX = e.clientX; drag.lastY = e.clientY;
     moveClone(e.clientX, e.clientY);
+    updateDropTarget(e.clientX, e.clientY);
+    updateAutoScroll(e.clientY);
+  }
+
+  // Najde místo pro placeholder pod daným bodem (dlaždice / prázdná část řady).
+  function updateDropTarget(x, y) {
+    if (!drag || !drag.clone) return;
     drag.clone.style.display = 'none';
-    var under = document.elementFromPoint(e.clientX, e.clientY);
+    var under = document.elementFromPoint(x, y);
     drag.clone.style.display = '';
     if (!under) return;
     var overAdd = under.closest('.add-tile');
@@ -343,8 +401,8 @@
     var overTile = under.closest('.tile');
     if (overTile && overTile !== drag.el && overTile.parentNode.classList.contains('tiles')) {
       var r = overTile.getBoundingClientRect();
-      var after = (e.clientY > r.top + r.height / 2) ||
-                  (Math.abs(e.clientY - (r.top + r.height / 2)) < 4 && e.clientX > r.left + r.width / 2);
+      var after = (y > r.top + r.height / 2) ||
+                  (Math.abs(y - (r.top + r.height / 2)) < 4 && x > r.left + r.width / 2);
       overTile.parentNode.insertBefore(drag.placeholder, after ? overTile.nextSibling : overTile);
       return;
     }
@@ -354,6 +412,26 @@
       if (addBtn) overTiles.insertBefore(drag.placeholder, addBtn);
       else overTiles.appendChild(drag.placeholder);
     }
+  }
+
+  // Auto-rolování, když je prst u horního/dolního okraje (umožní přesun do vzdálené řady).
+  var EDGE = 90;
+  function updateAutoScroll(y) {
+    var dir = 0;
+    if (y < EDGE) dir = -1;
+    else if (y > window.innerHeight - EDGE) dir = 1;
+    drag.scrollDir = dir;
+    if (dir !== 0 && !drag.scrollRaf) autoScrollTick();
+  }
+  function autoScrollTick() {
+    if (!drag || !drag.active || !drag.scrollDir) { if (drag) drag.scrollRaf = null; return; }
+    var before = window.scrollY;
+    var speed = drag.scrollDir < 0
+      ? Math.min(18, (EDGE - drag.lastY) / 5 + 4)
+      : Math.min(18, (drag.lastY - (window.innerHeight - EDGE)) / 5 + 4);
+    window.scrollBy(0, drag.scrollDir * speed);
+    if (window.scrollY !== before) { moveClone(drag.lastX, drag.lastY); updateDropTarget(drag.lastX, drag.lastY); }
+    drag.scrollRaf = requestAnimationFrame(autoScrollTick);
   }
 
   function onPointerUp() {
@@ -443,6 +521,9 @@
     document.getElementById('statusBtns').addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
       setStatusButtons(b.getAttribute('data-status'));
+    });
+    document.getElementById('fSide').addEventListener('change', function (e) {
+      populateRowSelect(e.target.value);
     });
     document.getElementById('vehSave').addEventListener('click', saveVehicle);
     document.getElementById('vehDelete').addEventListener('click', deleteVehicle);
