@@ -141,7 +141,7 @@
   .tile {
     position: relative; aspect-ratio: 1 / 1; border-radius: 12px; cursor: pointer;
     background: var(--parked); border: 1px solid rgba(255,255,255,.08);
-    padding: 28px 9px 9px; display: flex; flex-direction: column; justify-content: space-between;
+    padding: 9px; display: flex; flex-direction: column; justify-content: space-between;
     overflow: hidden; transition: transform .08s;
     user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
   }
@@ -150,31 +150,6 @@
   .tile.received { background: linear-gradient(150deg, #145c43, #1f9468); }
   .tile.departure { background: linear-gradient(150deg, #4d2a7d, #9a52d6); }
 
-  /* úchyt pro přetažení (jediné místo, odkud se táhne; nepouští scroll) */
-  .drag-handle {
-    position: absolute; top: 0; left: 0; right: 0; height: 26px; z-index: 4;
-    display: flex; align-items: center; justify-content: center; gap: 4px;
-    touch-action: none; cursor: grab; -webkit-user-select: none; user-select: none;
-    color: rgba(255,255,255,.72); font-size: 11px; font-weight: 700; letter-spacing: .5px;
-    background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,0));
-  }
-  .drag-handle:active { cursor: grabbing; }
-
-  /* drag & drop */
-  .drag-clone {
-    position: fixed; z-index: 200; pointer-events: none; opacity: .95;
-    transform: scale(1.07); box-shadow: 0 16px 36px rgba(0,0,0,.55);
-    border-radius: 12px; overflow: hidden;
-  }
-  .tile-placeholder {
-    aspect-ratio: 1 / 1; border-radius: 12px;
-    border: 2px dashed var(--accent); background: rgba(79,157,255,.1);
-  }
-  /* původní dlaždice během tažení = placeholder (obsah skrytý, jen rámeček) */
-  .tile.dragging-src { background: rgba(79,157,255,.12) !important; border: 2px dashed var(--accent); }
-  .tile.dragging-src > * { visibility: hidden; }
-  body.dragging { touch-action: none; -webkit-user-select: none; user-select: none; }
-  body.dragging .tile { cursor: grabbing; }
   .tile .stat-badge {
     position: absolute; top: 4px; right: 6px; z-index: 5; font-size: 10px; font-weight: 800;
     padding: 2px 6px; border-radius: 6px; background: rgba(0,0,0,.45); letter-spacing: .3px;
@@ -308,7 +283,7 @@
     <button data-side="left" class="active">◀ Levá strana</button>
     <button data-side="right">Pravá strana ▶</button>
   </div>
-  <div class="drag-hint" id="dragHint">✋ Chytni proužek <b>⇕ táhni</b> nahoře na dlaždici a přetáhni (i mezi řadami — u kraje stránka sama roluje). Klepnutím na dlaždici otevřeš detail; na druhou stranu přesuneš vůz v detailu.</div>
+  <div class="drag-hint" id="dragHint">👆 Klepni na vozidlo a v jeho detailu vyber <b>Strana · Řada · Pozice</b> — vůz se přesune přesně tam, kam chceš.</div>
   <div id="rows"></div>
 </main>
 
@@ -346,7 +321,7 @@
     </div>
 
     <div id="moveSection">
-      <div class="move-label">↔ Přesunout vůz</div>
+      <div class="move-label">↔ Přesunout vůz — strana, řada a pozice</div>
       <div class="row2">
         <div class="field">
           <label>Strana</label>
@@ -359,6 +334,10 @@
           <label>Řada</label>
           <select id="fRow"></select>
         </div>
+      </div>
+      <div class="field">
+        <label>Pozice v řadě</label>
+        <select id="fPos"></select>
       </div>
     </div>
 
