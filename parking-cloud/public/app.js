@@ -145,7 +145,8 @@
     var badge = STATUS_LABEL[v.status] ? '<div class="stat-badge">' + STATUS_LABEL[v.status] + '</div>' : '';
     var fl = flagsFor(v);
     return '<div class="tile ' + v.status + '" data-id="' + esc(v.id) + '">' +
-      '<div class="brand-bar" style="background:' + brandColor(v.model) + '"></div>' + badge +
+      '<div class="brand-bar" style="background:' + brandColor(v.model) + '"></div>' +
+      '<div class="drag-handle" title="Přetáhni pro přesun">⇕ táhni</div>' + badge +
       '<div class="model">' + esc(v.model || '—') + '</div>' +
       '<div><div class="vin">' + esc(v.vin || '—') + '</div>' + keyHtml + '</div>' +
       (fl ? '<div class="flags">' + fl + '</div>' : '') + '</div>';
@@ -324,23 +325,28 @@
   }
 
   // ---------- Drag & drop (dotyk + myš) ----------
+  // Tažení startuje JEN z úchytu .drag-handle (touch-action:none → nepouští scroll).
   var drag = null;
-  var DRAG_HOLD_MS = 220, MOVE_CANCEL = 9;
 
   function onPointerDown(e) {
     if (e.button != null && e.button !== 0) return;
-    if (state.filter !== 'all' || state.query) return; // přesun jen v nefiltrovaném zobrazení
-    var tile = e.target.closest('.tile');
+    var handle = e.target.closest('.drag-handle');
+    if (!handle) return;
+    var tile = handle.closest('.tile');
     if (!tile) return;
+    if (state.filter !== 'all' || state.query) { toast('Přesouvat lze jen ve filtru „Vše"'); return; }
+    e.preventDefault();
+    e.stopPropagation();
     drag = {
       id: tile.getAttribute('data-id'), el: tile,
       startX: e.clientX, startY: e.clientY, pointerId: e.pointerId,
-      active: false, moved: false, longTimer: null
+      active: false, moved: false, handle: handle
     };
-    drag.longTimer = setTimeout(function () { startDrag(); }, DRAG_HOLD_MS);
+    try { document.body.setPointerCapture(e.pointerId); } catch (_) {}
     window.addEventListener('pointermove', onPointerMove, { passive: false });
     window.addEventListener('pointerup', onPointerUp);
     window.addEventListener('pointercancel', onPointerUp);
+    startDrag();
   }
 
   function startDrag() {
@@ -352,14 +358,12 @@
     drag.offX = drag.startX - rect.left; drag.offY = drag.startY - rect.top;
     var clone = tile.cloneNode(true);
     clone.classList.add('drag-clone');
+    clone.classList.remove('dragging-src');
     clone.style.width = rect.width + 'px'; clone.style.height = rect.height + 'px';
     document.body.appendChild(clone);
     drag.clone = clone;
-    var ph = document.createElement('div');
-    ph.className = 'tile-placeholder';
-    tile.parentNode.insertBefore(ph, tile);
-    drag.placeholder = ph;
-    tile.style.display = 'none';
+    // původní dlaždici nezmizíme – necháme ji v DOM jako placeholder (drží pointer capture)
+    tile.classList.add('dragging-src');
     document.body.classList.add('dragging');
     if (navigator.vibrate) { try { navigator.vibrate(15); } catch (e) {} }
     moveClone(drag.startX, drag.startY);
@@ -372,22 +376,16 @@
   }
 
   function onPointerMove(e) {
-    if (!drag) return;
-    if (!drag.active) {
-      if (Math.abs(e.clientX - drag.startX) > MOVE_CANCEL || Math.abs(e.clientY - drag.startY) > MOVE_CANCEL) {
-        clearTimeout(drag.longTimer); cleanupDrag(false);
-      }
-      return;
-    }
+    if (!drag || !drag.active) return;
     e.preventDefault();
-    drag.moved = true;
+    if (Math.abs(e.clientX - drag.startX) > 4 || Math.abs(e.clientY - drag.startY) > 4) drag.moved = true;
     drag.lastX = e.clientX; drag.lastY = e.clientY;
     moveClone(e.clientX, e.clientY);
     updateDropTarget(e.clientX, e.clientY);
     updateAutoScroll(e.clientY);
   }
 
-  // Najde místo pro placeholder pod daným bodem (dlaždice / prázdná část řady).
+  // Posune původní dlaždici (placeholder) na pozici pod daným bodem (i do jiné řady).
   function updateDropTarget(x, y) {
     if (!drag || !drag.clone) return;
     drag.clone.style.display = 'none';
@@ -396,21 +394,21 @@
     if (!under) return;
     var overAdd = under.closest('.add-tile');
     if (overAdd && overAdd.parentNode.classList.contains('tiles')) {
-      overAdd.parentNode.insertBefore(drag.placeholder, overAdd); return;
+      overAdd.parentNode.insertBefore(drag.el, overAdd); return;
     }
     var overTile = under.closest('.tile');
     if (overTile && overTile !== drag.el && overTile.parentNode.classList.contains('tiles')) {
       var r = overTile.getBoundingClientRect();
       var after = (y > r.top + r.height / 2) ||
                   (Math.abs(y - (r.top + r.height / 2)) < 4 && x > r.left + r.width / 2);
-      overTile.parentNode.insertBefore(drag.placeholder, after ? overTile.nextSibling : overTile);
+      overTile.parentNode.insertBefore(drag.el, after ? overTile.nextSibling : overTile);
       return;
     }
     var overTiles = under.closest('.tiles');
     if (overTiles) {
       var addBtn = overTiles.querySelector('.add-tile');
-      if (addBtn) overTiles.insertBefore(drag.placeholder, addBtn);
-      else overTiles.appendChild(drag.placeholder);
+      if (addBtn) overTiles.insertBefore(drag.el, addBtn);
+      else overTiles.appendChild(drag.el);
     }
   }
 
@@ -436,30 +434,25 @@
 
   function onPointerUp() {
     if (!drag) return;
-    clearTimeout(drag.longTimer);
     if (!drag.active) { cleanupDrag(false); return; }
 
-    var ph = drag.placeholder, container = ph.parentNode, tile = drag.el;
-    container.insertBefore(tile, ph);
-    tile.style.display = '';
-    ph.remove();
+    var tile = drag.el, container = tile.parentNode;
+    tile.classList.remove('dragging-src');
     if (drag.clone) drag.clone.remove();
     document.body.classList.remove('dragging');
 
     var destRow = parseInt(container.getAttribute('data-row'), 10);
     var ids = [];
     container.querySelectorAll('.tile').forEach(function (t) { ids.push(t.getAttribute('data-id')); });
-    var moved = drag.moved, movedId = drag.id;
+    var moved = drag.moved;
 
-    cleanupDrag(true);
+    cleanupDrag(true); // potlač následný klik (úchyt detail neotevírá)
 
     if (moved) {
       api('/move', { method: 'POST', body: JSON.stringify({ side: state.side, row: destRow, order: ids }) })
         .then(function () { return loadState(true); })
         .then(function () { toast('Přesunuto ✓'); })
         .catch(function () { toast('Přesun se nepovedl'); loadState(true); });
-    } else {
-      openVehicle(movedId); // podržení bez tažení = otevřít detail
     }
   }
 
