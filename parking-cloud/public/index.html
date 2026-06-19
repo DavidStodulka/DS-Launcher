@@ -24,6 +24,7 @@
     --parked: #3a4a6b;
     --workshop: #f2a33c;
     --received: #36c98d;
+    --departure: #b46cff;
     --danger: #ef5d6b;
     --radius: 14px;
     --safe-top: env(safe-area-inset-top, 0px);
@@ -142,10 +143,26 @@
     background: var(--parked); border: 1px solid rgba(255,255,255,.08);
     padding: 9px; display: flex; flex-direction: column; justify-content: space-between;
     overflow: hidden; transition: transform .08s;
+    user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+    touch-action: pan-y;
   }
   .tile:active { transform: scale(.96); }
   .tile.workshop { background: linear-gradient(150deg, #6b4a16, #b9802a); }
   .tile.received { background: linear-gradient(150deg, #145c43, #1f9468); }
+  .tile.departure { background: linear-gradient(150deg, #4d2a7d, #9a52d6); }
+
+  /* drag & drop */
+  .drag-clone {
+    position: fixed; z-index: 200; pointer-events: none; opacity: .95;
+    transform: scale(1.07); box-shadow: 0 16px 36px rgba(0,0,0,.55);
+    border-radius: 12px; overflow: hidden;
+  }
+  .tile-placeholder {
+    aspect-ratio: 1 / 1; border-radius: 12px;
+    border: 2px dashed var(--accent); background: rgba(79,157,255,.1);
+  }
+  body.dragging { overflow: hidden; touch-action: none; -webkit-user-select: none; user-select: none; }
+  body.dragging .tile { cursor: grabbing; }
   .tile .stat-badge {
     position: absolute; top: 7px; right: 7px; font-size: 10px; font-weight: 800;
     padding: 2px 6px; border-radius: 6px; background: rgba(0,0,0,.35); letter-spacing: .3px;
@@ -172,6 +189,7 @@
   .add-row:active { background: var(--panel); }
 
   .empty { text-align: center; color: var(--muted); padding: 40px 20px; }
+  .drag-hint { color: var(--muted); font-size: 12px; text-align: center; margin: -4px 0 12px; opacity: .85; }
 
   /* ---------- Modal / sheet ---------- */
   .overlay {
@@ -206,10 +224,10 @@
   .row2 { display: flex; gap: 10px; }
   .row2 .field { flex: 1; }
 
-  .status-btns { display: flex; gap: 9px; margin: 6px 0 16px; }
+  .status-btns { display: flex; flex-wrap: wrap; gap: 9px; margin: 6px 0 16px; }
   .status-btns button {
-    flex: 1; padding: 14px 8px; border-radius: 12px; border: 2px solid var(--line);
-    background: var(--panel); color: var(--text); font-weight: 800; font-size: 14px; cursor: pointer;
+    flex: 1 1 calc(50% - 5px); padding: 13px 8px; border-radius: 12px; border: 2px solid var(--line);
+    background: var(--panel); color: var(--text); font-weight: 800; font-size: 13.5px; cursor: pointer;
     display: flex; flex-direction: column; align-items: center; gap: 5px;
   }
   .status-btns button .ic { font-size: 20px; }
@@ -217,6 +235,7 @@
   .status-btns button.sel-workshop { border-color: var(--workshop); background: rgba(242,163,60,.16); }
   .status-btns button.sel-received { border-color: var(--received); background: rgba(54,201,141,.16); }
   .status-btns button.sel-parked { border-color: var(--accent); background: rgba(79,157,255,.16); }
+  .status-btns button.sel-departure { border-color: var(--departure); background: rgba(180,108,255,.18); }
 
   .sheet-actions { display: flex; gap: 10px; margin-top: 4px; }
   .btn {
@@ -275,6 +294,7 @@
     <button data-side="left" class="active">◀ Levá strana</button>
     <button data-side="right">Pravá strana ▶</button>
   </div>
+  <div class="drag-hint" id="dragHint">✋ Podrž a táhni dlaždici pro přesun mezi pozicemi i řadami.</div>
   <div id="rows"></div>
 </main>
 
@@ -289,6 +309,7 @@
       <button data-status="parked"><span class="ic">🅿️</span>Zaparkováno</button>
       <button data-status="workshop"><span class="ic">🔧</span>Dílna</button>
       <button data-status="received"><span class="ic">🆕</span>Nově přijato</button>
+      <button data-status="departure"><span class="ic">🚗</span>Připravit na odjezd</button>
     </div>
 
     <div class="field">
@@ -328,6 +349,7 @@
       <span><i style="background:var(--parked)"></i> Zaparkováno</span>
       <span><i style="background:var(--workshop)"></i> Dílna</span>
       <span><i style="background:var(--received)"></i> Nově přijato</span>
+      <span><i style="background:var(--departure)"></i> Připravit na odjezd</span>
     </div>
     <div class="menu-item" id="miRefresh"><span class="mi-ic">🔄</span><div><div>Obnovit ze serveru</div><div class="mi-sub">Načte aktuální stav</div></div></div>
     <div class="menu-item" id="miShare"><span class="mi-ic">🔗</span><div><div>Sdílet odkaz</div><div class="mi-sub">Pošli appku kolegům</div></div></div>

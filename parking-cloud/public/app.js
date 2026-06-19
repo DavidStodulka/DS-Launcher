@@ -10,12 +10,14 @@
     scala: '#4f9dff', kodiaq: '#7c5cff', kamiq: '#36c98d',
     karoq: '#f2a33c', fabia: '#ef5d6b', octavia: '#23c4d6', enyaq: '#a0e84f'
   };
-  var STATUS_LABEL = { parked: '', workshop: 'DÍLNA', received: 'NOVÝ' };
+  var STATUS_LABEL = { parked: '', workshop: 'DÍLNA', received: 'NOVÝ', departure: 'ODJEZD' };
 
   var state = { vehicles: [], side: 'left', filter: 'all', query: '' };
   var editingId = null;
   var currentStatus = 'parked';
   var pollTimer = null;
+  var isDragging = false;
+  var suppressClick = false;
 
   // ---------- API ----------
   function api(path, opts) {
@@ -97,13 +99,14 @@
   function render() { renderStats(); renderRows(); }
 
   function renderStats() {
-    var c = { all: 0, parked: 0, workshop: 0, received: 0 };
+    var c = { all: 0, parked: 0, workshop: 0, received: 0, departure: 0 };
     state.vehicles.forEach(function (v) { c.all++; c[v.status] = (c[v.status] || 0) + 1; });
     var defs = [
       { key: 'all', label: 'Vše', color: '#8ea2c8' },
       { key: 'parked', label: 'Zaparkováno', color: getCss('--parked') },
       { key: 'workshop', label: 'Dílna', color: getCss('--workshop') },
-      { key: 'received', label: 'Nově přijato', color: getCss('--received') }
+      { key: 'received', label: 'Nově přijato', color: getCss('--received') },
+      { key: 'departure', label: 'Odjezd', color: getCss('--departure') }
     ];
     document.getElementById('stats').innerHTML = defs.map(function (d) {
       return '<div class="chip ' + (state.filter === d.key ? 'active' : '') + '" data-filter="' + d.key + '">' +
@@ -114,17 +117,20 @@
   function renderRows() {
     var container = document.getElementById('rows');
     var rows = rowsForSide(state.side);
+    var filtering = state.query || state.filter !== 'all';
+    var hint = document.getElementById('dragHint');
+    if (hint) hint.style.display = filtering ? 'none' : '';
     var html = '';
     rows.forEach(function (rn) {
       var all = state.vehicles.filter(function (v) { return v.side === state.side && v.row === rn; });
       var vis = all.filter(matchesFilter);
-      if ((state.query || state.filter !== 'all') && vis.length === 0) return;
+      if (filtering && vis.length === 0) return;
       html += '<div class="row-card"><div class="row-head">' +
         '<span class="rnum">' + rn + '</span>' +
         '<span class="rtitle">Řada ' + rn + '</span>' +
         '<span class="rcount">' + all.length + ' voz' + plur(all.length) + '</span>' +
         '<button class="row-del" data-delrow="' + rn + '" title="Smazat řadu">🗑</button></div>';
-      html += '<div class="tiles">';
+      html += '<div class="tiles" data-row="' + rn + '">';
       vis.forEach(function (v) { html += tileHTML(v); });
       html += '<button class="add-tile" data-addto="' + rn + '" title="Přidat vozidlo">+</button>';
       html += '</div></div>';
@@ -269,11 +275,131 @@
     toastTimer = setTimeout(function () { t.classList.remove('show'); }, 1800);
   }
 
+  // ---------- Drag & drop (dotyk + myš) ----------
+  var drag = null;
+  var DRAG_HOLD_MS = 220, MOVE_CANCEL = 9;
+
+  function onPointerDown(e) {
+    if (e.button != null && e.button !== 0) return;
+    if (state.filter !== 'all' || state.query) return; // přesun jen v nefiltrovaném zobrazení
+    var tile = e.target.closest('.tile');
+    if (!tile) return;
+    drag = {
+      id: tile.getAttribute('data-id'), el: tile,
+      startX: e.clientX, startY: e.clientY, pointerId: e.pointerId,
+      active: false, moved: false, longTimer: null
+    };
+    drag.longTimer = setTimeout(function () { startDrag(); }, DRAG_HOLD_MS);
+    window.addEventListener('pointermove', onPointerMove, { passive: false });
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
+  }
+
+  function startDrag() {
+    if (!drag) return;
+    drag.active = true; isDragging = true;
+    var tile = drag.el, rect = tile.getBoundingClientRect();
+    drag.offX = drag.startX - rect.left; drag.offY = drag.startY - rect.top;
+    var clone = tile.cloneNode(true);
+    clone.classList.add('drag-clone');
+    clone.style.width = rect.width + 'px'; clone.style.height = rect.height + 'px';
+    document.body.appendChild(clone);
+    drag.clone = clone;
+    var ph = document.createElement('div');
+    ph.className = 'tile-placeholder';
+    tile.parentNode.insertBefore(ph, tile);
+    drag.placeholder = ph;
+    tile.style.display = 'none';
+    document.body.classList.add('dragging');
+    if (navigator.vibrate) { try { navigator.vibrate(15); } catch (e) {} }
+    moveClone(drag.startX, drag.startY);
+  }
+
+  function moveClone(x, y) {
+    if (!drag.clone) return;
+    drag.clone.style.left = (x - drag.offX) + 'px';
+    drag.clone.style.top = (y - drag.offY) + 'px';
+  }
+
+  function onPointerMove(e) {
+    if (!drag) return;
+    if (!drag.active) {
+      if (Math.abs(e.clientX - drag.startX) > MOVE_CANCEL || Math.abs(e.clientY - drag.startY) > MOVE_CANCEL) {
+        clearTimeout(drag.longTimer); cleanupDrag(false);
+      }
+      return;
+    }
+    e.preventDefault();
+    drag.moved = true;
+    moveClone(e.clientX, e.clientY);
+    drag.clone.style.display = 'none';
+    var under = document.elementFromPoint(e.clientX, e.clientY);
+    drag.clone.style.display = '';
+    if (!under) return;
+    var overAdd = under.closest('.add-tile');
+    if (overAdd && overAdd.parentNode.classList.contains('tiles')) {
+      overAdd.parentNode.insertBefore(drag.placeholder, overAdd); return;
+    }
+    var overTile = under.closest('.tile');
+    if (overTile && overTile !== drag.el && overTile.parentNode.classList.contains('tiles')) {
+      var r = overTile.getBoundingClientRect();
+      var after = (e.clientY > r.top + r.height / 2) ||
+                  (Math.abs(e.clientY - (r.top + r.height / 2)) < 4 && e.clientX > r.left + r.width / 2);
+      overTile.parentNode.insertBefore(drag.placeholder, after ? overTile.nextSibling : overTile);
+      return;
+    }
+    var overTiles = under.closest('.tiles');
+    if (overTiles) {
+      var addBtn = overTiles.querySelector('.add-tile');
+      if (addBtn) overTiles.insertBefore(drag.placeholder, addBtn);
+      else overTiles.appendChild(drag.placeholder);
+    }
+  }
+
+  function onPointerUp() {
+    if (!drag) return;
+    clearTimeout(drag.longTimer);
+    if (!drag.active) { cleanupDrag(false); return; }
+
+    var ph = drag.placeholder, container = ph.parentNode, tile = drag.el;
+    container.insertBefore(tile, ph);
+    tile.style.display = '';
+    ph.remove();
+    if (drag.clone) drag.clone.remove();
+    document.body.classList.remove('dragging');
+
+    var destRow = parseInt(container.getAttribute('data-row'), 10);
+    var ids = [];
+    container.querySelectorAll('.tile').forEach(function (t) { ids.push(t.getAttribute('data-id')); });
+    var moved = drag.moved, movedId = drag.id;
+
+    cleanupDrag(true);
+
+    if (moved) {
+      api('/move', { method: 'POST', body: JSON.stringify({ side: state.side, row: destRow, order: ids }) })
+        .then(function () { return loadState(true); })
+        .then(function () { toast('Přesunuto ✓'); })
+        .catch(function () { toast('Přesun se nepovedl'); loadState(true); });
+    } else {
+      openVehicle(movedId); // podržení bez tažení = otevřít detail
+    }
+  }
+
+  function cleanupDrag(didDrag) {
+    window.removeEventListener('pointermove', onPointerMove);
+    window.removeEventListener('pointerup', onPointerUp);
+    window.removeEventListener('pointercancel', onPointerUp);
+    isDragging = false;
+    if (didDrag) { suppressClick = true; setTimeout(function () { suppressClick = false; }, 60); }
+    drag = null;
+  }
+
   // ---------- Polling ----------
   function startPolling() {
     stopPolling();
     pollTimer = setInterval(function () {
       if (document.querySelector('.overlay.open')) return; // nepřepisuj během editace
+      if (isDragging) return; // nepřepisuj během přetahování
       if (document.hidden) return;
       loadState(true);
     }, POLL_MS);
@@ -303,7 +429,9 @@
     document.getElementById('search').addEventListener('input', function (e) {
       state.query = e.target.value.trim(); renderRows();
     });
+    document.getElementById('rows').addEventListener('pointerdown', onPointerDown);
     document.getElementById('rows').addEventListener('click', function (e) {
+      if (suppressClick) return;
       var tile = e.target.closest('.tile');
       if (tile) { openVehicle(tile.getAttribute('data-id')); return; }
       var add = e.target.closest('.add-tile');

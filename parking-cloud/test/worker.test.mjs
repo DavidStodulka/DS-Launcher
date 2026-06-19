@@ -35,6 +35,13 @@ function makeDB(initial) {
       rows.push({ id, side, pos, rownum, model, vin, keynum, note, status, updated_at });
       return { rows: [], meta: { changes: 1 } };
     }
+    if (sql.startsWith('UPDATE vehicles SET side=?')) { // přesun/seřazení
+      const [side, rownum, pos, updated_at, id] = a;
+      const r = rows.find(x => x.id === id);
+      if (!r) return { rows: [], meta: { changes: 0 } };
+      Object.assign(r, { side, rownum, pos, updated_at });
+      return { rows: [], meta: { changes: 1 } };
+    }
     if (sql.startsWith('UPDATE vehicles SET')) {
       const [model, vin, keynum, note, status, updated_at, id] = a;
       const r = rows.find(x => x.id === id);
@@ -106,6 +113,10 @@ const tests = async () => {
   ok(r.status === 200 && r.data.status === 'workshop', 'stav = workshop');
   ok(r.data.note === 'oprava', 'poznámka uložena');
 
+  console.log('PUT stav "departure" (připravit na odjezd)');
+  r = await call('PUT', '/api/vehicles/' + newId, { model: 'Kodiaq', vin: '444', key: '4', status: 'departure' });
+  ok(r.status === 200 && r.data.status === 'departure', 'stav = departure');
+
   console.log('PUT neexistující → 404');
   r = await call('PUT', '/api/vehicles/nope', { model: 'x' });
   ok(r.status === 404, 'status 404');
@@ -130,6 +141,24 @@ const tests = async () => {
   ok(r.data.vehicles.length === 64, 'state má 64 vozů');
   ok(left === 12, 'z toho 12 vlevo');
   ok(r.data.vehicles.some(v => v.note.indexOf('📸') > -1), 'vlaječky 📸 zachovány');
+
+  console.log('POST /api/move (přesun mezi řadami + přečíslování pozic)');
+  // přesuneme vůz z left/1 do left/2 a seřadíme cílovou řadu
+  let l1 = r.data.vehicles.filter(v => v.side === 'left' && v.row === 1);
+  let l2 = r.data.vehicles.filter(v => v.side === 'left' && v.row === 2);
+  const movedId = l1[0].id;
+  const targetOrder = [l2[0].id, movedId, l2[1].id]; // vložíme doprostřed
+  r = await call('POST', '/api/move', { side: 'left', row: 2, order: targetOrder });
+  ok(r.status === 200 && r.data.count === 3, 'move vrátil count 3');
+  r = await call('GET', '/api/state');
+  const mv = r.data.vehicles.find(v => v.id === movedId);
+  ok(mv.side === 'left' && mv.row === 2 && mv.pos === 1, 'přesunutý vůz je left/2 na pozici 1');
+  const newL2 = r.data.vehicles.filter(v => v.side === 'left' && v.row === 2);
+  ok(newL2.length === 3 && newL2.map(v => v.id).join() === targetOrder.join(), 'cílová řada má 3 vozy ve správném pořadí');
+
+  console.log('POST /api/move bez order → 400');
+  r = await call('POST', '/api/move', { side: 'left', row: 1, order: [] });
+  ok(r.status === 400, 'status 400');
 
   console.log('Neznámá cesta → 404');
   r = await call('GET', '/api/blah');

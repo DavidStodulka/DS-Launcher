@@ -31,7 +31,7 @@ function rowToVehicle(r) {
     note: r.note || '', status: r.status || 'parked',
   };
 }
-const VALID_STATUS = ['parked', 'workshop', 'received'];
+const VALID_STATUS = ['parked', 'workshop', 'received', 'departure'];
 
 export default {
   async fetch(request, env) {
@@ -90,6 +90,22 @@ export default {
         const id = decodeURIComponent(mPut[1]);
         await env.DB.prepare('DELETE FROM vehicles WHERE id=?').bind(id).run();
         return json({ ok: true });
+      }
+
+      // POST /api/move  { side, row, order:[ids] } — přesun/seřazení dlaždic
+      if (pathname === '/api/move' && request.method === 'POST') {
+        const b = await request.json();
+        const side = b.side === 'left' ? 'left' : 'right';
+        const row = parseInt(b.row, 10);
+        const order = Array.isArray(b.order) ? b.order : [];
+        if (isNaN(row) || !order.length) return json({ error: 'bad request' }, 400);
+        const now = Date.now();
+        const stmt = env.DB.prepare(
+          'UPDATE vehicles SET side=?, rownum=?, pos=?, updated_at=? WHERE id=?'
+        );
+        const batch = order.map((id, i) => stmt.bind(side, row, i, now, String(id)));
+        await env.DB.batch(batch);
+        return json({ ok: true, count: batch.length });
       }
 
       // POST /api/rows/delete
