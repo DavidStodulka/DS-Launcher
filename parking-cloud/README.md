@@ -29,10 +29,26 @@ Telefon (prohlížeč)  ──HTTPS──►  Cloudflare Worker  ──►  D1 d
 | POST | `/api/rows/delete` | smaže celou řadu `{side,row}` |
 | POST | `/api/reset` | obnoví původních 64 vozů |
 
-## Nasazení — jediný krok pro tebe
+## Nasazení
 
-Databáze i kód jsou hotové. Stačí Worker jednou nasadit pod tvým Cloudflare
-účtem (já na to nemám oprávnění/token):
+### Automaticky (GitHub Actions)
+
+Po prvním ručním nasazení (níže) se appka dál nasazuje **sama** — workflow
+`.github/workflows/deploy-parking-cloud.yml` při každém pushi do `main`,
+který se týká `parking-cloud/**`, spustí testy a pak `wrangler deploy`.
+
+Potřebuje to jen jednou nastavit GitHub secret s Cloudflare API tokenem:
+
+1. Vytvoř token: **https://dash.cloudflare.com/profile/api-tokens** →
+   *Create Token* → šablona **„Edit Cloudflare Workers"** (případně přidej
+   i právo na D1, pokud šablona nepokrývá databázi).
+2. V GitHubu: repo → **Settings → Secrets and variables → Actions → New
+   repository secret** → název `CLOUDFLARE_API_TOKEN`, hodnota = token.
+
+Od té chvíle stačí mergovat do `main` a appka se nasadí sama (průběh vidíš
+v záložce **Actions**).
+
+### Ručně (první nasazení / lokální test)
 
 ```bash
 cd parking-cloud
