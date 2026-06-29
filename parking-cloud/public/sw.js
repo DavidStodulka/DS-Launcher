@@ -1,5 +1,5 @@
 /* Service worker — cachuje jen "shell" appky. API (/api/) jde vždy ze sítě (živá data). */
-var CACHE = 'parking-cloud-v5';
+var CACHE = 'parking-cloud-v6';
 var ASSETS = ['./', './index.html', './app.js', './manifest.webmanifest', './icon.svg', './icon-maskable.svg'];
 
 self.addEventListener('install', function (e) {

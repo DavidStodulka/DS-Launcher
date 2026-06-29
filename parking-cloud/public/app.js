@@ -151,6 +151,151 @@
       (fl ? '<div class="flags">' + fl + '</div>' : '') + '</div>';
   }
 
+  // ---------- Row reorder (podržení prstu = přeskupení v rámci jedné řady) ----------
+  var LONGPRESS_MS = 320;
+  var MOVE_CANCEL_PX = 8;
+  var dragCtx = null;
+
+  function onTilePointerDown(e) {
+    if (e.button !== undefined && e.button !== 0) return;
+    if (dragCtx || state.query || state.filter !== 'all') return; // jen v nefiltrovaném pohledu
+    var tile = e.target.closest('.tile');
+    if (!tile) return;
+    var container = tile.closest('.tiles');
+    if (!container) return;
+    dragCtx = {
+      pointerId: e.pointerId, tile: tile, container: container,
+      startX: e.clientX, startY: e.clientY, lastX: e.clientX, lastY: e.clientY,
+      active: false, timer: setTimeout(startDrag, LONGPRESS_MS)
+    };
+    document.addEventListener('pointermove', onDocPointerMove);
+    document.addEventListener('pointerup', onDocPointerUp);
+    document.addEventListener('pointercancel', onDocPointerCancel);
+  }
+
+  function onDocPointerMove(e) {
+    if (!dragCtx || e.pointerId !== dragCtx.pointerId) return;
+    dragCtx.lastX = e.clientX; dragCtx.lastY = e.clientY;
+    if (!dragCtx.active) {
+      var dx = e.clientX - dragCtx.startX, dy = e.clientY - dragCtx.startY;
+      if (Math.sqrt(dx * dx + dy * dy) > MOVE_CANCEL_PX) endPress(); // pohyb dřív než se spustí drag = scroll
+      return;
+    }
+    e.preventDefault();
+    updateDragPosition();
+    updateDragOrder();
+  }
+  function onDocPointerUp(e) {
+    if (!dragCtx || e.pointerId !== dragCtx.pointerId) return;
+    if (dragCtx.active) finishDrag(false); else endPress();
+  }
+  function onDocPointerCancel(e) {
+    if (!dragCtx || e.pointerId !== dragCtx.pointerId) return;
+    if (dragCtx.active) finishDrag(true); else endPress();
+  }
+  function detachDocListeners() {
+    document.removeEventListener('pointermove', onDocPointerMove);
+    document.removeEventListener('pointerup', onDocPointerUp);
+    document.removeEventListener('pointercancel', onDocPointerCancel);
+  }
+  function endPress() {
+    if (dragCtx && dragCtx.timer) clearTimeout(dragCtx.timer);
+    detachDocListeners();
+    dragCtx = null;
+  }
+
+  // Po LONGPRESS_MS bez výrazného pohybu „popne" dlaždice do plovoucího režimu.
+  function startDrag() {
+    if (!dragCtx) return;
+    dragCtx.active = true;
+    isDragging = true; suppressClick = true;
+    if (navigator.vibrate) navigator.vibrate(15);
+
+    var tile = dragCtx.tile;
+    var rect = tile.getBoundingClientRect();
+    dragCtx.offsetX = dragCtx.lastX - rect.left;
+    dragCtx.offsetY = dragCtx.lastY - rect.top;
+    dragCtx.originalOrder = Array.prototype.filter.call(dragCtx.container.children, function (el) {
+      return el.classList.contains('tile');
+    }).map(function (el) { return el.getAttribute('data-id'); });
+
+    var ph = document.createElement('div');
+    ph.className = 'tile';
+    ph.style.visibility = 'hidden';
+    tile.parentNode.insertBefore(ph, tile);
+    dragCtx.placeholder = ph;
+
+    tile.classList.add('dragging');
+    tile.style.width = rect.width + 'px';
+    tile.style.height = rect.height + 'px';
+    tile.style.left = rect.left + 'px';
+    tile.style.top = rect.top + 'px';
+    document.body.appendChild(tile); // ven z .row-card (overflow:hidden by jinak plovoucí dlaždici stříhal)
+  }
+
+  function updateDragPosition() {
+    var tile = dragCtx.tile;
+    tile.style.left = (dragCtx.lastX - dragCtx.offsetX) + 'px';
+    tile.style.top = (dragCtx.lastY - dragCtx.offsetY) + 'px';
+  }
+
+  // Najde dlaždici pod středem tažené dlaždice a přesune za/před ni placeholder.
+  function updateDragOrder() {
+    var container = dragCtx.container;
+    var rect = dragCtx.tile.getBoundingClientRect();
+    var cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+    var siblings = Array.prototype.filter.call(container.children, function (el) {
+      return el !== dragCtx.placeholder && el.classList.contains('tile');
+    });
+    var target = null, before = true;
+    for (var i = 0; i < siblings.length; i++) {
+      var r = siblings[i].getBoundingClientRect();
+      if (cy >= r.top && cy <= r.bottom) {
+        target = siblings[i]; before = cx < r.left + r.width / 2;
+        break;
+      }
+    }
+    if (!target && siblings.length) {
+      var first = siblings[0].getBoundingClientRect();
+      if (cy < first.top) { target = siblings[0]; before = true; }
+      else {
+        var last = siblings[siblings.length - 1].getBoundingClientRect();
+        if (cy > last.bottom) { target = siblings[siblings.length - 1]; before = false; }
+      }
+    }
+    if (target) container.insertBefore(dragCtx.placeholder, before ? target : target.nextSibling);
+  }
+
+  function finishDrag(cancelled) {
+    detachDocListeners();
+    var tile = dragCtx.tile, ph = dragCtx.placeholder, container = dragCtx.container;
+    var originalOrder = dragCtx.originalOrder;
+
+    tile.classList.remove('dragging');
+    tile.style.left = ''; tile.style.top = ''; tile.style.width = ''; tile.style.height = '';
+    if (ph.parentNode) ph.parentNode.replaceChild(tile, ph);
+    else container.appendChild(tile);
+
+    isDragging = false;
+    setTimeout(function () { suppressClick = false; }, 60); // ať následný "click" po puštění neotevře detail
+
+    var rn = parseInt(container.getAttribute('data-row'), 10);
+    var ids = Array.prototype.filter.call(container.children, function (el) {
+      return el.classList.contains('tile');
+    }).map(function (el) { return el.getAttribute('data-id'); });
+
+    dragCtx = null;
+    if (cancelled || ids.join() === originalOrder.join()) return;
+
+    ids.forEach(function (id, i) {
+      var v = state.vehicles.find(function (x) { return x.id === id; });
+      if (v) v.pos = i;
+    });
+    api('/move', { method: 'POST', body: JSON.stringify({ side: state.side, row: rn, order: ids }) })
+      .then(function () { return loadState(true); })
+      .catch(function () { toast('Nepodařilo se uložit pořadí'); loadState(true); });
+  }
+
   // ---------- Vehicle sheet ----------
   function openVehicle(id) {
     var v = state.vehicles.find(function (x) { return x.id === id; });
@@ -405,6 +550,10 @@
       var delr = e.target.closest('[data-delrow]');
       if (delr) { deleteRow(parseInt(delr.getAttribute('data-delrow'), 10)); return; }
       if (e.target.closest('#addRow')) { addRow(); return; }
+    });
+    document.getElementById('rows').addEventListener('pointerdown', onTilePointerDown);
+    document.getElementById('rows').addEventListener('contextmenu', function (e) {
+      if (e.target.closest('.tile')) e.preventDefault();
     });
     document.getElementById('statusBtns').addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;

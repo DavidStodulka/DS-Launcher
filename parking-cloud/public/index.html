@@ -149,6 +149,10 @@
   .tile.workshop { background: linear-gradient(150deg, #6b4a16, #b9802a); }
   .tile.received { background: linear-gradient(150deg, #145c43, #1f9468); }
   .tile.departure { background: linear-gradient(150deg, #4d2a7d, #9a52d6); }
+  .tile.dragging {
+    position: fixed; z-index: 999; pointer-events: none; touch-action: none;
+    box-shadow: 0 16px 34px rgba(0,0,0,.55); transform: scale(1.05);
+  }
 
   .tile .stat-badge {
     position: absolute; top: 4px; right: 6px; z-index: 5; font-size: 10px; font-weight: 800;
@@ -283,7 +287,7 @@
     <button data-side="left" class="active">◀ Levá strana</button>
     <button data-side="right">Pravá strana ▶</button>
   </div>
-  <div class="drag-hint" id="dragHint">👆 Klepni na vozidlo a v jeho detailu vyber <b>Strana · Řada · Pozice</b> — vůz se přesune přesně tam, kam chceš.</div>
+  <div class="drag-hint" id="dragHint">👆 Podrž dlaždici a táhni — přeskupíš pořadí <b>v rámci řady</b>. Pro přesun do jiné řady/strany klepni na vozidlo a vyber Stranu · Řadu · Pozici.</div>
   <div id="rows"></div>
 </main>
 
