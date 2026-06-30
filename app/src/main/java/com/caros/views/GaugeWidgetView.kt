@@ -152,7 +152,7 @@ class GaugeWidgetView @JvmOverloads constructor(
             cx - arcRect.width() / 2f, cy,
             cx + arcRect.width() / 2f, cy,
             intArrayOf(COLOR_GREEN, COLOR_YELLOW, COLOR_RED),
-            floatArrayOf(0f, (yellowAt - minValue) / (maxValue - minValue), (redAt - minValue) / (maxValue - minValue)),
+            floatArrayOf(0f, (yellowAt - minValue) / (maxValue - minValue).coerceAtLeast(0.001f), (redAt - minValue) / (maxValue - minValue).coerceAtLeast(0.001f)),
             Shader.TileMode.CLAMP
         )
     }
@@ -167,7 +167,7 @@ class GaugeWidgetView @JvmOverloads constructor(
         canvas.drawArc(arcRect, START_ANGLE, SWEEP_ANGLE, false, trackPaint)
 
         // Fill arc
-        val fraction = (displayedValue - minValue) / (maxValue - minValue)
+        val fraction = (displayedValue - minValue) / (maxValue - minValue).coerceAtLeast(0.001f)
         val sweep    = fraction.coerceIn(0f, 1f) * SWEEP_ANGLE
         if (sweep > 0f) {
             canvas.drawArc(arcRect, START_ANGLE, sweep, false, fillPaint)
@@ -194,5 +194,9 @@ class GaugeWidgetView @JvmOverloads constructor(
     init {
         Timber.tag(LOG_TAG).d("GaugeWidgetView initialised")
         setLayerType(LAYER_TYPE_HARDWARE, null)
+    }
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        animator.cancel()
     }
 }

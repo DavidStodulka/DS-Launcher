@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.caros.R
 import com.caros.databinding.FragmentLeftPanelBinding
@@ -20,6 +21,7 @@ class LeftPanelFragment : Fragment() {
     private val binding get() = _binding!!
 
     @Inject lateinit var quickLaunch: QuickLaunchManager
+    private val mainViewModel: MainViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,13 +41,14 @@ class LeftPanelFragment : Fragment() {
     private fun refreshInstallStatus() {
         val status = quickLaunch.getInstallStatus()
 
-        fun applyStatus(btn: android.widget.TextView, pkg: String, label: String) {
+        fun applyStatus(btn: android.widget.LinearLayout, pkg: String, label: String) {
+            val tv = btn.getChildAt(1) as? android.widget.TextView
             if (status[pkg] == true) {
-                btn.text = label
+                tv?.text = label
                 btn.isEnabled = true
                 btn.alpha = 1.0f
             } else {
-                btn.text = "Není nainstalováno"
+                tv?.text = "Není nainstalováno"
                 btn.isEnabled = false
                 btn.alpha = 0.4f
             }
@@ -75,6 +78,23 @@ class LeftPanelFragment : Fragment() {
 
         binding.btnAudio.setOnClickListener {
             findNavController().navigate(R.id.audioFragment)
+        }
+
+        binding.btnFMRadio.setOnClickListener {
+            findNavController().navigate(R.id.fmRadioFragment)
+        }
+
+        binding.btnClimate.setOnClickListener {
+            findNavController().navigate(R.id.climateFragment)
+        }
+
+        // Short press = toggle voice listening; long press = open voice setup
+        binding.btnVoice.setOnClickListener {
+            mainViewModel.toggleVoiceListening()
+        }
+        binding.btnVoice.setOnLongClickListener {
+            findNavController().navigate(R.id.voiceSetupFragment)
+            true
         }
     }
 

@@ -7,8 +7,12 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.caros.R
 import com.caros.can.CANFrame
@@ -56,9 +60,12 @@ class LiveDataFragment : Fragment() {
 
     private fun startLiveUpdates() {
         viewLifecycleOwner.lifecycleScope.launch {
-            while (isActive) {
-                updateFromFrame(mainViewModel.canFrame.value)
-                delay(500L)
+            // Poll only while the view is at least STARTED — pauses in background
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                while (isActive) {
+                    updateFromFrame(mainViewModel.canFrame.value)
+                    delay(500L)
+                }
             }
         }
     }
@@ -91,14 +98,7 @@ class LiveDataFragment : Fragment() {
     // ── LiveDataAdapter ───────────────────────────────────────────────────────
 
     private class LiveDataAdapter :
-        RecyclerView.Adapter<LiveDataAdapter.ViewHolder>() {
-
-        private var items: List<LiveDataRow> = emptyList()
-
-        fun submitList(list: List<LiveDataRow>) {
-            items = list
-            notifyDataSetChanged()
-        }
+        ListAdapter<LiveDataRow, LiveDataAdapter.ViewHolder>(DIFF) {
 
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val tvLabel: TextView = view.findViewById(R.id.tvLiveLabel)
@@ -113,12 +113,19 @@ class LiveDataFragment : Fragment() {
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val row = items[position]
+            val row = getItem(position)
             holder.tvLabel.text = row.label
             holder.tvValue.text = row.value
             holder.tvUnit.text = row.unit
         }
 
-        override fun getItemCount(): Int = items.size
+        companion object {
+            private val DIFF = object : DiffUtil.ItemCallback<LiveDataRow>() {
+                override fun areItemsTheSame(oldItem: LiveDataRow, newItem: LiveDataRow) =
+                    oldItem.label == newItem.label
+                override fun areContentsTheSame(oldItem: LiveDataRow, newItem: LiveDataRow) =
+                    oldItem == newItem
+            }
+        }
     }
 }

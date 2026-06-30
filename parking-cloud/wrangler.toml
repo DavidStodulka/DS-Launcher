@@ -1,0 +1,12 @@
+name = "ds-parking"
+main = "src/worker.js"
+compatibility_date = "2024-11-01"
+
+# Statická appka (HTML/JS) se servíruje přímo z Workeru
+assets = { directory = "./public", binding = "ASSETS" }
+
+# Sdílená databáze (vytvořená předem) — společná data pro všechny
+[[d1_databases]]
+binding = "DB"
+database_name = "ds-parking-db"
+database_id = "a7f82c80-7412-4eca-84b0-0bb64bd10eae"

@@ -70,19 +70,43 @@ object VAGFrameMap {
     const val ID_VEHICLE_SPEED = 0x320
 
     /**
-     * ABS/ESP wheel speed channel — alternative speed source.
-     * Byte 0–1: front-left, Byte 2–3: front-right (km/h * 100)
+     * ABS/ESP wheel speed — all four wheels.
+     * Byte 0–1: front-left   km/h * 100
+     * Byte 2–3: front-right  km/h * 100
+     * Byte 4–5: rear-left    km/h * 100
+     * Byte 6–7: rear-right   km/h * 100
      * // CALIBRATE: verify ID from live can_log.txt capture
      */
     const val ID_WHEEL_SPEED = 0x350
 
     /**
-     * Longitudinal and lateral acceleration (ESP/ABS module).
-     * Byte 0–1: lateral g   signed 16-bit / 1000.0
-     * Byte 2–3: longitudinal g signed 16-bit / 1000.0
+     * ESP/ABS longitudinal + lateral acceleration and stability control flags.
+     * Byte 0–1: lateral G      signed 16-bit, /1000.0 → g (positive = right)
+     * Byte 2–3: longitudinal G signed 16-bit, /1000.0 → g (positive = forward)
+     * Byte 4 bit 0: ESP active
+     * Byte 4 bit 1: TC active
+     * Byte 4 bit 2: ABS active
      * // CALIBRATE: verify ID from live can_log.txt capture
      */
     const val ID_ACCELERATION = 0x368
+
+    /**
+     * EPS (Electric Power Steering) steering angle.
+     * Byte 0–1: steering angle signed 16-bit, /10.0 → degrees (negative = left)
+     * Byte 2–3: angular velocity signed 16-bit, /10.0 → °/s
+     * // CALIBRATE: verify ID from live can_log.txt capture
+     */
+    const val ID_EPS_STEERING = 0x0C6
+
+    /**
+     * TPMS tire pressure (optional equipment — not all León 5F have TPMS).
+     * Byte 0: front-left  kPa (raw * 1.364 = kPa)
+     * Byte 1: front-right kPa
+     * Byte 2: rear-left   kPa
+     * Byte 3: rear-right  kPa
+     * // CALIBRATE: verify ID from live can_log.txt capture; may be absent
+     */
+    const val ID_TPMS = 0x3E3
 
     // ── Thermal / Temperatures ────────────────────────────────────────────────
 
@@ -235,12 +259,12 @@ object VAGFrameMap {
     )
 
     /** All IDs that feed vehicle dynamics data. */
-    val DYNAMICS_IDS = setOf(ID_VEHICLE_SPEED, ID_WHEEL_SPEED, ID_ACCELERATION)
+    val DYNAMICS_IDS = setOf(ID_VEHICLE_SPEED, ID_WHEEL_SPEED, ID_ACCELERATION, ID_EPS_STEERING)
 
     /** All IDs that feed body / comfort data. */
     val BODY_IDS = setOf(
         ID_DOORS_LIGHTS, ID_STALK_STATE, ID_BATTERY_VOLTAGE,
-        ID_IGNITION, ID_ODOMETER
+        ID_IGNITION, ID_ODOMETER, ID_TPMS
     )
 
     /** All IDs that feed the climate subsystem. */

@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#080808">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- WIZARD -->
+        <LinearLayout
+            android:id="@+id/wizardLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#111111"
+            android:padding="24dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tvWizardTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Nastavení ekosystému"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:fontFamily="sans-serif-condensed"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:id="@+id/tvWizardDesc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#9E9E9E"
+                android:textSize="14sp"
+                android:layout_marginBottom="16dp"/>
+
+            <ProgressBar
+                android:id="@+id/setupProgressBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:id="@+id/tvSetupStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#1565C0"
+                android:textSize="13sp"
+                android:fontFamily="monospace"
+                android:layout_marginBottom="16dp"/>
+
+            <Button
+                android:id="@+id/btnWizardAction"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="Nainstalovat Termux"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#1565C0"
+                android:textSize="15sp"/>
+
+        </LinearLayout>
+
+        <!-- DASHBOARD 6 cards 2x3 grid -->
+        <LinearLayout
+            android:id="@+id/dashboardLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <!-- Row 1 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <!-- SSH card -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:minHeight="120dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:background="#111111"
+                    android:padding="12dp"
+                    android:layout_marginEnd="4dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="🔐 SSH Přístup" android:textColor="#FFFFFF" android:textSize="14sp"
+                        android:textStyle="bold" android:fontFamily="sans-serif-condensed"/>
+                    <TextView android:id="@+id/tvSSHStatus" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="○ Neaktivní"
+                        android:textColor="#757575" android:textSize="12sp" android:layout_marginTop="4dp"/>
+                    <TextView android:id="@+id/tvSSHAddress" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="---"
+                        android:textColor="#1565C0" android:textSize="12sp" android:fontFamily="monospace"/>
+                    <TextView android:id="@+id/tvSSHCommand" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:text=""
+                        android:textColor="#9E9E9E" android:textSize="10sp" android:fontFamily="monospace"
+                        android:layout_marginTop="4dp" android:singleLine="true" android:ellipsize="end"/>
+                    <Button android:id="@+id/btnCopySSH"
+                        android:layout_width="wrap_content" android:layout_height="28dp"
+                        android:text="Kopírovat SSH" android:textSize="10sp"
+                        android:backgroundTint="#1E3A5F" android:textColor="#1565C0"
+                        android:insetTop="0dp" android:insetBottom="0dp"
+                        android:layout_marginTop="6dp"/>
+                </LinearLayout>
+
+                <!-- MQTT card -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:minHeight="120dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:background="#111111"
+                    android:padding="12dp"
+                    android:layout_marginStart="4dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="📡 MQTT Broker" android:textColor="#FFFFFF" android:textSize="14sp"
+                        android:textStyle="bold" android:fontFamily="sans-serif-condensed"/>
+                    <TextView android:id="@+id/tvMQTTStatus" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="○ Neaktivní"
+                        android:textColor="#757575" android:textSize="12sp" android:layout_marginTop="4dp"/>
+                    <Button android:id="@+id/btnRestartMQTT" android:layout_width="wrap_content"
+                        android:layout_height="32dp" android:text="Restart" android:textSize="11sp"
+                        android:backgroundTint="#1E1E1E" android:textColor="#757575"
+                        android:layout_marginTop="4dp" android:insetTop="0dp" android:insetBottom="0dp"/>
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Row 2 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <!-- InfluxDB/Data Logger card -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:background="#111111"
+                    android:padding="12dp"
+                    android:layout_marginEnd="4dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="📊 Data Logger" android:textColor="#FFFFFF" android:textSize="14sp"
+                        android:textStyle="bold" android:fontFamily="sans-serif-condensed"/>
+                    <TextView android:id="@+id/tvInfluxStatus" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="○ Zastaveno"
+                        android:textColor="#757575" android:textSize="12sp" android:layout_marginTop="4dp"/>
+                </LinearLayout>
+
+                <!-- Syncthing card -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:background="#111111"
+                    android:padding="12dp"
+                    android:layout_marginStart="4dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="🔄 Synchronizace" android:textColor="#FFFFFF" android:textSize="14sp"
+                        android:textStyle="bold" android:fontFamily="sans-serif-condensed"/>
+                    <TextView android:id="@+id/tvSyncStatus" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="○ Čeká"
+                        android:textColor="#757575" android:textSize="12sp" android:layout_marginTop="4dp"/>
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Row 3 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <!-- Python Engine card -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:background="#111111"
+                    android:padding="12dp"
+                    android:layout_marginEnd="4dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="🐍 Python Engine" android:textColor="#FFFFFF" android:textSize="14sp"
+                        android:textStyle="bold" android:fontFamily="sans-serif-condensed"/>
+                    <TextView android:id="@+id/tvPythonStatus" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="○ Zastaveno"
+                        android:textColor="#757575" android:textSize="12sp" android:layout_marginTop="4dp"/>
+                    <Button android:id="@+id/btnRestartPython" android:layout_width="wrap_content"
+                        android:layout_height="32dp" android:text="Reset" android:textSize="11sp"
+                        android:backgroundTint="#1E1E1E" android:textColor="#757575"
+                        android:insetTop="0dp" android:insetBottom="0dp"/>
+                </LinearLayout>
+
+                <!-- Grafana card -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:background="#111111"
+                    android:padding="12dp"
+                    android:layout_marginStart="4dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="📈 Grafana Dashboard" android:textColor="#FFFFFF" android:textSize="14sp"
+                        android:textStyle="bold" android:fontFamily="sans-serif-condensed"/>
+                    <TextView android:id="@+id/tvGrafanaAddress" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="---"
+                        android:textColor="#1565C0" android:textSize="12sp" android:fontFamily="monospace"
+                        android:layout_marginTop="4dp"/>
+                    <Button android:id="@+id/btnOpenGrafana" android:layout_width="wrap_content"
+                        android:layout_height="32dp" android:text="Otevřít" android:textSize="11sp"
+                        android:backgroundTint="#1565C0" android:textColor="#FFFFFF"
+                        android:insetTop="0dp" android:insetBottom="0dp"/>
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

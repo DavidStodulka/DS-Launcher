@@ -72,13 +72,18 @@ class CodingPresetsFragment : Fragment() {
     // ── PresetAdapter ─────────────────────────────────────────────────────────
 
     private inner class PresetAdapter :
-        ListAdapter<PresetState, PresetAdapter.PresetViewHolder>(DIFF_CALLBACK) {
+        ListAdapter<PresetState, PresetAdapter.PresetViewHolder>(
+            object : DiffUtil.ItemCallback<PresetState>() {
+                override fun areItemsTheSame(a: PresetState, b: PresetState) = a.preset.id == b.preset.id
+                override fun areContentsTheSame(a: PresetState, b: PresetState) = a == b
+            }
+        ) {
 
         inner class PresetViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val tvName: TextView = view.findViewById(R.id.tvPresetName)
             val tvDesc: TextView = view.findViewById(R.id.tvPresetDesc)
             val tvCurrentStatus: TextView = view.findViewById(R.id.tvCurrentStatus)
-            val switchToggle: Switch = view.findViewById(R.id.switchToggle)
+            val switchToggle: Switch = view.findViewById(R.id.switchPreset)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PresetViewHolder {
@@ -104,12 +109,5 @@ class CodingPresetsFragment : Fragment() {
             }
         }
 
-        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<PresetState>() {
-            override fun areItemsTheSame(a: PresetState, b: PresetState) =
-                a.preset.id == b.preset.id
-
-            override fun areContentsTheSame(a: PresetState, b: PresetState) =
-                a == b
-        }
     }
 }

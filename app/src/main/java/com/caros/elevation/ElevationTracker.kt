@@ -142,7 +142,9 @@ class ElevationTracker @Inject constructor(
             timestamp = location.time,
             slopePercent = slope
         )
-        _points.value = _points.value + point
+        // Cap the in-memory trace so multi-hour recordings can't exhaust the heap
+        val updated = _points.value + point
+        _points.value = if (updated.size > MAX_POINTS) updated.takeLast(MAX_POINTS) else updated
         lastPoint = point
     }
 
@@ -180,4 +182,9 @@ class ElevationTracker @Inject constructor(
         _points.value.zipWithNext()
             .sumOf { (a, b) -> if (b.altM < a.altM) (a.altM - b.altM).toDouble() else 0.0 }
             .toFloat()
+
+    companion object {
+        /** ~14 h of points at 1 Hz — enough for any drive, bounded memory. */
+        private const val MAX_POINTS = 50_000
+    }
 }

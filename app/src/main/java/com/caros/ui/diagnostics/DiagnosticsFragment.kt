@@ -6,7 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.caros.can.CANFrame
 import com.caros.databinding.FragmentDiagnosticsBinding
 import com.caros.ui.main.MainViewModel
@@ -24,6 +26,7 @@ class DiagnosticsFragment : Fragment() {
     private val binding get() = _binding!!
 
     @Inject lateinit var db: CarOSDatabase
+    @Inject lateinit var dpfRegenManager: com.caros.vcds.DPFRegenManager
 
     private val mainViewModel: MainViewModel by activityViewModels()
 
@@ -40,6 +43,7 @@ class DiagnosticsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         loadTripStats()
         observeCANFrame()
+        setupDPFRegen()
     }
 
     private fun loadTripStats() {
@@ -58,8 +62,9 @@ class DiagnosticsFragment : Fragment() {
                             (trip.endTime - trip.startTime) / 1_000L else 0L
                         binding.tvTripTime.text = "%02d:%02d".format(durationSec / 60, durationSec % 60)
 
-                        val fuel = trip?.fuelUsedLitres
-                        binding.tvFuelEst.text = if (fuel != null) "~%.1f L".format(fuel) else "-- L"
+                        // tvMaxRpm and tvAvgThrottle populated from live CAN in updateGauges
+                        binding.tvMaxRpm.text = "--"
+                        binding.tvAvgThrottle.text = "--"
                     }
                 } catch (e: Exception) {
                     // Leave fields as default
@@ -70,8 +75,10 @@ class DiagnosticsFragment : Fragment() {
 
     private fun observeCANFrame() {
         viewLifecycleOwner.lifecycleScope.launch {
-            mainViewModel.canFrame.collect { frame ->
-                updateGauges(frame)
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mainViewModel.canFrame.collect { frame ->
+                    updateGauges(frame)
+                }
             }
         }
     }
@@ -84,7 +91,7 @@ class DiagnosticsFragment : Fragment() {
 
         // Oil Temp gauge
         frame.oilTemp?.celsius?.let { oilTemp ->
-            binding.gaugeOil.setValue(oilTemp)
+            binding.gaugeOilTemp.setValue(oilTemp)
         }
 
         // Battery Voltage gauge
@@ -92,14 +99,49 @@ class DiagnosticsFragment : Fragment() {
             binding.gaugeVoltage.setValue(batt.volts)
         }
 
-        // Oil gauge (uses separate id in linter-revised layout)
-        frame.oilTemp?.celsius?.let { oilTemp ->
-            binding.gaugeOilTemp.setValue(oilTemp)
-        }
-
         // DPF Load gauge
         frame.dpfData?.let { dpf ->
             binding.gaugeDPF.setValue(dpf.loadPercent)
+        }
+    }
+
+    private fun setupDPFRegen() {
+        binding.btnStartDPFRegen.setOnClickListener {
+            binding.btnStartDPFRegen.isEnabled = false
+            binding.tvDPFRegenStatus.text = "Stav: Spouštím..."
+            binding.progressDPFRegen.visibility = android.view.View.VISIBLE
+            viewLifecycleOwner.lifecycleScope.launch {
+                dpfRegenManager.initiateRegen()
+            }
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            dpfRegenManager.regenState.collect { state ->
+                when (state) {
+                    is com.caros.vcds.DPFRegenManager.RegenState.Idle -> {
+                        binding.tvDPFRegenStatus.text = "Stav: Připraven"
+                        binding.progressDPFRegen.visibility = android.view.View.GONE
+                        binding.btnStartDPFRegen.isEnabled = true
+                    }
+                    is com.caros.vcds.DPFRegenManager.RegenState.Starting -> {
+                        binding.tvDPFRegenStatus.text = "Stav: Navazuji spojení s ECU..."
+                        binding.progressDPFRegen.progress = 0
+                    }
+                    is com.caros.vcds.DPFRegenManager.RegenState.InProgress -> {
+                        binding.tvDPFRegenStatus.text = "Stav: Regenerace probíhá (${state.progressPct}%)"
+                        binding.progressDPFRegen.progress = state.progressPct
+                    }
+                    is com.caros.vcds.DPFRegenManager.RegenState.Completed -> {
+                        binding.tvDPFRegenStatus.text = "Stav: ✅ Regenerace dokončena"
+                        binding.progressDPFRegen.progress = 100
+                        binding.btnStartDPFRegen.isEnabled = true
+                    }
+                    is com.caros.vcds.DPFRegenManager.RegenState.Failed -> {
+                        binding.tvDPFRegenStatus.text = "Stav: ❌ Chyba: ${state.reason}"
+                        binding.progressDPFRegen.visibility = android.view.View.GONE
+                        binding.btnStartDPFRegen.isEnabled = true
+                    }
+                }
+            }
         }
     }
 

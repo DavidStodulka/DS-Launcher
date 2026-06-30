@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Flagpole -->
+    <path android:fillColor="#FFFFFF" android:pathData="M4,2v20h2v-20z" />
+    <!-- Checkered flag blocks row 1 -->
+    <path android:fillColor="#FFFFFF" android:pathData="M6,2h4v4h-4z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M14,2h4v4h-4z" />
+    <!-- Checkered flag blocks row 2 -->
+    <path android:fillColor="#FFFFFF" android:pathData="M10,6h4v4h-4z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M18,6h4v4h-4z" />
+    <!-- Checkered flag blocks row 3 -->
+    <path android:fillColor="#FFFFFF" android:pathData="M6,10h4v4h-4z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M14,10h4v4h-4z" />
+</vector>

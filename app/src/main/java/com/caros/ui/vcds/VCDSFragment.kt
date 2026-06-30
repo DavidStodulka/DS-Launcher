@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.caros.databinding.FragmentVcdsBinding
 import com.google.android.material.tabs.TabLayoutMediator
@@ -45,8 +47,3 @@ private class VCDSPagerAdapter(fragment: Fragment) : FragmentStateAdapter(fragme
     }
 }
 
-// Extension to access lifecycleScope from Fragment
-private val Fragment.lifecycleScope get() = viewLifecycleOwner.lifecycleScope
-
-private val androidx.fragment.app.Fragment.lifecycleScope: kotlinx.coroutines.CoroutineScope
-    get() = viewLifecycleOwner.lifecycleScope

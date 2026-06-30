@@ -11,7 +11,7 @@
     android:paddingEnd="12dp"
     android:paddingTop="12dp"
     android:paddingBottom="8dp"
-    tools:context=".ui.fragments.AudioEqFragment">
+    tools:context=".ui.audio.EQFragment">
 
     <!-- Preset buttons row -->
     <LinearLayout
@@ -102,7 +102,7 @@
 
     </LinearLayout>
 
-    <!-- 10-band EQ: horizontal row of vertical SeekBars -->
+    <!-- 10-band EQ: horizontal row of vertical SeekBars with dual-layer auto indicators -->
     <LinearLayout
         android:id="@+id/eqBandContainer"
         android:layout_width="match_parent"
@@ -134,12 +134,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:max="24"
-                android:progress="12"
+                android:max="240"
+                android:progress="120"
                 android:rotation="270"
                 android:progressTint="#1565C0"
                 android:thumbTint="#1565C0"
                 android:progressBackgroundTint="#1E1E1E" />
+
+            <TextView
+                android:id="@+id/tvAutoGainBand0"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="auto: 0.0"
+                android:textColor="#4CAF50"
+                android:textSize="8sp"
+                android:fontFamily="sans-serif-condensed"
+                android:gravity="center"
+                tools:text="auto: +2.1" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -149,7 +160,7 @@
                 android:textSize="9sp"
                 android:fontFamily="sans-serif-condensed"
                 android:gravity="center"
-                android:layout_marginTop="4dp" />
+                android:layout_marginTop="2dp" />
 
         </LinearLayout>
 
@@ -176,12 +187,22 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:max="24"
-                android:progress="12"
+                android:max="240"
+                android:progress="120"
                 android:rotation="270"
                 android:progressTint="#1565C0"
                 android:thumbTint="#1565C0"
                 android:progressBackgroundTint="#1E1E1E" />
+
+            <TextView
+                android:id="@+id/tvAutoGainBand1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="auto: 0.0"
+                android:textColor="#4CAF50"
+                android:textSize="8sp"
+                android:fontFamily="sans-serif-condensed"
+                android:gravity="center" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -191,7 +212,7 @@
                 android:textSize="9sp"
                 android:fontFamily="sans-serif-condensed"
                 android:gravity="center"
-                android:layout_marginTop="4dp" />
+                android:layout_marginTop="2dp" />
 
         </LinearLayout>
 
@@ -218,12 +239,22 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:max="24"
-                android:progress="12"
+                android:max="240"
+                android:progress="120"
                 android:rotation="270"
                 android:progressTint="#1565C0"
                 android:thumbTint="#1565C0"
                 android:progressBackgroundTint="#1E1E1E" />
+
+            <TextView
+                android:id="@+id/tvAutoGainBand2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="auto: 0.0"
+                android:textColor="#4CAF50"
+                android:textSize="8sp"
+                android:fontFamily="sans-serif-condensed"
+                android:gravity="center" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -233,7 +264,7 @@
                 android:textSize="9sp"
                 android:fontFamily="sans-serif-condensed"
                 android:gravity="center"
-                android:layout_marginTop="4dp" />
+                android:layout_marginTop="2dp" />
 
         </LinearLayout>
 
@@ -260,12 +291,22 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:max="24"
-                android:progress="12"
+                android:max="240"
+                android:progress="120"
                 android:rotation="270"
                 android:progressTint="#1565C0"
                 android:thumbTint="#1565C0"
                 android:progressBackgroundTint="#1E1E1E" />
+
+            <TextView
+                android:id="@+id/tvAutoGainBand3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="auto: 0.0"
+                android:textColor="#4CAF50"
+                android:textSize="8sp"
+                android:fontFamily="sans-serif-condensed"
+                android:gravity="center" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -275,7 +316,7 @@
                 android:textSize="9sp"
                 android:fontFamily="sans-serif-condensed"
                 android:gravity="center"
-                android:layout_marginTop="4dp" />
+                android:layout_marginTop="2dp" />
 
         </LinearLayout>
 
@@ -302,12 +343,22 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:max="24"
-                android:progress="12"
+                android:max="240"
+                android:progress="120"
                 android:rotation="270"
                 android:progressTint="#1565C0"
                 android:thumbTint="#1565C0"
                 android:progressBackgroundTint="#1E1E1E" />
+
+            <TextView
+                android:id="@+id/tvAutoGainBand4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="auto: 0.0"
+                android:textColor="#4CAF50"
+                android:textSize="8sp"
+                android:fontFamily="sans-serif-condensed"
+                android:gravity="center" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -317,7 +368,7 @@
                 android:textSize="9sp"
                 android:fontFamily="sans-serif-condensed"
                 android:gravity="center"
-                android:layout_marginTop="4dp" />
+                android:layout_marginTop="2dp" />
 
         </LinearLayout>
 
@@ -344,12 +395,22 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:max="24"
-                android:progress="12"
+                android:max="240"
+                android:progress="120"
                 android:rotation="270"
                 android:progressTint="#1565C0"
                 android:thumbTint="#1565C0"
                 android:progressBackgroundTint="#1E1E1E" />
+
+            <TextView
+                android:id="@+id/tvAutoGainBand5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="auto: 0.0"
+                android:textColor="#4CAF50"
+                android:textSize="8sp"
+                android:fontFamily="sans-serif-condensed"
+                android:gravity="center" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -359,7 +420,7 @@
                 android:textSize="9sp"
                 android:fontFamily="sans-serif-condensed"
                 android:gravity="center"
-                android:layout_marginTop="4dp" />
+                android:layout_marginTop="2dp" />
 
         </LinearLayout>
 
@@ -386,12 +447,22 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:max="24"
-                android:progress="12"
+                android:max="240"
+                android:progress="120"
                 android:rotation="270"
                 android:progressTint="#1565C0"
                 android:thumbTint="#1565C0"
                 android:progressBackgroundTint="#1E1E1E" />
+
+            <TextView
+                android:id="@+id/tvAutoGainBand6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="auto: 0.0"
+                android:textColor="#4CAF50"
+                android:textSize="8sp"
+                android:fontFamily="sans-serif-condensed"
+                android:gravity="center" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -401,7 +472,7 @@
                 android:textSize="9sp"
                 android:fontFamily="sans-serif-condensed"
                 android:gravity="center"
-                android:layout_marginTop="4dp" />
+                android:layout_marginTop="2dp" />
 
         </LinearLayout>
 
@@ -428,12 +499,22 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:max="24"
-                android:progress="12"
+                android:max="240"
+                android:progress="120"
                 android:rotation="270"
                 android:progressTint="#1565C0"
                 android:thumbTint="#1565C0"
                 android:progressBackgroundTint="#1E1E1E" />
+
+            <TextView
+                android:id="@+id/tvAutoGainBand7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="auto: 0.0"
+                android:textColor="#4CAF50"
+                android:textSize="8sp"
+                android:fontFamily="sans-serif-condensed"
+                android:gravity="center" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -443,7 +524,7 @@
                 android:textSize="9sp"
                 android:fontFamily="sans-serif-condensed"
                 android:gravity="center"
-                android:layout_marginTop="4dp" />
+                android:layout_marginTop="2dp" />
 
         </LinearLayout>
 
@@ -470,12 +551,22 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:max="24"
-                android:progress="12"
+                android:max="240"
+                android:progress="120"
                 android:rotation="270"
                 android:progressTint="#1565C0"
                 android:thumbTint="#1565C0"
                 android:progressBackgroundTint="#1E1E1E" />
+
+            <TextView
+                android:id="@+id/tvAutoGainBand8"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="auto: 0.0"
+                android:textColor="#4CAF50"
+                android:textSize="8sp"
+                android:fontFamily="sans-serif-condensed"
+                android:gravity="center" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -485,7 +576,7 @@
                 android:textSize="9sp"
                 android:fontFamily="sans-serif-condensed"
                 android:gravity="center"
-                android:layout_marginTop="4dp" />
+                android:layout_marginTop="2dp" />
 
         </LinearLayout>
 
@@ -512,12 +603,22 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:max="24"
-                android:progress="12"
+                android:max="240"
+                android:progress="120"
                 android:rotation="270"
                 android:progressTint="#1565C0"
                 android:thumbTint="#1565C0"
                 android:progressBackgroundTint="#1E1E1E" />
+
+            <TextView
+                android:id="@+id/tvAutoGainBand9"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="auto: 0.0"
+                android:textColor="#4CAF50"
+                android:textSize="8sp"
+                android:fontFamily="sans-serif-condensed"
+                android:gravity="center" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -527,7 +628,7 @@
                 android:textSize="9sp"
                 android:fontFamily="sans-serif-condensed"
                 android:gravity="center"
-                android:layout_marginTop="4dp" />
+                android:layout_marginTop="2dp" />
 
         </LinearLayout>
 

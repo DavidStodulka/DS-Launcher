@@ -225,7 +225,7 @@ class PerformanceMeasurementEngine @Inject constructor() {
             durationMs = durationMs,
             maxSpeedKmh = maxSpeed,
             avgAccelerationMs2 = avgAccel,
-            startConditions = startConditions!!
+            startConditions = startConditions ?: StartConditions(0f, "?", 0f, measureStart)
         )
         _state.value = MeasurementState.COMPLETE
     }

@@ -49,12 +49,31 @@ class SystemSettings @Inject constructor(
      */
     fun setADBWireless(enabled: Boolean) {
         val value = if (enabled) "5555" else "0"
+        // su may block on the root-grant prompt — never wait for it on the caller's thread
+        Thread {
+            try {
+                runSuCommand("setprop service.adb.tcp.port $value")
+                runSuCommand("stop adbd && start adbd")
+                Timber.i("$TAG: ADB wireless ${if (enabled) "enabled on :$value" else "disabled"}")
+            } catch (e: Exception) {
+                Timber.e(e, "$TAG: failed to toggle ADB wireless")
+            }
+        }.apply { isDaemon = true }.start()
+    }
+
+    private fun runSuCommand(command: String) {
+        val proc = ProcessBuilder("su", "-c", command)
+            .redirectErrorStream(true)
+            .start()
         try {
-            Runtime.getRuntime().exec(arrayOf("su", "-c", "setprop service.adb.tcp.port $value"))
-            Runtime.getRuntime().exec(arrayOf("su", "-c", "stop adbd && start adbd"))
-            Timber.i("$TAG: ADB wireless ${if (enabled) "enabled on :$value" else "disabled"}")
-        } catch (e: Exception) {
-            Timber.e(e, "$TAG: failed to toggle ADB wireless")
+            if (!proc.waitFor(5, java.util.concurrent.TimeUnit.SECONDS)) {
+                Timber.w("$TAG: su command timed out: $command")
+                proc.destroyForcibly()
+            }
+        } finally {
+            runCatching { proc.inputStream.close() }
+            runCatching { proc.outputStream.close() }
+            proc.destroy()
         }
     }
 

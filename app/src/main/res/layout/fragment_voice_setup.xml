@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#080808">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- API Key card -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:background="#111111" android:padding="16dp"
+            android:layout_marginBottom="8dp">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Gemini API Klíč" android:textColor="#FFFFFF" android:textSize="16sp"
+                android:textStyle="bold" android:fontFamily="sans-serif-condensed" android:layout_marginBottom="8dp"/>
+            <EditText android:id="@+id/etApiKey" android:layout_width="match_parent"
+                android:layout_height="48dp" android:inputType="textPassword"
+                android:hint="AIza..." android:textColor="#FFFFFF" android:textColorHint="#444444"
+                android:background="@drawable/input_bg" android:paddingStart="12dp"
+                android:layout_marginBottom="8dp"/>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical">
+                <Button android:id="@+id/btnTestApiKey" android:layout_width="wrap_content"
+                    android:layout_height="40dp" android:text="Otestovat" android:textColor="#FFFFFF"
+                    android:backgroundTint="#1565C0" android:insetTop="0dp" android:insetBottom="0dp"/>
+                <TextView android:id="@+id/tvApiKeyStatus" android:layout_width="0dp"
+                    android:layout_height="wrap_content" android:layout_weight="1"
+                    android:textColor="#757575" android:textSize="13sp" android:paddingStart="12dp"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Steering wheel button card -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:background="#111111" android:padding="16dp"
+            android:layout_marginBottom="8dp">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="Tlačítko na volantu" android:textColor="#FFFFFF" android:textSize="16sp"
+                android:textStyle="bold" android:fontFamily="sans-serif-condensed" android:layout_marginBottom="4dp"/>
+            <TextView android:id="@+id/tvCurrentKeyCode" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:text="Není nastaveno"
+                android:textColor="#757575" android:textSize="13sp" android:layout_marginBottom="8dp"/>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical">
+                <Button android:id="@+id/btnCalibrateButton" android:layout_width="0dp"
+                    android:layout_height="72dp" android:layout_weight="1"
+                    android:text="Kalibrovat tlačítko"
+                    android:textColor="#FFFFFF" android:backgroundTint="#1565C0"/>
+                <com.caros.views.CountdownArcView
+                    android:id="@+id/countdownArc"
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:layout_marginStart="12dp"
+                    android:visibility="gone" />
+            </LinearLayout>
+            <TextView android:id="@+id/tvCalibrateStatus" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:text="" android:textColor="#2E7D32"
+                android:textSize="13sp" android:layout_marginTop="8dp"/>
+        </LinearLayout>
+
+        <!-- History card -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:background="#111111" android:padding="16dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:text="Historie příkazů"
+                    android:textColor="#FFFFFF" android:textSize="16sp" android:textStyle="bold"
+                    android:fontFamily="sans-serif-condensed"/>
+                <Button android:id="@+id/btnClearHistory" android:layout_width="wrap_content"
+                    android:layout_height="36dp" android:text="Vymazat" android:textSize="12sp"
+                    android:backgroundTint="#1E1E1E" android:textColor="#757575"
+                    android:insetTop="0dp" android:insetBottom="0dp"/>
+            </LinearLayout>
+            <TextView android:id="@+id/tvCommandHistory" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:text="Žádná historie"
+                android:textColor="#444444" android:textSize="13sp" android:fontFamily="monospace"
+                android:layout_marginTop="8dp"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

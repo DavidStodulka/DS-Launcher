@@ -193,7 +193,7 @@
     <!--  LIST / RECYCLER ITEM STYLES                                         -->
     <!-- ================================================================== -->
 
-    <style name="CarOS.ListItem">
+    <style name="CarOS.ListItem" parent="">
         <item name="android:minHeight">@dimen/list_item_height</item>
         <item name="android:paddingStart">@dimen/content_margin_horizontal</item>
         <item name="android:paddingEnd">@dimen/content_margin_horizontal</item>
@@ -212,7 +212,7 @@
     <!--  CARD STYLES                                                         -->
     <!-- ================================================================== -->
 
-    <style name="CarOS.Card">
+    <style name="CarOS.Card" parent="">
         <item name="android:background">@color/caros_panel</item>
         <item name="android:padding">@dimen/card_padding</item>
         <item name="android:elevation">@dimen/card_elevation</item>
@@ -228,7 +228,7 @@
     <!--  TOOLBAR / PANEL HEADER STYLES                                       -->
     <!-- ================================================================== -->
 
-    <style name="CarOS.Toolbar">
+    <style name="CarOS.Toolbar" parent="">
         <item name="android:background">@color/caros_panel</item>
         <item name="android:minHeight">@dimen/toolbar_height</item>
         <item name="android:paddingStart">@dimen/content_margin_horizontal</item>
@@ -240,7 +240,7 @@
     <!--  STATUS BAR WIDGET STYLES                                            -->
     <!-- ================================================================== -->
 
-    <style name="CarOS.StatusBar">
+    <style name="CarOS.StatusBar" parent="">
         <item name="android:background">@color/caros_status_bar_bg</item>
         <item name="android:minHeight">@dimen/status_bar_height</item>
         <item name="android:paddingStart">@dimen/spacing_sm</item>
@@ -258,7 +258,7 @@
     <!--  BOTTOM NAVIGATION STYLES                                            -->
     <!-- ================================================================== -->
 
-    <style name="CarOS.BottomNav">
+    <style name="CarOS.BottomNav" parent="">
         <item name="android:background">@color/caros_nav_bg</item>
         <item name="android:minHeight">@dimen/bottom_nav_height</item>
         <item name="android:elevation">8dp</item>
@@ -275,7 +275,6 @@
         <item name="android:textColor">@color/caros_text_primary</item>
         <item name="android:colorBackground">@color/caros_dialog_bg</item>
         <item name="android:windowTitleStyle">@style/CarOS.TextAppearance.Title</item>
-        <item name="android:buttonBarStyle">@android:style/Widget.ButtonBar</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
         <item name="android:windowMinWidthMajor">50%</item>
         <item name="android:windowMinWidthMinor">80%</item>
@@ -285,7 +284,7 @@
     <!--  DIVIDER STYLE                                                       -->
     <!-- ================================================================== -->
 
-    <style name="CarOS.Divider">
+    <style name="CarOS.Divider" parent="">
         <item name="android:background">@color/caros_divider</item>
     </style>
 
@@ -307,7 +306,7 @@
     <!--  SWITCH / TOGGLE STYLES                                              -->
     <!-- ================================================================== -->
 
-    <style name="CarOS.Switch" parent="@android:style/Widget.CompoundButton.Switch">
+    <style name="CarOS.Switch" parent="Widget.AppCompat.CompoundButton.Switch">
         <item name="android:minHeight">@dimen/touch_target_min</item>
     </style>
 
@@ -324,7 +323,7 @@
     <!--  SCROLLBAR STYLE                                                     -->
     <!-- ================================================================== -->
 
-    <style name="CarOS.Scrollbar">
+    <style name="CarOS.Scrollbar" parent="">
         <item name="android:scrollbarThumbVertical">@color/caros_outline</item>
         <item name="android:scrollbarAlwaysDrawVerticalTrack">false</item>
         <item name="android:scrollbars">vertical</item>

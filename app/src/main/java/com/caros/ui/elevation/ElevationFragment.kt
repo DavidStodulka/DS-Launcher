@@ -9,6 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import com.caros.databinding.FragmentElevationBinding
 import com.caros.elevation.ElevationTracker
 import com.caros.elevation.RouteRecorder
+import com.caros.views.ElevationViewPoint
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -65,10 +66,23 @@ class ElevationFragment : Fragment() {
             elevationTracker.points.collect { points ->
                 if (points.isNotEmpty()) {
                     val profileData = points.mapIndexed { idx, point ->
-                        // Pair: cumulative distance index to altitude
-                        idx.toFloat() to point.altM
+                        ElevationViewPoint(
+                            distanceKm = idx.toFloat() * 0.01f,  // crude 10m spacing
+                            altitudeM  = point.altM,
+                            slopePct   = point.slopePercent
+                        )
                     }
                     binding.elevationProfileView.setData(profileData)
+
+                    // Estimate fuel consumption (diesel base 6 L/100 km, slope correction ±0.06 per %)
+                    val totalDistKm = points.size * 0.01
+                    val totalFuelL = points.sumOf { pt ->
+                        val rate = (6.0 + pt.slopePercent * 0.06).coerceAtLeast(0.5)
+                        rate * 0.01 / 100.0
+                    }
+                    val per100 = if (totalDistKm > 0.01) totalFuelL / totalDistKm * 100 else 0.0
+                    binding.tvFuelEstimate.text =
+                        "Spotřeba: %.2f L  (%.1f L/100 km)".format(totalFuelL, per100)
                 }
             }
         }

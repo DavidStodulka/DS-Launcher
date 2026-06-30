@@ -45,10 +45,11 @@ class VCDSManager @Inject constructor(
 
     /**
      * Open the OBD connection.  Call once on module startup or when the user
-     * presses "Connect" in the VCDS screen.
+     * presses "Connect" in the VCDS screen.  Retries with exponential backoff
+     * before falling back to mock mode.
      */
     suspend fun connect() {
-        obdConnection.connect()
+        obdConnection.connectWithBackoff(maxAttempts = 3)
         _connectionType.value = obdConnection.connectionType
     }
 

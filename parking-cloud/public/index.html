@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+<meta name="theme-color" content="#0f1729" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Parkoviště" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="icon.svg" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<title>Parkoviště — správa vozidel</title>
+<style>
+  :root {
+    --bg: #0f1729;
+    --bg2: #16203a;
+    --panel: #1c2945;
+    --panel2: #243355;
+    --line: #2e3f63;
+    --text: #e8edf7;
+    --muted: #93a1c0;
+    --accent: #4f9dff;
+    --parked: #3a4a6b;
+    --workshop: #f2a33c;
+    --received: #36c98d;
+    --departure: #b46cff;
+    --danger: #ef5d6b;
+    --radius: 14px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+    background: linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    font-size: 15px;
+  }
+
+  /* ---------- Header ---------- */
+  header {
+    position: sticky; top: 0; z-index: 30;
+    padding: calc(var(--safe-top) + 10px) 14px 10px;
+    background: rgba(15,23,41,.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .titlebar { display: flex; align-items: center; gap: 10px; }
+  .titlebar h1 { font-size: 18px; margin: 0; font-weight: 700; letter-spacing: .2px; }
+  .sync { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .sync .sdot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); transition: background .3s; }
+  .sync.ok .sdot { background: var(--received); }
+  .sync.busy .sdot { background: var(--workshop); }
+  .sync.err .sdot { background: var(--danger); }
+  .logo {
+    width: 34px; height: 34px; border-radius: 9px;
+    background: linear-gradient(135deg, var(--accent), #7c5cff);
+    display: grid; place-items: center; font-size: 18px;
+    box-shadow: 0 4px 14px rgba(79,157,255,.35);
+  }
+  .icon-btn {
+    width: 40px; height: 40px; border-radius: 11px; border: 1px solid var(--line);
+    background: var(--panel); color: var(--text); font-size: 18px;
+    display: grid; place-items: center; cursor: pointer;
+  }
+  .icon-btn:active { transform: scale(.94); }
+
+  .search {
+    margin-top: 10px; display: flex; align-items: center; gap: 8px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 9px 12px;
+  }
+  .search input {
+    border: 0; outline: 0; background: transparent; color: var(--text);
+    width: 100%; font-size: 16px;
+  }
+  .search span { color: var(--muted); font-size: 16px; }
+
+  /* ---------- Stats / filters ---------- */
+  .stats {
+    display: flex; gap: 8px; margin-top: 10px; overflow-x: auto;
+    scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  }
+  .stats::-webkit-scrollbar { display: none; }
+  .chip {
+    flex: 0 0 auto; padding: 7px 12px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--panel);
+    color: var(--muted); font-size: 13px; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; gap: 6px; white-space: nowrap;
+  }
+  .chip .dot { width: 9px; height: 9px; border-radius: 50%; }
+  .chip b { color: var(--text); }
+  .chip.active { border-color: var(--accent); background: var(--panel2); color: var(--text); }
+
+  /* ---------- Content ---------- */
+  main { padding: 14px 12px 120px; max-width: 1100px; margin: 0 auto; }
+
+  .side-tabs {
+    display: flex; gap: 8px; margin-bottom: 14px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 4px;
+  }
+  .side-tabs button {
+    flex: 1; padding: 10px; border: 0; border-radius: 9px; background: transparent;
+    color: var(--muted); font-size: 14px; font-weight: 700; cursor: pointer;
+  }
+  .side-tabs button.active { background: var(--accent); color: #fff; box-shadow: 0 3px 10px rgba(79,157,255,.4); }
+
+  .row-card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: var(--radius); margin-bottom: 14px; overflow: hidden;
+  }
+  .row-head {
+    display: flex; align-items: center; gap: 10px; padding: 11px 14px;
+    border-bottom: 1px solid var(--line); background: var(--bg2);
+  }
+  .row-head .rnum {
+    min-width: 30px; height: 30px; padding: 0 8px; border-radius: 8px;
+    background: var(--panel2); color: var(--text); font-weight: 800; font-size: 14px;
+    display: grid; place-items: center;
+  }
+  .row-head .rtitle { flex: 1; font-weight: 700; font-size: 15px; }
+  .row-head .rcount { color: var(--muted); font-size: 12px; font-weight: 600; }
+  .row-head .row-del {
+    border: 0; background: transparent; color: var(--muted); font-size: 17px; cursor: pointer;
+    width: 30px; height: 30px; border-radius: 8px;
+  }
+  .row-head .row-del:active { background: var(--panel2); }
+
+  .tiles {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+    gap: 9px; padding: 12px;
+  }
+  @media (min-width: 520px) {
+    .tiles { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+  }
+
+  .tile {
+    position: relative; aspect-ratio: 1 / 1; border-radius: 12px; cursor: pointer;
+    background: var(--parked); border: 1px solid rgba(255,255,255,.08);
+    padding: 9px; display: flex; flex-direction: column; justify-content: space-between;
+    overflow: hidden; transition: transform .08s;
+    user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  }
+  .tile:active { transform: scale(.96); }
+  .tile.workshop { background: linear-gradient(150deg, #6b4a16, #b9802a); }
+  .tile.received { background: linear-gradient(150deg, #145c43, #1f9468); }
+  .tile.departure { background: linear-gradient(150deg, #4d2a7d, #9a52d6); }
+  .tile.dragging {
+    position: fixed; z-index: 999; pointer-events: none; touch-action: none;
+    box-shadow: 0 16px 34px rgba(0,0,0,.55); transform: scale(1.05);
+  }
+
+  .tile .stat-badge {
+    position: absolute; top: 4px; right: 6px; z-index: 5; font-size: 10px; font-weight: 800;
+    padding: 2px 6px; border-radius: 6px; background: rgba(0,0,0,.45); letter-spacing: .3px;
+  }
+  .tile .model { font-size: 12.5px; font-weight: 700; line-height: 1.15; padding-right: 30px;
+    overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .tile .vin { font-size: 19px; font-weight: 800; letter-spacing: .5px; }
+  .tile .key { font-size: 11px; color: rgba(255,255,255,.85); font-weight: 600; }
+  .tile .key.nokey { color: #ffd0d0; }
+  .tile .flags { position: absolute; bottom: 7px; right: 8px; font-size: 13px; }
+  .tile .brand-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
+
+  .add-tile {
+    aspect-ratio: 1 / 1; border-radius: 12px; cursor: pointer;
+    border: 2px dashed var(--line); background: transparent; color: var(--muted);
+    display: grid; place-items: center; font-size: 30px; font-weight: 300;
+  }
+  .add-tile:active { background: var(--panel2); }
+
+  .add-row {
+    width: 100%; padding: 14px; border: 2px dashed var(--line); border-radius: var(--radius);
+    background: transparent; color: var(--muted); font-size: 15px; font-weight: 700; cursor: pointer;
+  }
+  .add-row:active { background: var(--panel); }
+
+  .empty { text-align: center; color: var(--muted); padding: 40px 20px; }
+  .drag-hint { color: var(--muted); font-size: 12px; text-align: center; margin: -4px 0 12px; opacity: .85; }
+
+  /* ---------- Modal / sheet ---------- */
+  .overlay {
+    position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.55);
+    backdrop-filter: blur(3px); display: none; align-items: flex-end; justify-content: center;
+  }
+  .overlay.open { display: flex; }
+  .sheet {
+    width: 100%; max-width: 560px; background: var(--bg2);
+    border-radius: 20px 20px 0 0; border: 1px solid var(--line); border-bottom: 0;
+    padding: 10px 18px calc(20px + var(--safe-bottom));
+    max-height: 92vh; overflow-y: auto; animation: slideUp .22s ease;
+  }
+  @media (min-width: 560px) {
+    .overlay { align-items: center; }
+    .sheet { border-radius: 20px; margin: 20px; }
+  }
+  @keyframes slideUp { from { transform: translateY(40px); opacity: .4; } to { transform: translateY(0); opacity: 1; } }
+  .grabber { width: 42px; height: 5px; background: var(--line); border-radius: 99px; margin: 4px auto 14px; }
+  .sheet h2 { margin: 0 0 4px; font-size: 19px; }
+  .sheet .sub { color: var(--muted); font-size: 13px; margin-bottom: 16px; }
+
+  .field { margin-bottom: 13px; }
+  .field label { display: block; font-size: 12px; color: var(--muted); font-weight: 700;
+    text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+  .field input, .field select, .field textarea {
+    width: 100%; padding: 12px 13px; font-size: 16px; color: var(--text);
+    background: var(--panel); border: 1px solid var(--line); border-radius: 11px; outline: 0;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); }
+  .field textarea { resize: vertical; min-height: 56px; }
+  .row2 { display: flex; gap: 10px; }
+  .row2 .field { flex: 1; }
+  .move-label { font-size: 12px; color: var(--muted); font-weight: 700; text-transform: uppercase;
+    letter-spacing: .5px; margin: 2px 0 10px; border-top: 1px solid var(--line); padding-top: 14px; }
+
+  .status-btns { display: flex; flex-wrap: wrap; gap: 9px; margin: 6px 0 16px; }
+  .status-btns button {
+    flex: 1 1 calc(50% - 5px); padding: 13px 8px; border-radius: 12px; border: 2px solid var(--line);
+    background: var(--panel); color: var(--text); font-weight: 800; font-size: 13.5px; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+  }
+  .status-btns button .ic { font-size: 20px; }
+  .status-btns button:active { transform: scale(.96); }
+  .status-btns button.sel-workshop { border-color: var(--workshop); background: rgba(242,163,60,.16); }
+  .status-btns button.sel-received { border-color: var(--received); background: rgba(54,201,141,.16); }
+  .status-btns button.sel-parked { border-color: var(--accent); background: rgba(79,157,255,.16); }
+  .status-btns button.sel-departure { border-color: var(--departure); background: rgba(180,108,255,.18); }
+
+  .sheet-actions { display: flex; gap: 10px; margin-top: 4px; }
+  .btn {
+    flex: 1; padding: 14px; border-radius: 12px; border: 0; font-size: 15px; font-weight: 800;
+    cursor: pointer; color: #fff;
+  }
+  .btn-primary { background: var(--accent); }
+  .btn-ghost { background: var(--panel); border: 1px solid var(--line); color: var(--text); }
+  .btn-danger { background: transparent; border: 1px solid var(--danger); color: var(--danger); flex: 0 0 auto; width: 52px; }
+  .btn:active { transform: scale(.97); }
+
+  /* menu sheet */
+  .menu-item {
+    display: flex; align-items: center; gap: 14px; padding: 15px 6px; cursor: pointer;
+    border-bottom: 1px solid var(--line); font-size: 16px;
+  }
+  .menu-item:last-child { border-bottom: 0; }
+  .menu-item .mi-ic { font-size: 22px; width: 26px; text-align: center; }
+  .menu-item .mi-sub { color: var(--muted); font-size: 12px; }
+  .menu-item.danger { color: var(--danger); }
+
+  /* toast */
+  .toast {
+    position: fixed; left: 50%; bottom: calc(24px + var(--safe-bottom)); transform: translateX(-50%) translateY(20px);
+    background: #fff; color: #111; padding: 11px 18px; border-radius: 12px; font-weight: 700; font-size: 14px;
+    box-shadow: 0 8px 30px rgba(0,0,0,.4); opacity: 0; pointer-events: none; transition: .25s; z-index: 100;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .legend { display: flex; gap: 14px; justify-content: center; margin: 2px 0 16px; flex-wrap: wrap; }
+  .legend span { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+  .legend i { width: 12px; height: 12px; border-radius: 4px; display: inline-block; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="titlebar">
+    <div class="logo">🅿️</div>
+    <div style="flex:1">
+      <h1>Parkoviště</h1>
+      <div id="syncStatus" class="sync"><span class="sdot"></span><span id="syncText">připojuji…</span></div>
+    </div>
+    <button class="icon-btn" id="btnSide" title="Strana">⇄</button>
+    <button class="icon-btn" id="btnMenu" title="Menu">☰</button>
+  </div>
+  <div class="search">
+    <span>🔎</span>
+    <input id="search" placeholder="Hledat model, VIN, klíč…" autocomplete="off" />
+  </div>
+  <div class="stats" id="stats"></div>
+</header>
+
+<main>
+  <div class="side-tabs" id="sideTabs">
+    <button data-side="left" class="active">◀ Levá strana</button>
+    <button data-side="right">Pravá strana ▶</button>
+  </div>
+  <div class="drag-hint" id="dragHint">👆 Podrž dlaždici a táhni — přeskupíš pořadí <b>v rámci řady</b>. Pro přesun do jiné řady/strany klepni na vozidlo a vyber Stranu · Řadu · Pozici.</div>
+  <div id="rows"></div>
+</main>
+
+<!-- Vehicle detail sheet -->
+<div class="overlay" id="vehOverlay">
+  <div class="sheet" id="vehSheet">
+    <div class="grabber"></div>
+    <h2 id="vehTitle">Vozidlo</h2>
+    <div class="sub" id="vehSub"></div>
+
+    <div class="status-btns" id="statusBtns">
+      <button data-status="parked"><span class="ic">🅿️</span>Zaparkováno</button>
+      <button data-status="workshop"><span class="ic">🔧</span>Dílna</button>
+      <button data-status="received"><span class="ic">🆕</span>Nově přijato</button>
+      <button data-status="departure"><span class="ic">🚗</span>Připravit na odjezd</button>
+    </div>
+
+    <div class="field">
+      <label>Model</label>
+      <input id="fModel" placeholder="např. Kodiaq sportline" />
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>VIN / č. vozu</label>
+        <input id="fVin" inputmode="numeric" placeholder="45853" />
+      </div>
+      <div class="field">
+        <label>Číslo klíče</label>
+        <input id="fKey" placeholder="22" />
+      </div>
+    </div>
+    <div class="field">
+      <label>Poznámka</label>
+      <textarea id="fNote" placeholder="Poznámka, např. chybí klíč, focení…"></textarea>
+    </div>
+
+    <div id="moveSection">
+      <div class="move-label">↔ Přesunout vůz — strana, řada a pozice</div>
+      <div class="row2">
+        <div class="field">
+          <label>Strana</label>
+          <select id="fSide">
+            <option value="left">Levá strana</option>
+            <option value="right">Pravá strana</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Řada</label>
+          <select id="fRow"></select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Pozice v řadě</label>
+        <select id="fPos"></select>
+      </div>
+    </div>
+
+    <div class="sheet-actions">
+      <button class="btn btn-danger" id="vehDelete" title="Smazat">🗑</button>
+      <button class="btn btn-ghost" id="vehCancel">Zavřít</button>
+      <button class="btn btn-primary" id="vehSave">Uložit</button>
+    </div>
+  </div>
+</div>
+
+<!-- Menu sheet -->
+<div class="overlay" id="menuOverlay">
+  <div class="sheet">
+    <div class="grabber"></div>
+    <h2>Menu</h2>
+    <div class="sub">☁️ Společná online data — synchronizováno mezi všemi zařízeními. Změny vidí každý okamžitě.</div>
+    <div class="legend">
+      <span><i style="background:var(--parked)"></i> Zaparkováno</span>
+      <span><i style="background:var(--workshop)"></i> Dílna</span>
+      <span><i style="background:var(--received)"></i> Nově přijato</span>
+      <span><i style="background:var(--departure)"></i> Připravit na odjezd</span>
+    </div>
+    <div class="menu-item" id="miRefresh"><span class="mi-ic">🔄</span><div><div>Obnovit ze serveru</div><div class="mi-sub">Načte aktuální stav</div></div></div>
+    <div class="menu-item" id="miShare"><span class="mi-ic">🔗</span><div><div>Sdílet odkaz</div><div class="mi-sub">Pošli appku kolegům</div></div></div>
+    <div class="menu-item" id="miExport"><span class="mi-ic">📤</span><div><div>Stáhnout zálohu</div><div class="mi-sub">Aktuální stav jako .json</div></div></div>
+    <div class="menu-item danger" id="miReset"><span class="mi-ic">♻️</span><div><div>Obnovit původní seznam</div><div class="mi-sub">Vrátí všech 64 vozů z TXT (pro všechny!)</div></div></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
+  }
+</script>
+</body>
+</html>

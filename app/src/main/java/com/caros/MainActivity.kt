@@ -6,12 +6,14 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
+import android.view.KeyEvent
 import android.view.WindowInsets
 import android.view.WindowManager
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import com.caros.can.CANService
 import com.caros.databinding.ActivityMainBinding
@@ -20,8 +22,14 @@ import com.caros.profiles.ProfileManager
 import com.caros.ui.main.LeftPanelFragment
 import com.caros.ui.main.MainViewModel
 import com.caros.ui.main.RightPanelFragment
+import com.caros.voice.SteeringWheelButtonDetector
+import com.caros.voice.TextToSpeechManager
+import com.caros.voice.VoiceCommandExecutor
+import com.caros.voice.VoiceInputManager
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -35,19 +43,43 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
 
     @Inject lateinit var profileManager: ProfileManager
+    @Inject lateinit var voiceCommandExecutor: VoiceCommandExecutor
+    @Inject lateinit var steeringWheelButtonDetector: SteeringWheelButtonDetector
+    @Inject lateinit var voiceInputManager: VoiceInputManager
+    @Inject lateinit var textToSpeechManager: TextToSpeechManager
 
     private val mainViewModel: MainViewModel by viewModels()
 
     private var canServiceBound = false
+    private var canFrameJob: kotlinx.coroutines.Job? = null
+
+    private companion object {
+        /** Max rate at which CAN frames propagate to the UI layer (200 ms = 5 Hz). */
+        const val UI_FRAME_SAMPLE_MS = 200L
+    }
 
     private val serviceConnection = object : ServiceConnection {
+        @OptIn(FlowPreview::class)
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             canServiceBound = true
             Timber.d("MainActivity: CANService connected")
+            // Wire the service's frame stream into the shared ViewModel so every
+            // fragment observing mainViewModel.canFrame gets live data.
+            // sample() caps UI updates at 5 Hz — real CAN hardware can emit
+            // hundreds of frames per second and redrawing each one is wasted work.
+            val canService = (service as? CANService.CANBinder)?.getService()
+            canFrameJob?.cancel()
+            canFrameJob = lifecycleScope.launch {
+                canService?.canFrame
+                    ?.sample(UI_FRAME_SAMPLE_MS)
+                    ?.collect { mainViewModel.updateCANFrame(it) }
+            }
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
             canServiceBound = false
+            canFrameJob?.cancel()
+            canFrameJob = null
             Timber.d("MainActivity: CANService disconnected")
         }
     }
@@ -65,6 +97,8 @@ class MainActivity : AppCompatActivity() {
         bindCAN()
         startNightDimCoroutine()
         observeDrivingMode()
+        observeRootStatus()
+        observeObdStatus()
     }
 
     private fun hideSystemUI() {
@@ -85,49 +119,63 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupNavigation() {
-        val navHostFragment = supportFragmentManager
-            .findFragmentById(R.id.centerPanel) as NavHostFragment
-        navController = navHostFragment.navController
+        // Dynamically add NavHostFragment into the centerPanel FrameLayout
+        val existing = supportFragmentManager.findFragmentById(R.id.centerPanel)
+        if (existing is NavHostFragment) {
+            navController = existing.navController
+        } else {
+            val navHost = NavHostFragment.create(R.navigation.nav_graph)
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.centerPanel, navHost, "navHost")
+                .setPrimaryNavigationFragment(navHost)
+                .commitNow()
+            navController = navHost.navController
+        }
     }
 
     private fun setupBottomNav() {
-        binding.btnHome.setOnClickListener {
-            navController.navigate(R.id.mainFragment)
-            updateNavHighlight(R.id.btnHome)
+        val navOpts = NavOptions.Builder()
+            .setLaunchSingleTop(true)
+            .setPopUpTo(R.id.mainFragment, inclusive = false)
+            .build()
+
+        binding.navHome.setOnClickListener {
+            navController.navigate(R.id.mainFragment, null, navOpts)
+            updateNavHighlight(R.id.navHome)
         }
-        binding.btnMedia.setOnClickListener {
-            navController.navigate(R.id.mediaFragment)
-            updateNavHighlight(R.id.btnMedia)
+        binding.navMedia.setOnClickListener {
+            navController.navigate(R.id.mediaFragment, null, navOpts)
+            updateNavHighlight(R.id.navMedia)
         }
-        binding.btnRace.setOnClickListener {
-            navController.navigate(R.id.raceFragment)
-            updateNavHighlight(R.id.btnRace)
+        binding.navRace.setOnClickListener {
+            navController.navigate(R.id.raceFragment, null, navOpts)
+            updateNavHighlight(R.id.navRace)
         }
-        binding.btnVCDS.setOnClickListener {
-            navController.navigate(R.id.vcdsFragment)
-            updateNavHighlight(R.id.btnVCDS)
+        binding.navVcds.setOnClickListener {
+            navController.navigate(R.id.vcdsFragment, null, navOpts)
+            updateNavHighlight(R.id.navVcds)
         }
-        binding.btnAndroid.setOnClickListener {
-            navController.navigate(R.id.settingsFragment)
-            updateNavHighlight(R.id.btnAndroid)
+        binding.navAndroid.setOnClickListener {
+            navController.navigate(R.id.settingsFragment, null, navOpts)
+            updateNavHighlight(R.id.navAndroid)
         }
-        binding.btnDiag.setOnClickListener {
-            navController.navigate(R.id.diagnosticsFragment)
-            updateNavHighlight(R.id.btnDiag)
+        binding.navDiag.setOnClickListener {
+            navController.navigate(R.id.diagnosticsFragment, null, navOpts)
+            updateNavHighlight(R.id.navDiag)
         }
     }
 
     private fun updateNavHighlight(selectedId: Int) {
-        val allButtons = listOf(
-            binding.btnHome,
-            binding.btnMedia,
-            binding.btnRace,
-            binding.btnVCDS,
-            binding.btnAndroid,
-            binding.btnDiag
+        val allNavItems = listOf(
+            binding.navHome,
+            binding.navMedia,
+            binding.navRace,
+            binding.navVcds,
+            binding.navAndroid,
+            binding.navDiag
         )
-        allButtons.forEach { btn ->
-            btn.alpha = if (btn.id == selectedId) 1.0f else 0.55f
+        allNavItems.forEach { item ->
+            item.alpha = if (item.id == selectedId) 1.0f else 0.55f
         }
     }
 
@@ -175,8 +223,39 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun observeRootStatus() {
+        lifecycleScope.launch {
+            mainViewModel.rootStatus.collect { binding.statusBarView.setRootStatus(it) }
+        }
+    }
+
+    private fun observeObdStatus() {
+        lifecycleScope.launch {
+            mainViewModel.obdState.collect { type ->
+                binding.statusBarView.setObdConnected(
+                    type != com.caros.vcds.ConnectionType.DISCONNECTED
+                )
+            }
+        }
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        // Route to calibration first if active
+        if (steeringWheelButtonDetector.isCalibrating && event != null) {
+            if (steeringWheelButtonDetector.onKeyEvent(event)) return true
+        }
+        val voiceKeyCode = mainViewModel.voiceKeyCode.value
+        if (keyCode == KeyEvent.KEYCODE_SEARCH || (voiceKeyCode != null && keyCode == voiceKeyCode)) {
+            mainViewModel.toggleVoiceListening()
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
+        voiceInputManager.destroy()
+        textToSpeechManager.shutdown()
         if (canServiceBound) {
             unbindService(serviceConnection)
             canServiceBound = false

@@ -105,7 +105,7 @@
 
             <!-- Measurement type buttons -->
             <Button
-                android:id="@+id/measure0to100"
+                android:id="@+id/btn0to100"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:text="0 – 100 km/h"
@@ -118,7 +118,7 @@
                 android:insetBottom="0dp" />
 
             <Button
-                android:id="@+id/measure0to200"
+                android:id="@+id/btn0to200"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:text="0 – 200 km/h"
@@ -131,7 +131,7 @@
                 android:insetBottom="0dp" />
 
             <Button
-                android:id="@+id/measure80to120"
+                android:id="@+id/btn80to120"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:text="80 – 120 km/h"
@@ -144,7 +144,7 @@
                 android:insetBottom="0dp" />
 
             <Button
-                android:id="@+id/measureBraking"
+                android:id="@+id/btnBraking"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:text="Braking Distance"
@@ -258,7 +258,7 @@
             android:padding="16dp">
 
             <TextView
-                android:id="@+id/measurementLabel"
+                android:id="@+id/tvMeasurementState"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="0 – 100 km/h"
@@ -270,7 +270,7 @@
 
             <!-- Large result display -->
             <TextView
-                android:id="@+id/mainResultDisplay"
+                android:id="@+id/tvResult"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="0.0s"
@@ -294,6 +294,51 @@
                 android:letterSpacing="0.08"
                 android:backgroundTint="#2E7D32"
                 android:elevation="4dp" />
+
+            <!-- HUD launch button (visible during active measurement) -->
+            <Button
+                android:id="@+id/btnLaunchHUD"
+                android:layout_width="180dp"
+                android:layout_height="44dp"
+                android:layout_marginTop="8dp"
+                android:text="OPEN HUD"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:fontFamily="sans-serif-condensed"
+                android:backgroundTint="#E65100"
+                android:visibility="gone"
+                android:insetTop="0dp"
+                android:insetBottom="0dp" />
+
+            <!-- Secondary result details -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp">
+
+                <TextView
+                    android:id="@+id/tvMaxSpeed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-- km/h"
+                    android:textColor="#757575"
+                    android:textSize="14sp"
+                    android:fontFamily="sans-serif-condensed"
+                    android:layout_marginEnd="16dp"
+                    tools:text="102.3 km/h" />
+
+                <TextView
+                    android:id="@+id/tvAvgAccel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="-- m/s²"
+                    android:textColor="#757575"
+                    android:textSize="14sp"
+                    android:fontFamily="sans-serif-condensed"
+                    tools:text="4.12 m/s²" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
@@ -321,7 +366,7 @@
                 android:layout_marginBottom="8dp" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/raceResultsRecyclerView"
+                android:id="@+id/rvSessions"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -329,7 +374,7 @@
                 tools:itemCount="6" />
 
             <Button
-                android:id="@+id/clearResultsButton"
+                android:id="@+id/btnReset"
                 android:layout_width="match_parent"
                 android:layout_height="36dp"
                 android:text="Clear Session"

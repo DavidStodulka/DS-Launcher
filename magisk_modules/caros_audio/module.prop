@@ -1,0 +1,7 @@
+id=caros_audio
+name=CarOS Audio Foundation
+version=v1
+versionCode=1
+author=CarOS
+description=Unified audio engine foundation: JamesDSP + V4A + Native AML. Sets SELinux contexts and audio device permissions.
+minMagisk=24000

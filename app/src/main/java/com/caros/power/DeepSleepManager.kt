@@ -87,26 +87,34 @@ class DeepSleepManager @Inject constructor(
         }
         Timber.i("$TAG: entering deep sleep")
 
-        // Step 1: dim screen to 0 via root Settings.System write
-        setScreenBrightness(0)
+        try {
+            // Step 1: dim screen to 0 via root Settings.System write
+            setScreenBrightness(0)
 
-        // Step 2: switch CPU governor to powersave to reduce consumption
-        setCpuGovernor("powersave")
+            // Step 2: switch CPU governor to powersave to reduce consumption
+            setCpuGovernor("powersave")
 
-        // Step 3: disable WiFi — saves ~200mW
-        disableWifi()
+            // Step 3: disable WiFi — saves ~200mW
+            disableWifi()
 
-        // Step 4: acquire partial WakeLock so CAN monitoring continues
-        if (!partialWakeLock.isHeld) {
-            partialWakeLock.acquire()
-            Timber.d("$TAG: partial WakeLock acquired")
+            // Step 4: acquire partial WakeLock so CAN monitoring continues
+            if (!partialWakeLock.isHeld) {
+                partialWakeLock.acquire()
+                Timber.d("$TAG: partial WakeLock acquired")
+            }
+
+            // Step 5: turn screen off
+            turnScreenOff()
+
+            _isInDeepSleep.value = true
+            Timber.i("$TAG: deep sleep active")
+        } catch (e: Exception) {
+            // Don't leave the WakeLock held if we never reached the sleeping state
+            Timber.e(e, "$TAG: enterDeepSleep failed — releasing partial WakeLock")
+            if (!_isInDeepSleep.value && partialWakeLock.isHeld) {
+                partialWakeLock.release()
+            }
         }
-
-        // Step 5: turn screen off
-        turnScreenOff()
-
-        _isInDeepSleep.value = true
-        Timber.i("$TAG: deep sleep active")
     }
 
     /**
@@ -231,7 +239,9 @@ class DeepSleepManager @Inject constructor(
         if (result.isFailure) {
             Timber.w("$TAG: root keyevent 26 failed, trying PowerManager.goToSleep()")
             try {
-                powerManager.goToSleep(android.os.SystemClock.uptimeMillis())
+                @Suppress("DiscouragedPrivateApi")
+                val m = android.os.PowerManager::class.java.getMethod("goToSleep", Long::class.javaPrimitiveType)
+                m.invoke(powerManager, android.os.SystemClock.uptimeMillis())
             } catch (e: Exception) {
                 Timber.e(e, "$TAG: PowerManager.goToSleep() also failed")
             }

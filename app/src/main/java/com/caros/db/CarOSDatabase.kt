@@ -20,11 +20,15 @@ package com.caros.db
 // ─────────────────────────────────────────────────────────────────────────────
 
 import android.content.Context
+import androidx.room.Dao
 import androidx.room.Database
+import androidx.room.Delete
+import androidx.room.Query
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
+import androidx.room.Upsert
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import dagger.Module
@@ -32,6 +36,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.flow.Flow
 import timber.log.Timber
 import javax.inject.Singleton
 
@@ -70,7 +75,7 @@ class BooleanConverter {
 // ─────────────────────────────────────────────────────────────────────────────
 
 private const val DB_NAME    = "caros_database"
-private const val DB_VERSION = 1
+private const val DB_VERSION = 4
 
 @Database(
     entities = [
@@ -81,7 +86,9 @@ private const val DB_VERSION = 1
         RaceSessionEntity::class,
         RouteEntity::class,
         ProfileEntity::class,
-        TripEntity::class
+        TripEntity::class,
+        AudioProfileEntity::class,
+        RoutePredictionEntity::class
     ],
     version      = DB_VERSION,
     exportSchema = true
@@ -103,6 +110,8 @@ abstract class CarOSDatabase : RoomDatabase() {
     abstract fun routeDao():            RouteDao
     abstract fun profileDao():          ProfileDao
     abstract fun tripDao():             TripDao
+    abstract fun audioProfileDao():        AudioProfileDao
+    abstract fun routePredictionDao():     RoutePredictionDao
 
     // ── Companion / singleton factory ─────────────────────────────────────────
 
@@ -144,7 +153,45 @@ abstract class CarOSDatabase : RoomDatabase() {
         //
         // Then add it to ALL_MIGRATIONS below.
 
-        private val ALL_MIGRATIONS: Array<Migration> = emptyArray()
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """CREATE TABLE IF NOT EXISTS `audio_profiles` (
+                        `id` TEXT NOT NULL PRIMARY KEY,
+                        `name` TEXT NOT NULL,
+                        `jsonData` TEXT NOT NULL,
+                        `lastModified` INTEGER NOT NULL
+                    )"""
+                )
+            }
+        }
+
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """CREATE TABLE IF NOT EXISTS `route_predictions` (
+                        `id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                        `dayOfWeek` INTEGER NOT NULL,
+                        `hourOfDay` INTEGER NOT NULL,
+                        `destLat` REAL NOT NULL,
+                        `destLon` REAL NOT NULL,
+                        `destLabel` TEXT NOT NULL,
+                        `tripCount` INTEGER NOT NULL DEFAULT 1,
+                        `lastUsedMs` INTEGER NOT NULL
+                    )"""
+                )
+            }
+        }
+
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_route_predictions_dayOfWeek_hourOfDay` ON `route_predictions` (`dayOfWeek`, `hourOfDay`)"
+                )
+            }
+        }
+
+        private val ALL_MIGRATIONS: Array<Migration> = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
     }
 
     // ── Database lifecycle callback ───────────────────────────────────────────
@@ -214,4 +261,31 @@ object DatabaseModule {
     @Provides
     fun provideTripDao(db: CarOSDatabase): TripDao =
         db.tripDao()
+
+    @Provides
+    fun provideAudioProfileDao(db: CarOSDatabase): AudioProfileDao =
+        db.audioProfileDao()
+
+    @Provides
+    fun provideRoutePredictionDao(db: CarOSDatabase): RoutePredictionDao =
+        db.routePredictionDao()
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  AudioProfileDao
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Dao
+interface AudioProfileDao {
+    @Query("SELECT * FROM audio_profiles ORDER BY lastModified DESC")
+    fun getAllProfiles(): Flow<List<AudioProfileEntity>>
+
+    @Upsert
+    suspend fun upsert(profile: AudioProfileEntity)
+
+    @Delete
+    suspend fun delete(profile: AudioProfileEntity)
+
+    @Query("SELECT * FROM audio_profiles WHERE id = :id LIMIT 1")
+    suspend fun getById(id: String): AudioProfileEntity?
 }

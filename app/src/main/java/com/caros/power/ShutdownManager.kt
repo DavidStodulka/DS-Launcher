@@ -18,8 +18,11 @@ import android.os.Looper
 import android.os.PowerManager
 import com.caros.core.ShellExecutor
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
@@ -43,6 +46,7 @@ class ShutdownManager @Inject constructor(
     private val TAG = "ShutdownManager"
     private val mainHandler = Handler(Looper.getMainLooper())
     private var scheduledRunnable: Runnable? = null
+    private val shutdownScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     // ─────────────────────────────────────────────────────────────────────────
     //  Public API
@@ -121,11 +125,8 @@ class ShutdownManager @Inject constructor(
         cancelScheduled()
         Timber.i("$TAG: scheduling shutdown in ${delayMs}ms")
         val runnable = Runnable {
-            // Fire-and-forget coroutine — this runs on the main handler
-            // so we spawn an IO coroutine to do the actual shutdown work
-            kotlinx.coroutines.GlobalScope.let { scope ->
-                scope.launch { shutdown() }
-            }
+            // Fire-and-forget on an IO-backed scope; never blocks the main thread
+            shutdownScope.launch { shutdown() }
         }
         scheduledRunnable = runnable
         mainHandler.postDelayed(runnable, delayMs)
@@ -175,7 +176,3 @@ class ShutdownManager @Inject constructor(
     }
 }
 
-// Extension for GlobalScope usage without the import — keeps the file self-contained
-private fun kotlinx.coroutines.CoroutineScope.launch(
-    block: suspend kotlinx.coroutines.CoroutineScope.() -> Unit
-) = kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.IO, block = block)

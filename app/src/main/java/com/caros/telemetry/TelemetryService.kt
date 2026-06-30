@@ -37,13 +37,18 @@ import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.caros.can.ACTION_ACC_STATE_CHANGED
 import com.caros.can.ACTION_CAN_FRAME
+import com.caros.can.CANParser
 import com.caros.can.EXTRA_ACC_ON
 import com.caros.can.EXTRA_COOLANT_CELSIUS
 import com.caros.can.EXTRA_IS_ACC_ON
 import com.caros.can.EXTRA_RPM
 import com.caros.can.EXTRA_SPEED_KMH
 import com.caros.core.CarOSApplication
+import com.caros.core.HealthModules
+import com.caros.core.ServiceHealthMonitor
 import com.caros.db.CarOSDatabase
+import com.caros.race.AggressiveDrivingDetector
+import com.caros.race.GForce
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -69,6 +74,10 @@ class TelemetryService : Service() {
 
     @Inject lateinit var db: CarOSDatabase
     @Inject lateinit var drivingStyleAnalyzer: DrivingStyleAnalyzer
+    @Inject lateinit var routePredictorEngine: RoutePredictorEngine
+    @Inject lateinit var aggressiveDrivingDetector: AggressiveDrivingDetector
+    @Inject lateinit var canParser: CANParser
+    @Inject lateinit var healthMonitor: ServiceHealthMonitor
 
     // ── Coroutine scope ───────────────────────────────────────────────────────
 
@@ -93,6 +102,7 @@ class TelemetryService : Service() {
 
     /** Distance accumulated in the current session in km. */
     @Volatile private var sessionDistanceKm: Double = 0.0
+    @Volatile private var lastNotificationUpdateMs: Long = 0L
 
     /** Last GPS location used for distance/g-force calculation. */
     @Volatile private var lastLocation: Location? = null
@@ -141,6 +151,14 @@ class TelemetryService : Service() {
     private var recordingJob: Job? = null
     private var stopTimerJob: Job? = null
 
+    /**
+     * Frame batch buffer — frames are accumulated here and written to Room in
+     * batches of [FRAME_BATCH_SIZE] (≈ every 5 s) instead of one insert per
+     * 500 ms, reducing eMMC write frequency 10×. Flushed on session end; a
+     * hard process kill loses at most the last ~5 s of frames.
+     */
+    private val frameBuffer = ArrayList<com.caros.db.TelemetryFrameEntity>(FRAME_BATCH_SIZE)
+
     // ── Broadcast receivers ───────────────────────────────────────────────────
 
     private val canFrameReceiver = object : BroadcastReceiver() {
@@ -182,8 +200,20 @@ class TelemetryService : Service() {
         registerReceivers()
         startLocationUpdates()
         startRecordingLoop()
+        startHeartbeat()
 
         _serviceState.value = ServiceState.RUNNING
+    }
+
+    private fun startHeartbeat() {
+        val appContext = applicationContext
+        healthMonitor.registerRestartAction(HealthModules.TELEMETRY) { start(appContext) }
+        serviceScope.launch {
+            while (true) {
+                healthMonitor.heartbeat(HealthModules.TELEMETRY)
+                delay(HEARTBEAT_INTERVAL_MS)
+            }
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -198,6 +228,8 @@ class TelemetryService : Service() {
     override fun onDestroy() {
         Timber.i("TelemetryService: onDestroy")
         _serviceState.value = ServiceState.STOPPED
+        // Intentional stop — stop watchdog monitoring so it doesn't resurrect us
+        healthMonitor.unregister(HealthModules.TELEMETRY)
 
         recordingJob?.cancel()
         stopTimerJob?.cancel()
@@ -300,6 +332,15 @@ class TelemetryService : Service() {
         val bearingDelta = bearingDelta(lastBearing, newLocation.bearing)
         val bearingRateRad = Math.toRadians(bearingDelta.toDouble()).toFloat() / dtSec
         lateralG = (newSpeedMs * bearingRateRad) / 9.81f
+
+        // Feed live G-force to aggression detector (only while a session is active).
+        // Prefers ESP hardware G-force from CANParser when available.
+        if (currentSessionId != 0L) {
+            aggressiveDrivingDetector.updateFromCANFrame(
+                frame    = canParser.currentFrame(),
+                fallback = GForce(lateralG, longitudinalG, nowMs)
+            )
+        }
     }
 
     /** Returns the shortest signed bearing difference in degrees [-180, 180]. */
@@ -364,6 +405,7 @@ class TelemetryService : Service() {
         currentSessionId   = db.telemetrySessionDao().insert(entity)
         sessionDistanceKm  = 0.0
         lastLocation       = null
+        aggressiveDrivingDetector.resetSession()
 
         Timber.i("TelemetryService: session started, id=$currentSessionId")
         updateNotification("Recording session #$currentSessionId")
@@ -376,13 +418,14 @@ class TelemetryService : Service() {
         Timber.i("TelemetryService: ending session $sid — reason=$reason")
         val endTime = System.currentTimeMillis()
 
+        flushFrameBuffer()
         db.telemetrySessionDao().closeSession(sid, endTime, sessionDistanceKm)
         currentSessionId  = 0L
         sessionDistanceKm = 0.0
 
         updateNotification("Waiting for motion…")
 
-        // Launch post-session analysis without blocking the service
+        // Launch post-session analysis and route learning without blocking the service
         serviceScope.launch(Dispatchers.IO) {
             try {
                 Timber.d("TelemetryService: analysing session $sid")
@@ -392,10 +435,35 @@ class TelemetryService : Service() {
                 Timber.e(e, "TelemetryService: analysis failed for session $sid")
             }
         }
+
+        // Record destination for predictive navigation
+        val finalGps = latestLocation.get()
+        if (finalGps != null) {
+            serviceScope.launch(Dispatchers.IO) {
+                try {
+                    routePredictorEngine.recordTrip(finalGps.latitude, finalGps.longitude)
+                } catch (e: Exception) {
+                    Timber.w(e, "TelemetryService: route prediction record failed")
+                }
+            }
+        }
+    }
+
+    /** Write any buffered frames to Room (called before closing a session). */
+    private suspend fun flushFrameBuffer() {
+        val batch = synchronized(frameBuffer) {
+            if (frameBuffer.isEmpty()) null
+            else frameBuffer.toList().also { frameBuffer.clear() }
+        } ?: return
+        try {
+            db.telemetryFrameDao().insertAll(batch)
+        } catch (e: Exception) {
+            Timber.w(e, "TelemetryService: failed to flush frame buffer")
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    //  Recording loop — writes one frame to DB every 500 ms
+    //  Recording loop — buffers frames, batch-writes to DB every ~5 s
     // ─────────────────────────────────────────────────────────────────────────
 
     private fun startRecordingLoop() {
@@ -429,14 +497,26 @@ class TelemetryService : Service() {
                     sessionId      = sid
                 )
 
-                try {
-                    db.telemetryFrameDao().insert(frame)
-                } catch (e: Exception) {
-                    Timber.w(e, "TelemetryService: failed to insert frame for session $sid")
+                val batch: List<com.caros.db.TelemetryFrameEntity>? = synchronized(frameBuffer) {
+                    frameBuffer.add(frame)
+                    if (frameBuffer.size >= FRAME_BATCH_SIZE) {
+                        val copy = frameBuffer.toList()
+                        frameBuffer.clear()
+                        copy
+                    } else null
+                }
+                if (batch != null) {
+                    try {
+                        db.telemetryFrameDao().insertAll(batch)
+                    } catch (e: Exception) {
+                        Timber.w(e, "TelemetryService: failed to insert frame batch for session $sid")
+                    }
                 }
 
                 // Update notification with current distance periodically
-                if (System.currentTimeMillis() % NOTIFICATION_UPDATE_INTERVAL < RECORDING_INTERVAL_MS) {
+                val now2 = System.currentTimeMillis()
+                if (now2 - lastNotificationUpdateMs >= NOTIFICATION_UPDATE_INTERVAL) {
+                    lastNotificationUpdateMs = now2
                     updateNotification("Recording — %.1f km".format(sessionDistanceKm))
                 }
             }
@@ -486,6 +566,8 @@ class TelemetryService : Service() {
         private const val NOTIFICATION_ID             = 2001
         private const val RECORDING_INTERVAL_MS       = 500L
         private const val NOTIFICATION_UPDATE_INTERVAL = 5_000L
+        private const val HEARTBEAT_INTERVAL_MS       = 5_000L
+        private const val FRAME_BATCH_SIZE            = 10
 
         const val ACTION_STOP_RECORDING = "com.caros.telemetry.ACTION_STOP_RECORDING"
 

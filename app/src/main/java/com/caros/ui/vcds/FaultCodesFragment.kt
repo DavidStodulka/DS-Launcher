@@ -18,6 +18,8 @@ import com.caros.can.DTCCode
 import com.caros.databinding.FragmentVcdsFaultCodesBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -99,13 +101,26 @@ class FaultCodesFragment : Fragment() {
                 .show()
         }
 
-        // Export button (if present in layout)
-        try {
-            binding.root.findViewById<View>(R.id.btnExportDtc)?.setOnClickListener {
-                exportDtcReport()
-            }
-        } catch (e: Exception) {
-            // Export button not in layout — silently skip
+    }
+
+    private fun showFreezeFrameDialog(dtc: com.caros.can.DTCCode, ecuAddress: Int) {
+        viewModel.loadFreezeFrame(ecuAddress, dtc)
+        val loadingDialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle("Freeze Frame: ${dtc.code}")
+            .setMessage("Načítám data...")
+            .setCancelable(true)
+            .create()
+        loadingDialog.show()
+        viewLifecycleOwner.lifecycleScope.launch {
+            val ff = viewModel.freezeFrame.filterNotNull().first()
+            loadingDialog.dismiss()
+            val msg = if (ff.parameters.isEmpty()) "Žádná data" else
+                ff.parameters.entries.joinToString("\n") { "${it.key}: ${it.value}" }
+            androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle("Freeze Frame: ${dtc.code}")
+                .setMessage(msg)
+                .setPositiveButton("OK", null)
+                .show()
         }
     }
 
@@ -149,12 +164,17 @@ class FaultCodesFragment : Fragment() {
     // ── DTCAdapter ────────────────────────────────────────────────────────────
 
     private inner class DTCAdapter :
-        ListAdapter<Pair<DTCCode, String>, DTCAdapter.DTCViewHolder>(DIFF_CALLBACK) {
+        ListAdapter<Pair<DTCCode, String>, DTCAdapter.DTCViewHolder>(
+            object : DiffUtil.ItemCallback<Pair<DTCCode, String>>() {
+                override fun areItemsTheSame(a: Pair<DTCCode, String>, b: Pair<DTCCode, String>) = a.first.code == b.first.code
+                override fun areContentsTheSame(a: Pair<DTCCode, String>, b: Pair<DTCCode, String>) = a == b
+            }
+        ) {
 
         inner class DTCViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val tvCode: TextView = view.findViewById(R.id.tvDTCCode)
             val tvDesc: TextView = view.findViewById(R.id.tvDTCDescription)
-            val tvStatus: TextView = view.findViewById(R.id.tvStatus)
+            val tvStatus: TextView = view.findViewById(R.id.tvDTCStatus)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DTCViewHolder {
@@ -174,14 +194,14 @@ class FaultCodesFragment : Fragment() {
                 else      -> android.graphics.Color.parseColor("#757575")
             }
             holder.tvStatus.setBackgroundColor(color)
+            holder.itemView.setOnClickListener {
+                val (dtc, ecuName) = getItem(holder.adapterPosition)
+                // Find ECU address from name
+                val ecuAddress = com.caros.vcds.ECUDatabase.LEON_5F_ECUS
+                    .firstOrNull { it.name == ecuName }?.address ?: 0x01
+                showFreezeFrameDialog(dtc, ecuAddress)
+            }
         }
 
-        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<Pair<DTCCode, String>>() {
-            override fun areItemsTheSame(a: Pair<DTCCode, String>, b: Pair<DTCCode, String>) =
-                a.first.code == b.first.code
-
-            override fun areContentsTheSame(a: Pair<DTCCode, String>, b: Pair<DTCCode, String>) =
-                a == b
-        }
     }
 }

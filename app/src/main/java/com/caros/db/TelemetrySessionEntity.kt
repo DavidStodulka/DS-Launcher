@@ -91,4 +91,12 @@ interface TelemetrySessionDao {
 
     @Query("DELETE FROM telemetry_sessions")
     suspend fun deleteAll()
+
+    /** Prune finished sessions that started before [beforeMs]. Returns rows deleted. */
+    @Query("DELETE FROM telemetry_sessions WHERE start_time < :beforeMs AND end_time IS NOT NULL")
+    suspend fun deleteOlderThan(beforeMs: Long): Int
+
+    /** Return the most recent [limit] sessions, newest first. */
+    @Query("SELECT * FROM telemetry_sessions ORDER BY start_time DESC LIMIT :limit")
+    suspend fun getRecentSessions(limit: Int): List<TelemetrySessionEntity>
 }

@@ -67,7 +67,11 @@ class CANParser @Inject constructor() {
             VAGFrameMap.ID_CLIMATE_STATUS,
             VAGFrameMap.ID_CLIMATE_STATUS_PASS -> decodeClimate(bytes)
             VAGFrameMap.ID_DPF_STATUS      -> decodeDPF(bytes)
+            VAGFrameMap.ID_DPF_REGEN       -> decodeDPFRegen(bytes)
             VAGFrameMap.ID_DSG_STATUS      -> decodeDSG(bytes)
+            VAGFrameMap.ID_ACCELERATION    -> decodeESPAcceleration(bytes)
+            VAGFrameMap.ID_EPS_STEERING    -> decodeSteeringAngle(bytes)
+            VAGFrameMap.ID_TPMS            -> decodeTPMS(bytes)
             else -> {
                 if (id !in VAGFrameMap.ALL_KNOWN_IDS) {
                     Timber.v("Unknown CAN ID 0x%03X — logging raw: %s", id, line)
@@ -236,19 +240,27 @@ class CANParser @Inject constructor() {
     }
 
     /**
-     * 0x350 — ABS wheel speed (front-left used as fallback speed).
+     * 0x350 — ABS wheel speed, all four wheels.
      *
-     * Only used if 0x320 has not been seen yet.
-     * Byte 0–1: FL wheel speed km/h = raw / 100.0
+     * Byte 0–1: front-left   km/h = raw / 100.0
+     * Byte 2–3: front-right  km/h = raw / 100.0
+     * Byte 4–5: rear-left    km/h = raw / 100.0
+     * Byte 6–7: rear-right   km/h = raw / 100.0
+     * Also fills [vehicleSpeed] if 0x320 has not been seen yet.
      * // CALIBRATE: verify byte layout from live can_log.txt capture
      */
     private fun decodeWheelSpeed(b: ByteArray): CANFrame {
-        // Prefer 0x320; only fill in if vehicleSpeed is absent
-        if (latest.vehicleSpeed != null) return latest
-        val kmh = b.u16be(0) / 100.0f
+        val fl = (b.u16be(0) / 100.0f).coerceAtLeast(0f)
+        val fr = (b.u16be(2) / 100.0f).coerceAtLeast(0f)
+        val rl = (b.u16be(4) / 100.0f).coerceAtLeast(0f)
+        val rr = (b.u16be(6) / 100.0f).coerceAtLeast(0f)
+        val speeds = WheelSpeeds(fl, fr, rl, rr)
+        // Use FL as fallback vehicle speed if 0x320 not available
+        val speed = if (latest.vehicleSpeed == null) VehicleSpeed(fl) else latest.vehicleSpeed
         return latest.copy(
             timestamp    = System.currentTimeMillis(),
-            vehicleSpeed = VehicleSpeed(kmh.coerceAtLeast(0f))
+            vehicleSpeed = speed,
+            wheelSpeeds  = speeds
         )
     }
 
@@ -428,6 +440,86 @@ class CANParser @Inject constructor() {
                 loadPercent   = load,
                 diffPressure  = diffKPa,
                 lastRegenTime = regenMs
+            )
+        )
+    }
+
+    /**
+     * 0x368 — ESP/ABS G-force and stability control flags.
+     *
+     * Byte 0–1: lateral G      signed 16-bit / 1000.0 → g
+     * Byte 2–3: longitudinal G signed 16-bit / 1000.0 → g
+     * Byte 4 bit 0: ESP active
+     * Byte 4 bit 1: TC active
+     * Byte 4 bit 2: ABS active
+     * // CALIBRATE: verify byte layout from live can_log.txt capture
+     */
+    private fun decodeESPAcceleration(b: ByteArray): CANFrame {
+        val latG   = b.s16be(0) / 1000.0f
+        val longG  = b.s16be(2) / 1000.0f
+        val flags  = b.u8(4)
+        return latest.copy(
+            timestamp      = System.currentTimeMillis(),
+            espAcceleration = ESPAcceleration(
+                lateralG       = latG.coerceIn(-3f, 3f),
+                longitudinalG  = longG.coerceIn(-3f, 3f),
+                espActive      = (flags and 0x01) != 0,
+                tcActive       = (flags and 0x02) != 0,
+                absActive      = (flags and 0x04) != 0
+            )
+        )
+    }
+
+    /**
+     * 0x65E — DPF active regeneration flag.
+     *
+     * Byte 0 bit 0: regeneration active
+     * // CALIBRATE: verify byte layout from live can_log.txt capture
+     */
+    private fun decodeDPFRegen(b: ByteArray): CANFrame {
+        return latest.copy(
+            timestamp     = System.currentTimeMillis(),
+            dpfRegenState = DPFRegenState(isRegenActive = b.bit(0, 0))
+        )
+    }
+
+    /**
+     * 0x0C6 — EPS steering angle.
+     *
+     * Byte 0–1: angle     signed 16-bit / 10.0 → degrees (negative = left)
+     * Byte 2–3: angular velocity signed 16-bit / 10.0 → °/s
+     * // CALIBRATE: verify byte layout from live can_log.txt capture
+     */
+    private fun decodeSteeringAngle(b: ByteArray): CANFrame {
+        val angle    = b.s16be(0) / 10.0f
+        val velocity = b.s16be(2) / 10.0f
+        return latest.copy(
+            timestamp     = System.currentTimeMillis(),
+            steeringAngle = SteeringAngle(
+                degrees           = angle.coerceIn(-800f, 800f),
+                degreesPerSecond  = velocity.coerceIn(-2000f, 2000f)
+            )
+        )
+    }
+
+    /**
+     * 0x3E3 — TPMS tire pressures (optional equipment).
+     *
+     * Byte 0: front-left  raw → kPa = raw * 1.364
+     * Byte 1: front-right raw → kPa = raw * 1.364
+     * Byte 2: rear-left   raw → kPa = raw * 1.364
+     * Byte 3: rear-right  raw → kPa = raw * 1.364
+     * // CALIBRATE: verify byte layout from live can_log.txt capture
+     */
+    private fun decodeTPMS(b: ByteArray): CANFrame {
+        val scale = 1.364f
+        return latest.copy(
+            timestamp = System.currentTimeMillis(),
+            tpmsData  = TPMSData(
+                frontLeftKPa  = (b.u8(0) * scale).coerceAtLeast(0f),
+                frontRightKPa = (b.u8(1) * scale).coerceAtLeast(0f),
+                rearLeftKPa   = (b.u8(2) * scale).coerceAtLeast(0f),
+                rearRightKPa  = (b.u8(3) * scale).coerceAtLeast(0f)
             )
         )
     }

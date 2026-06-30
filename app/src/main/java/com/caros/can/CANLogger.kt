@@ -13,6 +13,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import timber.log.Timber
 import java.io.BufferedWriter
 import java.io.File
@@ -43,11 +45,16 @@ private const val CHANNEL_CAPACITY   = 2048
 @Singleton
 class CANLogger @Inject constructor() {
 
-    private val logScope   = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private val logChannel = Channel<String>(capacity = CHANNEL_CAPACITY, onBufferOverflow =
-        kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST)
+    private val logScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    // Recreated on every start() — a closed Channel cannot be reused, and this
+    // singleton outlives CANService restarts (START_STICKY).
+    @Volatile private var logChannel: Channel<String>? = null
 
     @Volatile private var isStarted = false
+
+    /** Guards currentWriter/currentFile/currentBytes against rotate()/write races. */
+    private val writerMutex = Mutex()
 
     private var currentWriter: BufferedWriter? = null
     private var currentFile:   File?           = null
@@ -67,15 +74,21 @@ class CANLogger @Inject constructor() {
 
         ensureLogDir()
 
+        val channel = Channel<String>(capacity = CHANNEL_CAPACITY, onBufferOverflow =
+            kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST)
+        logChannel = channel
+
         logScope.launch {
-            for (entry in logChannel) {
+            for (entry in channel) {
                 try {
-                    writeEntry(entry)
+                    writerMutex.withLock { writeEntry(entry) }
                 } catch (e: Exception) {
                     Timber.e(e, "CANLogger write error — reopening file")
-                    closeWriter()
+                    writerMutex.withLock { closeWriter() }
                 }
             }
+            // Channel closed (stop()) — flush whatever is open
+            writerMutex.withLock { closeWriter() }
         }
         Timber.d("CANLogger started, writing to %s", LOG_DIR)
     }
@@ -84,9 +97,8 @@ class CANLogger @Inject constructor() {
      * Stops the logger and flushes any pending entries.
      */
     fun stop() {
-        logChannel.close()
-        closeWriter()
         isStarted = false
+        logChannel?.close()   // consumer drains remaining entries, then closes the file
         Timber.d("CANLogger stopped")
     }
 
@@ -101,7 +113,7 @@ class CANLogger @Inject constructor() {
     fun log(rawLine: String) {
         if (!isStarted) return
         val entry = "${System.currentTimeMillis()},$rawLine"
-        logChannel.trySend(entry)  // non-blocking, drops if full
+        logChannel?.trySend(entry)  // non-blocking, drops if full
     }
 
     /**
@@ -109,7 +121,7 @@ class CANLogger @Inject constructor() {
      * Useful when a new logging session begins.
      */
     fun rotate() {
-        logScope.launch { closeWriter() }
+        logScope.launch { writerMutex.withLock { closeWriter() } }
     }
 
     // ── Internal write logic ──────────────────────────────────────────────────
@@ -141,10 +153,15 @@ class CANLogger @Inject constructor() {
         Timber.d("CANLogger: opening new log file %s", file.absolutePath)
 
         val bw = BufferedWriter(FileWriter(file, true /* append */))
-        bw.write("# CarOS CAN log — opened ${System.currentTimeMillis()}")
-        bw.newLine()
-        bw.write("# timestamp_ms,raw_line")
-        bw.newLine()
+        try {
+            bw.write("# CarOS CAN log — opened ${System.currentTimeMillis()}")
+            bw.newLine()
+            bw.write("# timestamp_ms,raw_line")
+            bw.newLine()
+        } catch (e: Exception) {
+            runCatching { bw.close() }
+            throw e
+        }
 
         currentWriter = bw
         currentFile   = file

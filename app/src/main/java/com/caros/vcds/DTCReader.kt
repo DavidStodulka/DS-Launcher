@@ -68,6 +68,84 @@ class DTCReader @Inject constructor(
         }
     }
 
+    /**
+     * Read freeze frame data for a specific DTC using UDS service 0x19 0x04.
+     *
+     * The freeze frame captures sensor values at the moment the DTC was set.
+     * Returns a [FreezeFrame] with decoded parameter values, or null if the
+     * ECU returned no data or an error response.
+     *
+     * @param ecuAddress  UDS address of the target ECU (e.g. 0x01 for engine)
+     * @param dtcCode     The DTC code string (e.g. "P0087") whose freeze frame is requested
+     */
+    suspend fun readFreezeFrame(ecuAddress: Int, dtcCode: DTCCode): FreezeFrame? =
+        withContext(Dispatchers.IO) {
+            try {
+                val dtcBytes = dtcCodeToBytes(dtcCode.code)
+                // UDS 19 04 <DTC_high> <DTC_low> <DTC_ext> 00 (snapshot record number 0)
+                val cmd = "ATSH%02X\r190400%02X%02X%02X00\r".format(
+                    ecuAddress, dtcBytes[0], dtcBytes[1], dtcBytes[2]
+                )
+                val response = obdConnection.sendCommand(cmd) ?: return@withContext null
+                parseFreezeFrameResponse(response, dtcCode)
+            } catch (e: Exception) {
+                null
+            }
+        }
+
+    /**
+     * Parse the UDS 0x59 0x04 freeze frame response into a [FreezeFrame].
+     * Parameters decoded: engine speed, vehicle speed, coolant temp, throttle.
+     */
+    private fun parseFreezeFrameResponse(raw: String, dtcCode: DTCCode): FreezeFrame? {
+        val bytes = mutableListOf<Int>()
+        for (line in raw.lines()) {
+            val t = line.trim()
+            if (t.isBlank() || t.startsWith(">") || t.startsWith("AT") || t == "OK") continue
+            bytes.addAll(t.split(Regex("\\s+")).mapNotNull { it.toIntOrNull(16) })
+        }
+        // Look for response SID 0x59
+        val idx = bytes.indexOf(0x59)
+        if (idx < 0 || bytes.size < idx + 6) return null
+
+        // bytes after header: [0x04, dtc_hi, dtc_lo, dtc_ext, record_num, param_count, ...]
+        val dataStart = idx + 6
+        val params = mutableMapOf<String, String>()
+
+        // Parse available bytes as standard OBD PIDs embedded in the snapshot
+        var i = dataStart
+        while (i < bytes.size - 1) {
+            val pid = bytes[i]
+            val value = bytes.getOrElse(i + 1) { 0 }
+            when (pid) {
+                0x0C -> { params["RPM"] = "${(value * 256 + bytes.getOrElse(i + 2) { 0 }) / 4} rpm"; i += 3 }
+                0x0D -> { params["Speed"] = "$value km/h"; i += 2 }
+                0x05 -> { params["Coolant"] = "${value - 40} °C"; i += 2 }
+                0x11 -> { params["Throttle"] = "%.1f%%".format(value * 100.0 / 255.0); i += 2 }
+                0x04 -> { params["Engine Load"] = "%.1f%%".format(value * 100.0 / 255.0); i += 2 }
+                0x0F -> { params["Intake Air"] = "${value - 40} °C"; i += 2 }
+                else -> i++
+            }
+        }
+
+        return FreezeFrame(dtcCode = dtcCode, parameters = params)
+    }
+
+    /** Convert a DTC code string like "P0087" to 3-byte UDS encoding. */
+    private fun dtcCodeToBytes(code: String): IntArray {
+        if (code.length < 5) return IntArray(3)
+        val prefix = when (code[0].uppercaseChar()) {
+            'P'  -> 0x00
+            'C'  -> 0x40
+            'B'  -> 0x80
+            else -> 0xC0
+        }
+        val numeric = code.substring(1).toIntOrNull(16) ?: 0
+        val high = prefix or ((numeric shr 8) and 0x3F)
+        val low = numeric and 0xFF
+        return intArrayOf(high, low, 0xFF) // 0xFF = all sub-types
+    }
+
     // ── Private helpers ───────────────────────────────────────────────────────
 
     /**

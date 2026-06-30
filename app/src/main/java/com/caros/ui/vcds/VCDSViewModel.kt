@@ -31,6 +31,17 @@ class VCDSViewModel @Inject constructor(
     private val _presetStates = MutableStateFlow<List<PresetState>>(emptyList())
     val presetStates: StateFlow<List<PresetState>> = _presetStates.asStateFlow()
 
+    // ── Freeze Frame ──────────────────────────────────────────────────────────
+
+    private val _freezeFrame = MutableStateFlow<com.caros.vcds.FreezeFrame?>(null)
+    val freezeFrame: StateFlow<com.caros.vcds.FreezeFrame?> = _freezeFrame.asStateFlow()
+
+    fun loadFreezeFrame(ecuAddress: Int, dtc: com.caros.can.DTCCode) {
+        viewModelScope.launch {
+            _freezeFrame.value = vcdsManager.dtcReader.readFreezeFrame(ecuAddress, dtc)
+        }
+    }
+
     init {
         loadPresets()
     }

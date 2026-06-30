@@ -41,19 +41,19 @@ class CodingPresets @Inject constructor(
      * Runs on [Dispatchers.IO] — safe to call from a ViewModel / coroutine.
      */
     suspend fun getAllPresets(): List<PresetState> = withContext(Dispatchers.IO) {
+        // Single history query shared by all presets (was one query per preset)
+        val recentHistory = db.codingHistoryDao().getRecent(limit = 200)
         ECUDatabase.CODING_PRESETS.map { preset ->
             val currentValue = readCurrentValue(preset)
             val isEnabled = currentValue == preset.enableValue
             val ecuAddrStr = "%02X".format(preset.ecuAddress)
             // History check: was there a coding change recorded for this preset's ECU + channel?
-            val recentHistory = db.codingHistoryDao()
-                .getRecent(limit = 200)
-                .firstOrNull { entry ->
-                    entry.ecuAddress == ecuAddrStr &&
-                    entry.channel == channelLabel(preset) &&
-                    entry.canBeReverted
-                }
-            PresetState(preset, isEnabled, recentHistory != null)
+            val canUndo = recentHistory.any { entry ->
+                entry.ecuAddress == ecuAddrStr &&
+                entry.channel == channelLabel(preset) &&
+                entry.canBeReverted
+            }
+            PresetState(preset, isEnabled, canUndo)
         }
     }
 

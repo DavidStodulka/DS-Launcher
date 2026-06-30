@@ -76,6 +76,15 @@ sealed class AutoAction {
 
     /** Apply the system "parked" profile (full UI access). */
     object SetParkedMode : AutoAction()
+
+    /** Speak [text] aloud via the system TTS (Czech voice). */
+    data class SpeakTTS(val text: String) : AutoAction()
+
+    /** Publish [value] to MQTT [topic] through the Termux bridge. */
+    data class PublishMQTT(val topic: String, val value: String) : AutoAction()
+
+    /** Activate the audio profile whose id or name matches [profileId] (e.g. "night"). */
+    data class SetAudioProfile(val profileId: String) : AutoAction()
 }
 
 /**
@@ -116,16 +125,22 @@ data class AutomationRule(
 class AutomationEngine @Inject constructor(
     @ApplicationContext private val context: Context,
     private val settingsManager: SystemSettingsManager,
-    private val shellExecutor: ShellExecutor
+    private val shellExecutor: ShellExecutor,
+    private val textToSpeechManager: com.caros.voice.TextToSpeechManager,
+    private val mqttPublisher: com.caros.termux.MQTTPublisher,
+    private val audioProfileManager: com.caros.audio.AudioProfileManager
 ) {
     // -------------------------------------------------------------------------
     //  State
     // -------------------------------------------------------------------------
 
-    private val rules = mutableListOf<AutomationRule>()
+    // Thread-safe: mutated from UI thread (addRule/removeRule) and read from
+    // the evaluation coroutine on Dispatchers.Default concurrently.
+    private val rules = java.util.concurrent.CopyOnWriteArrayList<AutomationRule>()
 
     /** Set of rule IDs whose condition is currently active (latched). */
-    private val triggeredRules = mutableSetOf<String>()
+    private val triggeredRules: MutableSet<String> =
+        java.util.concurrent.ConcurrentHashMap.newKeySet()
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
@@ -184,6 +199,20 @@ class AutomationEngine @Inject constructor(
                 name = "Noční ztlumení obrazovky",
                 condition = AutoCondition.TimeOfDay(20, 0),
                 action = AutoAction.SetBrightness(80)
+            ),
+            AutomationRule(
+                id = "dpf_tts",
+                name = "DPF hlasové upozornění",
+                condition = AutoCondition.DPFLoadAbove(80f),
+                action = AutoAction.SpeakTTS(
+                    "Filtr pevných částic je zanesený. Doporučuji třicet minut jízdy po dálnici."
+                )
+            ),
+            AutomationRule(
+                id = "night_audio",
+                name = "Noční audio profil",
+                condition = AutoCondition.TimeOfDay(20, 0),
+                action = AutoAction.SetAudioProfile("night")
             )
         )
         Timber.d("AutomationEngine: %d built-in rules loaded", rules.size)
@@ -319,6 +348,26 @@ class AutomationEngine @Inject constructor(
 
             is AutoAction.SetParkedMode ->
                 Timber.d("AutomationEngine: parked mode set (UI should observe ProfileManager)")
+
+            is AutoAction.SpeakTTS ->
+                textToSpeechManager.speak(action.text)
+
+            is AutoAction.PublishMQTT ->
+                withContext(Dispatchers.IO) {
+                    mqttPublisher.publish(action.topic, action.value)
+                }
+
+            is AutoAction.SetAudioProfile -> {
+                val profile = audioProfileManager.loadProfiles().firstOrNull {
+                    it.id.equals(action.profileId, ignoreCase = true) ||
+                    it.name.equals(action.profileId, ignoreCase = true)
+                }
+                if (profile != null) {
+                    audioProfileManager.applyProfile(profile)
+                } else {
+                    Timber.w("AutomationEngine: unknown audio profile '%s'", action.profileId)
+                }
+            }
         }
     }
 

@@ -2,6 +2,7 @@
 <navigation
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/mainFragment">
 
@@ -54,4 +55,40 @@
         android:id="@+id/serviceAdvisorFragment"
         android:name="com.caros.ui.service.ServiceAdvisorFragment"
         android:label="Service"/>
+
+    <fragment
+        android:id="@+id/ecosystemFragment"
+        android:name="com.caros.ui.ecosystem.EcosystemFragment"
+        android:label="Ecosystem"
+        app:layout="@layout/fragment_ecosystem"/>
+
+    <fragment
+        android:id="@+id/voiceSetupFragment"
+        android:name="com.caros.ui.voice.VoiceSetupFragment"
+        android:label="Voice Setup"
+        app:layout="@layout/fragment_voice_setup"/>
+
+    <fragment
+        android:id="@+id/drivingStyleFragment"
+        android:name="com.caros.ui.telemetry.DrivingStyleFragment"
+        android:label="Driving Style"
+        app:layout="@layout/fragment_driving_style"/>
+
+    <fragment
+        android:id="@+id/fmRadioFragment"
+        android:name="com.caros.ui.media.FMRadioFragment"
+        android:label="FM Rádio"
+        tools:layout="@layout/fragment_fm_radio" />
+
+    <fragment
+        android:id="@+id/climateFragment"
+        android:name="com.caros.ui.climate.ClimateFragment"
+        android:label="Klimatizace"
+        tools:layout="@layout/fragment_climate" />
+
+    <fragment
+        android:id="@+id/systemHealthFragment"
+        android:name="com.caros.ui.health.SystemHealthFragment"
+        android:label="Zdraví systému"
+        tools:layout="@layout/fragment_system_health" />
 </navigation>

@@ -9,7 +9,7 @@
     tools:context=".MainActivity">
 
     <!-- Status Bar -->
-    <com.ds.launcher.ui.views.StatusBarView
+    <com.caros.views.StatusBarView
         android:id="@+id/statusBarView"
         android:layout_width="0dp"
         android:layout_height="36dp"

@@ -80,6 +80,14 @@ android {
         abortOnError false
         checkReleaseBuilds false
     }
+
+    testOptions {
+        unitTests {
+            // Android framework calls (Intent, Uri, …) return defaults instead of
+            // throwing "not mocked" in plain JVM unit tests
+            returnDefaultValues = true
+        }
+    }
 }
 
 dependencies {
@@ -143,13 +151,27 @@ dependencies {
     // Timber logging
     implementation 'com.jakewharton.timber:timber:5.0.1'
 
+    // OkHttp (Gemini API calls)
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+
+    // Encrypted SharedPreferences (steering wheel key calibration)
+    implementation 'androidx.security:security-crypto:1.1.0-alpha06'
+
     // DataStore Preferences
     implementation 'androidx.datastore:datastore-preferences:1.0.0'
+
+    // OSMDroid — offline maps with telemetry route overlay
+    implementation 'org.osmdroid:osmdroid-android:6.1.18'
+
+    // Vosk offline speech recognition
+    implementation 'com.alphacephei:vosk-android:0.3.47@aar'
+    implementation 'net.java.dev.jna:jna:5.9.0@aar'
 
     // Testing
     testImplementation 'junit:junit:4.13.2'
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
     testImplementation "androidx.arch.core:core-testing:2.2.0"
+    testImplementation 'io.mockk:mockk:1.13.9'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     androidTestImplementation "androidx.room:room-testing:$room_version"

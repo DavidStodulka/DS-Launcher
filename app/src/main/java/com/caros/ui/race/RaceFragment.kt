@@ -67,10 +67,12 @@ class RaceFragment : Fragment() {
         }
 
         // Sessions history
+        val adapter = RaceSessionAdapter()
         binding.rvSessions.layoutManager = LinearLayoutManager(context)
+        binding.rvSessions.adapter = adapter
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.sessions.collectLatest { sessions ->
-                // TODO: bind to adapter
+            viewModel.sessions().collectLatest { sessions ->
+                adapter.submitList(sessions)
             }
         }
     }

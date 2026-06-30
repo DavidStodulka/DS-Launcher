@@ -119,10 +119,10 @@ class ViperController @Inject constructor(
      */
     fun applyProfile(profile: AudioProfile) {
         if (!isViperInstalled) return
-        setEnabled(profile.viperEnabled)
-        if (profile.viperEnabled && profile.viperSettings.isNotBlank()) {
-            setParameter("viper_settings_json", profile.viperSettings)
-        }
+        // Apply surround and bass settings via ViPER parameters
+        setParameter("viperbass_strength", profile.bassStrength)
+        setParameter("surround_level", profile.surroundStrength)
+        setParameter("clarity_mode", if (profile.vocalClarity) 1 else 0)
     }
 
     // -------------------------------------------------------------------------
