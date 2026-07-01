@@ -73,6 +73,35 @@ NEDĚLEJ: žádné dd, žádné mazání/úpravy partitions, žádnou úpravu Al
 
 ---
 
-Jediný bod, kde stojí za to zastavit se u mě: **obsah `config.txt`** (Cowork ho
-vypíše v Kroku 2). Když bude vypadat divně (prázdný / jen číslo verze / bez
-`AllAppUpdate`), pošli mi ho — jinak balík jede jako oficiální stock a je to OK.
+## AKTUALIZACE po analýze balíku (2 kritické opravy)
+
+Po vypsání configů se ukázalo:
+
+- **config.txt** = jen device props (rotace, BT, launcher…), aplikuje se po flashi.
+  NEřídí co se flashuje. Nech být.
+- **updatecfg.txt = "test"** (přepsáno z 15 B) = **NEblokuje** hlavní flash. Ten
+  se řídí přítomností `6316_1.zip` + `AllAppUpdate.bin` + binárky + sekvencí 3× RST.
+  `updatecfg.txt` řeší hlavně reset app vrstvy/nastavení. Nech soubor jak je.
+
+**OPRAVA #1 (kritická) — kernel musí být `6316_1.zip` (ZIP), ne jen rozbalená složka.**
+Modifikovaný `/system` (a tím Magisk + verity) přepíše právě kernel balík `6316_1.zip`.
+Pokud na USB bude jen složka `6316_1\` a ne zip, jádro/system se nemusí flashnout a
+jednotka zůstane rozbitá. → Najdi/použij originální `6316_1.zip` a dej ho na USB.
+
+**OPRAVA #2 (bonus = ADB) — hook je `8581lsec.sh` (uis8581a), ne 7862.**
+Do `lsec_updatesh\` dej rekonstruovaný OEM `8581lsec.sh` (identický obsah jako
+7862lsec.sh) + `7862lsec.sh` + `fyt_build.prop`:
+```
+#!/system/bin/sh
+cp -rf /storage/sdcard1/lsec_updatesh/fyt_build.prop /oem/app/fyt_build.prop
+chmod 644 /oem/app/fyt_build.prop
+```
+Po reflashi hook zkopíruje fyt_build.prop → zapne **ADB na TCP 5555**
+(persist.service.adb.enable=1) → čistý síťový kanál pro další práci a správný root.
+`fyt_build.prop` NEuprav (OEM originál). Pozn.: NEplést s naším vbmeta `8581lsec.sh`
+z Tier 1 — ten na tenhle reflash klíč NEpatří.
+
+Finální struktura USB (kořen):
+    lsec6316update, 6316_1.zip, AllAppUpdate.bin, config.txt, updatecfg.txt,
+    lsec_updatesh\{8581lsec.sh, 7862lsec.sh, fyt_build.prop}
+    (+ OEM_APP\, myconfiguration\, lsec6315update — pokud jsou v balíku)
