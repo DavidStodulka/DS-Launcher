@@ -9,6 +9,27 @@ běží → máme spolehlivý injektážní bod na opravu bez BROM/ADB.
 
 ---
 
+## 0. ⚠ Co NEspouštět (poučení ze zachyceného trace)
+
+Ze zachyceného FYT trace (Android update V7.22) běžel omylem **starý wipe
+skript**, který dělá jen:
+
+```
+find /dev/block -name metadata | ... dd if=/dev/zero ... bs=4096 count=4096
+find /dev/block -name userdata | ... dd if=/dev/zero ... bs=1048576 count=2
+```
+
+To je **low-level factory reset** (vymaže metadata + začátek userdata) a
+odpovídá STARÉ, zavržené teorii `dm-2 = /data`. **Nespravuje** `dm-2 = system`
+— po něm `E:[libfs_mgr]Failed to open '/dev/block/dm-2'` **přetrvává** (potvrzeno
+na obrazovce) a jednotka jen dlouho reformátuje smazanou userdata → recovery.
+
+Trace zároveň potvrdil, že tovární discovery
+`grep -l "PARTNAME=xxx" /sys/class/block/*/uevent | xargs dirname | xargs basename`
+na tomto zařízení **funguje** → Tier 1 skript ho proto používá místo `by-name`.
+
+---
+
 ## 1. Diagnóza (co se opravdu děje)
 
 Chyba při bootloopu:
