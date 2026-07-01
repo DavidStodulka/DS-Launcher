@@ -82,8 +82,13 @@ Pokud jde o super metadata, definitivní oprava je **plný stock reflash**
 
 ## 2. Postup (v pořadí)
 
-> Detailní návod „co dát na USB“ je v [`lsec_updatesh/README.txt`](lsec_updatesh/README.txt).
-> Vždy se na USB dává jeden skript přejmenovaný na **`8581lsec.sh`**.
+> Detailní návod „co dát na USB“ je v [`lsec_updatesh/README.txt`](lsec_updatesh/README.txt)
+> a přesný Cowork pokyn v [`COWORK_USB_INSTRUCTION.md`](COWORK_USB_INSTRUCTION.md).
+>
+> ⚠ **Update spouští flashovací binárka `lsec6316update` + `config.txt`** (krok
+> „copy config file (OK)"), NE složka `lsec_updatesh` sama. `8581lsec.sh` je jen
+> post-flash hook. Bez binárky + configu jednotka na USB **nereaguje** — proto
+> se nesmí z funkčního USB mazat spouštěcí soubory, jen vyměnit obsah skriptu.
 
 ### Tier 0 — Diagnostika (5 min, nic nemění) ✅ dělej první
 `lsec_updatesh/00-diagnostics.sh` → sesbírá kernel log z minulého bootu,
