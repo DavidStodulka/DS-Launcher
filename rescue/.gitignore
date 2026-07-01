@@ -1,0 +1,7 @@
+# Firmware / vbmeta / boot blobs se do repa NEcommitují.
+# (velké, potenciálně chráněné, patří jen na USB / lokální PC)
+*.img
+*.bin
+*.pac
+*.br
+AllAppUpdate.bin
