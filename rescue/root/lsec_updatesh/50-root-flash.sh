@@ -11,7 +11,7 @@
 #  Discovery přes grep -l PARTNAME (ověřená metoda tohoto zařízení).
 #  Před během si nech dumpnout current boot (40-dump-boot.sh) jako zálohu.
 # ============================================================
-f=$(find /storage /mnt /udisk -name magisk_patched.img 2>/dev/null | head -1); [ -n "$f" ] && grep -l "PARTNAME=boot$" /sys/class/block/*/uevent 2>/dev/null | head -1 | xargs dirname | xargs basename | xargs -I{} dd if="$f" of=/dev/block/{}
+f=$(find /storage /mnt /udisk -name "magisk_patched*.img" 2>/dev/null | head -1); [ -n "$f" ] && grep -l "PARTNAME=boot$" /sys/class/block/*/uevent 2>/dev/null | head -1 | xargs dirname | xargs basename | xargs -I{} dd if="$f" of=/dev/block/{}
 v=$(find /storage /mnt /udisk -name vbmeta_disabled.img 2>/dev/null | head -1); [ -n "$v" ] && grep -l "PARTNAME=vbmeta$" /sys/class/block/*/uevent 2>/dev/null | head -1 | xargs dirname | xargs basename | xargs -I{} dd if="$v" of=/dev/block/{}
 v=$(find /storage /mnt /udisk -name vbmeta_disabled.img 2>/dev/null | head -1); [ -n "$v" ] && grep -l "PARTNAME=vbmeta_bak$" /sys/class/block/*/uevent 2>/dev/null | head -1 | xargs dirname | xargs basename | xargs -I{} dd if="$v" of=/dev/block/{}
 sync
