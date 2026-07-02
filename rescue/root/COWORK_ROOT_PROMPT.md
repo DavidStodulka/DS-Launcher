@@ -58,14 +58,16 @@ KROK C — SESTAV ROOT USB (script-only, bez full reflashe):
     - magisk_patched-….img (z kroku A)
     - vbmeta_disabled.img  (z Mekede\lsec_updatesh\; když chybí:
                             avbtool make_vbmeta_image --flags 2 --padding_size 4096 --output vbmeta_disabled.img)
+    - fyt_build.prop       (z Mekede\lsec_updatesh\; zapne po flashi ADB 5555 — pro ladění)
   NEDÁVEJ 6316_1.zip, AllAppUpdate.bin ani updatecfg.txt (nechci full reflash/reset).
   Vytvoř složku lsec_updatesh\ a v ní 8581lsec.sh + kopii 7862lsec.sh s TÍMTO
-  obsahem (ulož UTF-8 BEZ BOM, konce řádků LF/Unix, žádné \r — jinak dd selže):
+  obsahem (v3: by-name + LOG na USB; ulož UTF-8 BEZ BOM, LF, žádné \r — jinak dd selže):
   ------------------------------------------------------------
   #!/system/bin/sh
-  f=$(find /storage /mnt /udisk -name "magisk_patched*.img" 2>/dev/null | head -1); [ -n "$f" ] && grep -l "PARTNAME=boot$" /sys/class/block/*/uevent 2>/dev/null | head -1 | xargs dirname | xargs basename | xargs -I{} dd if="$f" of=/dev/block/{}
-  v=$(find /storage /mnt /udisk -name vbmeta_disabled.img 2>/dev/null | head -1); [ -n "$v" ] && grep -l "PARTNAME=vbmeta$" /sys/class/block/*/uevent 2>/dev/null | head -1 | xargs dirname | xargs basename | xargs -I{} dd if="$v" of=/dev/block/{}
-  v=$(find /storage /mnt /udisk -name vbmeta_disabled.img 2>/dev/null | head -1); [ -n "$v" ] && grep -l "PARTNAME=vbmeta_bak$" /sys/class/block/*/uevent 2>/dev/null | head -1 | xargs dirname | xargs basename | xargs -I{} dd if="$v" of=/dev/block/{}
+  D=$(find /storage /mnt /udisk -type d -name lsec_updatesh 2>/dev/null | head -1); [ -z "$D" ] && D=/cache; echo "=== lsec root v3 start ===" > "$D/lsec.log"; ls -la /dev/block/by-name >> "$D/lsec.log" 2>&1
+  D=$(find /storage /mnt /udisk -type d -name lsec_updatesh 2>/dev/null | head -1); [ -z "$D" ] && D=/cache; p=$(find /storage /mnt /udisk -name fyt_build.prop 2>/dev/null | head -1); [ -n "$p" ] && { cp -f "$p" /oem/app/fyt_build.prop 2>>"$D/lsec.log"; chmod 644 /oem/app/fyt_build.prop 2>>"$D/lsec.log"; echo "prop rc=$?" >> "$D/lsec.log"; }
+  D=$(find /storage /mnt /udisk -type d -name lsec_updatesh 2>/dev/null | head -1); [ -z "$D" ] && D=/cache; f=$(find /storage /mnt /udisk -name "magisk_patched*.img" 2>/dev/null | head -1); echo "patched=$f" >> "$D/lsec.log"; [ -n "$f" ] && { dd if="$f" of=/dev/block/by-name/boot 2>>"$D/lsec.log"; echo "boot rc=$?" >> "$D/lsec.log"; }
+  D=$(find /storage /mnt /udisk -type d -name lsec_updatesh 2>/dev/null | head -1); [ -z "$D" ] && D=/cache; v=$(find /storage /mnt /udisk -name vbmeta_disabled.img 2>/dev/null | head -1); echo "vbmeta=$v" >> "$D/lsec.log"; [ -n "$v" ] && { dd if="$v" of=/dev/block/by-name/vbmeta 2>>"$D/lsec.log"; echo "vbmeta rc=$?" >> "$D/lsec.log"; dd if="$v" of=/dev/block/by-name/vbmeta_bak 2>>"$D/lsec.log"; echo "vbmeta_bak rc=$?" >> "$D/lsec.log"; }
   sync
   sleep 8
   ------------------------------------------------------------
