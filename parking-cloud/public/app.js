@@ -10,9 +10,12 @@
     scala: '#4f9dff', kodiaq: '#7c5cff', kamiq: '#36c98d',
     karoq: '#f2a33c', fabia: '#ef5d6b', octavia: '#23c4d6', enyaq: '#a0e84f'
   };
-  var STATUS_LABEL = { parked: '', workshop: 'DÍLNA', received: 'NOVÝ', departure: 'ODJEZD' };
+  var STATUS_LABEL = { parked: '', workshop: 'DÍLNA', received: 'NOVÝ', departure: 'ODJEZD', kaufmann: 'KAUFMANN' };
+  var SIDE_LABEL = { left: 'Levá strana', right: 'Pravá strana', dilna: 'Parkoviště Dílna', kaufmann: 'Parkoviště Kaufmann' };
 
   var state = { vehicles: [], side: 'left', filter: 'all', query: '' };
+  var archiveItems = [];
+  var archiveQuery = '';
   var editingId = null;
   var currentStatus = 'parked';
   var pollTimer = null;
@@ -94,19 +97,22 @@
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#888';
   }
   function plur(n) { return n === 1 ? '' : (n >= 2 && n <= 4 ? 'y' : 'ů'); }
+  function sideLabel(side) { return SIDE_LABEL[side] || side; }
+  function isFlatSide(side) { return side === 'dilna' || side === 'kaufmann'; }
 
   // ---------- Rendering ----------
   function render() { renderStats(); renderRows(); }
 
   function renderStats() {
-    var c = { all: 0, parked: 0, workshop: 0, received: 0, departure: 0 };
+    var c = { all: 0, parked: 0, workshop: 0, received: 0, departure: 0, kaufmann: 0 };
     state.vehicles.forEach(function (v) { c.all++; c[v.status] = (c[v.status] || 0) + 1; });
     var defs = [
       { key: 'all', label: 'Vše', color: '#8ea2c8' },
       { key: 'parked', label: 'Zaparkováno', color: getCss('--parked') },
       { key: 'workshop', label: 'Dílna', color: getCss('--workshop') },
       { key: 'received', label: 'Nově přijato', color: getCss('--received') },
-      { key: 'departure', label: 'Odjezd', color: getCss('--departure') }
+      { key: 'departure', label: 'Odjezd', color: getCss('--departure') },
+      { key: 'kaufmann', label: 'Kaufmann', color: getCss('--kaufmann') }
     ];
     document.getElementById('stats').innerHTML = defs.map(function (d) {
       return '<div class="chip ' + (state.filter === d.key ? 'active' : '') + '" data-filter="' + d.key + '">' +
@@ -115,6 +121,7 @@
   }
 
   function renderRows() {
+    if (isFlatSide(state.side)) { renderFlatPlace(); return; }
     var container = document.getElementById('rows');
     var rows = rowsForSide(state.side);
     var filtering = state.query || state.filter !== 'all';
@@ -137,6 +144,30 @@
     });
     if (rows.length === 0) html += '<div class="empty">Žádné řady na této straně.<br>Přidej první řadu níže.</div>';
     html += '<button class="add-row" id="addRow">+ Přidat řadu</button>';
+    container.innerHTML = html;
+  }
+
+  // Dílna/Kaufmann — plochý seznam bez řad, pořadí = FIFO (pos), přeskupení stejným drag mechanismem (row=0).
+  function renderFlatPlace() {
+    var container = document.getElementById('rows');
+    var filtering = state.query || state.filter !== 'all';
+    var hint = document.getElementById('dragHint');
+    if (hint) hint.style.display = filtering ? 'none' : '';
+    var all = state.vehicles
+      .filter(function (v) { return v.side === state.side; })
+      .sort(function (a, b) { return a.pos - b.pos; });
+    var vis = all.filter(matchesFilter);
+    var html = '';
+    if (!(filtering && vis.length === 0)) {
+      html += '<div class="row-card"><div class="row-head">' +
+        '<span class="rtitle">' + esc(sideLabel(state.side)) + '</span>' +
+        '<span class="rcount">' + all.length + ' voz' + plur(all.length) + '</span></div>';
+      html += '<div class="tiles" data-row="0">';
+      vis.forEach(function (v) { html += tileHTML(v); });
+      html += '<button class="add-tile" data-addto="0" title="Přidat vozidlo">+</button>';
+      html += '</div></div>';
+    }
+    if (!all.length && !filtering) html += '<div class="empty">Zatím žádná vozidla na tomto placu.</div>';
     container.innerHTML = html;
   }
 
@@ -302,18 +333,29 @@
     if (!v) return;
     editingId = id;
     document.getElementById('vehTitle').textContent = v.model || 'Vozidlo';
-    document.getElementById('vehSub').textContent = (v.side === 'left' ? 'Levá strana' : 'Pravá strana') + ' · Řada ' + v.row;
+    document.getElementById('vehSub').textContent = sideLabel(v.side) + (isFlatSide(v.side) ? '' : ' · Řada ' + v.row);
     document.getElementById('fModel').value = v.model || '';
     document.getElementById('fVin').value = v.vin || '';
     document.getElementById('fKey').value = v.key || '';
     document.getElementById('fNote').value = v.note || '';
     setStatusButtons(v.status);
+    document.getElementById('statusBtns').style.display = isFlatSide(v.side) ? 'none' : '';
     document.getElementById('fSide').value = v.side;
+    updateMoveFieldsVisibility();
     populateRowSelect(v.side, v.row);
     populatePosSelect(v.side, v.row, id, currentIndex(v.side, v.row, id));
     document.getElementById('moveSection').style.display = '';
     document.getElementById('vehDelete').style.display = '';
+    document.getElementById('vehArchive').style.display = '';
+    document.getElementById('placeBtns').style.display = '';
+    document.querySelector('#placeBtns [data-place="dilna"]').style.display = (v.side === 'dilna') ? 'none' : '';
+    document.querySelector('#placeBtns [data-place="kaufmann"]').style.display = (v.side === 'kaufmann') ? 'none' : '';
     openOverlay('vehOverlay');
+  }
+
+  function updateMoveFieldsVisibility() {
+    var side = document.getElementById('fSide').value;
+    document.getElementById('rowField').style.display = isFlatSide(side) ? 'none' : '';
   }
 
   // Aktuální pořadí vozu v jeho řadě (0-based).
@@ -342,6 +384,7 @@
   // Přepočítá nabídku pozic podle aktuálně zvolené strany a řady.
   function refreshPosFromSelects() {
     var side = document.getElementById('fSide').value;
+    if (isFlatSide(side)) { populatePosSelect(side, 0, editingId, null); return; }
     var rowVal = document.getElementById('fRow').value;
     if (rowVal === '__new') {
       document.getElementById('fPos').innerHTML = '<option value="1">1. (na konec)</option>';
@@ -364,20 +407,25 @@
   function openNew(rn) {
     editingId = null;
     document.getElementById('vehTitle').textContent = 'Nové vozidlo';
-    document.getElementById('vehSub').textContent = (state.side === 'left' ? 'Levá strana' : 'Pravá strana') + ' · Řada ' + rn;
+    document.getElementById('vehSub').textContent = sideLabel(state.side) + (isFlatSide(state.side) ? '' : ' · Řada ' + rn);
     document.getElementById('fModel').value = '';
     document.getElementById('fVin').value = '';
     document.getElementById('fKey').value = '';
     document.getElementById('fNote').value = '';
-    setStatusButtons('received');
+    var initStatus = state.side === 'dilna' ? 'workshop' : state.side === 'kaufmann' ? 'kaufmann' : 'received';
+    setStatusButtons(initStatus);
+    document.getElementById('statusBtns').style.display = isFlatSide(state.side) ? 'none' : '';
     document.getElementById('moveSection').style.display = 'none';
     document.getElementById('vehDelete').style.display = 'none';
+    document.getElementById('vehArchive').style.display = 'none';
+    document.getElementById('placeBtns').style.display = 'none';
     document.getElementById('vehSheet').dataset.newrow = rn;
     openOverlay('vehOverlay');
   }
 
-  // Naplní výběr řady pro danou stranu (existující řady + možnost nové).
+  // Naplní výběr řady pro danou stranu (existující řady + možnost nové). Dílna/Kaufmann nemají řady.
   function populateRowSelect(side, selected) {
+    if (isFlatSide(side)) { document.getElementById('fRow').innerHTML = '<option value="0">—</option>'; return; }
     var rows = rowsForSide(side);
     var html = rows.map(function (rn) { return '<option value="' + rn + '">Řada ' + rn + '</option>'; }).join('');
     html += '<option value="__new">+ Nová řada…</option>';
@@ -408,11 +456,14 @@
     if (editingId) {
       var id = editingId;
       var v = state.vehicles.find(function (x) { return x.id === id; });
-      // cíl přesunu z výběru Strana/Řada
-      var destSide = document.getElementById('fSide').value === 'right' ? 'right' : 'left';
+      // cíl přesunu z výběru Strana/Plac + Řada
+      var destSide = document.getElementById('fSide').value;
+      if (['left', 'right', 'dilna', 'kaufmann'].indexOf(destSide) === -1) destSide = 'left';
       var rowVal = document.getElementById('fRow').value;
       var destRow;
-      if (rowVal === '__new') {
+      if (isFlatSide(destSide)) {
+        destRow = 0;
+      } else if (rowVal === '__new') {
         var rowsThere = rowsForSide(destSide);
         var next = rowsThere.length ? Math.max.apply(null, rowsThere) + 1 : 1;
         var input = prompt('Číslo nové řady:', String(next));
@@ -425,6 +476,13 @@
       var destIndex = (parseInt(document.getElementById('fPos').value, 10) || 1) - 1;
       var curIdx = v ? currentIndex(v.side, v.row, id) : -1;
       var needMove = v && (destSide !== v.side || destRow !== v.row || destIndex !== curIdx);
+      // Umístění na Dílnu/Kaufmann vynucuje odpovídající stav, i při přesunu přes výběr Strana/Plac.
+      if (isFlatSide(destSide)) {
+        payload.status = destSide === 'dilna' ? 'workshop' : 'kaufmann';
+      } else if (payload.status === 'workshop' || payload.status === 'kaufmann') {
+        // Odchod z placu bez řad — stav vázaný na umístění tam už nedává smysl, reset na Zaparkováno.
+        payload.status = 'parked';
+      }
       req = api('/vehicles/' + encodeURIComponent(id), { method: 'PUT', body: JSON.stringify(payload) })
         .then(function () {
           if (needMove) {
@@ -450,6 +508,75 @@
     api('/vehicles/' + encodeURIComponent(id), { method: 'DELETE' })
       .then(function () { return loadState(true); }).then(function () { toast('Smazáno'); })
       .catch(function () { toast('Nepodařilo se smazat'); });
+  }
+
+  // Okamžité přeskladnění na Parkoviště Dílna/Kaufmann — uloží rozpracované údaje
+  // a přidá vůz na konec cílového placu (FIFO). Umístění zároveň nastaví odpovídající stav.
+  function relocateTo(place) {
+    if (!editingId) return;
+    var id = editingId;
+    var payload = {
+      model: document.getElementById('fModel').value.trim(),
+      vin: document.getElementById('fVin').value.trim(),
+      key: document.getElementById('fKey').value.trim(),
+      note: document.getElementById('fNote').value.trim(),
+      status: place === 'dilna' ? 'workshop' : 'kaufmann'
+    };
+    if (!payload.model && !payload.vin) { toast('Vyplň model nebo VIN'); return; }
+    closeOverlay('vehOverlay');
+    api('/vehicles/' + encodeURIComponent(id), { method: 'PUT', body: JSON.stringify(payload) })
+      .then(function () {
+        var order = buildOrder(place, 0, id, null); // null → append na konec (FIFO)
+        return api('/move', { method: 'POST', body: JSON.stringify({ side: place, row: 0, order: order }) });
+      })
+      .then(function () { return loadState(true); })
+      .then(function () { toast(place === 'dilna' ? 'Přeskladněno do Dílny ✓' : 'Přeskladněno do Kaufmannu ✓'); })
+      .catch(function () { toast('Nepodařilo se přeskladnit'); loadState(true); });
+  }
+
+  // Vyřadí vůz po předprodeji — smaže z aktivních parkovišť, v archivu natrvalo
+  // zůstane jen VIN a číslo klíče (bez možnosti obnovy).
+  function archiveVehicle() {
+    if (!editingId) return;
+    if (!confirm('Vyřadit vůz z parkovišť po předprodeji? V archivu zůstane natrvalo jen VIN a číslo klíče, ostatní údaje se nenávratně smažou.')) return;
+    var id = editingId;
+    closeOverlay('vehOverlay');
+    api('/archive', { method: 'POST', body: JSON.stringify({ id: id }) })
+      .then(function () { return loadState(true); }).then(function () { toast('Vyřazeno do archivu'); })
+      .catch(function () { toast('Nepodařilo se vyřadit'); });
+  }
+
+  // ---------- Archiv (odděleně od hlavního stavu i hledání) ----------
+  function openArchive() {
+    closeOverlay('menuOverlay');
+    document.getElementById('archiveSearch').value = '';
+    archiveQuery = '';
+    openOverlay('archiveOverlay');
+    loadArchive();
+  }
+  function loadArchive() {
+    document.getElementById('archiveList').innerHTML = '<div class="empty">Načítám…</div>';
+    fetch(API + '/archive', { cache: 'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (data) { archiveItems = data.items || []; renderArchive(); })
+      .catch(function () { document.getElementById('archiveList').innerHTML = '<div class="empty">Nepodařilo se načíst archiv.</div>'; });
+  }
+  function renderArchive() {
+    var q = archiveQuery.toLowerCase();
+    var items = archiveItems.filter(function (it) {
+      if (!q) return true;
+      return (it.vin + ' ' + it.key).toLowerCase().indexOf(q) > -1;
+    });
+    var el = document.getElementById('archiveList');
+    if (!items.length) {
+      el.innerHTML = '<div class="empty">' + (archiveItems.length ? 'Nic nenalezeno.' : 'Archiv je zatím prázdný.') + '</div>';
+      return;
+    }
+    el.innerHTML = items.map(function (it) {
+      return '<div class="row-card"><div class="row-head" style="border-bottom:0">' +
+        '<span class="rtitle">VIN ' + esc(it.vin || '—') + '</span>' +
+        '<span class="rcount">🔑 ' + esc(it.key || '—') + '</span></div></div>';
+    }).join('');
   }
 
   function addRow() {
@@ -521,15 +648,17 @@
 
   // ---------- Events ----------
   function bind() {
-    document.getElementById('sideTabs').addEventListener('click', function (e) {
+    function onTabClick(e) {
       var b = e.target.closest('button'); if (!b) return;
       state.side = b.getAttribute('data-side');
-      document.querySelectorAll('#sideTabs button').forEach(function (x) { x.classList.remove('active'); });
+      document.querySelectorAll('#sideTabs button, #placeTabs button').forEach(function (x) { x.classList.remove('active'); });
       b.classList.add('active'); renderRows();
-    });
+    }
+    document.getElementById('sideTabs').addEventListener('click', onTabClick);
+    document.getElementById('placeTabs').addEventListener('click', onTabClick);
     document.getElementById('btnSide').addEventListener('click', function () {
       state.side = state.side === 'left' ? 'right' : 'left';
-      document.querySelectorAll('#sideTabs button').forEach(function (x) {
+      document.querySelectorAll('#sideTabs button, #placeTabs button').forEach(function (x) {
         x.classList.toggle('active', x.getAttribute('data-side') === state.side);
       });
       renderRows();
@@ -559,22 +688,33 @@
       var b = e.target.closest('button'); if (!b) return;
       setStatusButtons(b.getAttribute('data-status'));
     });
+    document.getElementById('placeBtns').addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      relocateTo(b.getAttribute('data-place'));
+    });
     document.getElementById('fSide').addEventListener('change', function (e) {
+      updateMoveFieldsVisibility();
       populateRowSelect(e.target.value);
       refreshPosFromSelects();
     });
     document.getElementById('fRow').addEventListener('change', refreshPosFromSelects);
     document.getElementById('vehSave').addEventListener('click', saveVehicle);
     document.getElementById('vehDelete').addEventListener('click', deleteVehicle);
+    document.getElementById('vehArchive').addEventListener('click', archiveVehicle);
     document.getElementById('vehCancel').addEventListener('click', function () { closeOverlay('vehOverlay'); });
 
     document.getElementById('btnMenu').addEventListener('click', function () { openOverlay('menuOverlay'); });
     document.getElementById('miRefresh').addEventListener('click', function () { loadState(false); closeOverlay('menuOverlay'); toast('Načítám…'); });
+    document.getElementById('miArchive').addEventListener('click', openArchive);
     document.getElementById('miShare').addEventListener('click', shareLink);
     document.getElementById('miExport').addEventListener('click', exportData);
     document.getElementById('miReset').addEventListener('click', resetData);
+    document.getElementById('archiveSearch').addEventListener('input', function (e) {
+      archiveQuery = e.target.value.trim(); renderArchive();
+    });
+    document.getElementById('archiveCancel').addEventListener('click', function () { closeOverlay('archiveOverlay'); });
 
-    ['vehOverlay', 'menuOverlay'].forEach(function (id) {
+    ['vehOverlay', 'menuOverlay', 'archiveOverlay'].forEach(function (id) {
       document.getElementById(id).addEventListener('click', function (e) { if (e.target === this) closeOverlay(id); });
     });
   }

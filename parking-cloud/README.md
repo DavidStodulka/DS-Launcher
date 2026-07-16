@@ -18,16 +18,35 @@ Telefon (prohlížeč)  ──HTTPS──►  Cloudflare Worker  ──►  D1 d
 - Appka se každých 12 s sama obnoví (a při návratu do okna), takže vidíš změny
   ostatních. Indikátor vpravo nahoře ukazuje stav synchronizace.
 
+## Parkoviště Dílna, Kaufmann a Archiv
+
+Vedle Levé a Pravé strany appka nabízí ještě dva „placy" bez řad — **Parkoviště
+Dílna** a **Parkoviště Kaufmann**. Auta se tam řadí pod sebe metodou **FIFO**
+(nové na konec), pořadí jde stejně jako v řadě přeskupit podržením prstu.
+
+- V detailu vozu tlačítka **🔧 Přeskladnit do Dílny** / **🏭 Přeskladnit do
+  Kaufmannu** vůz okamžitě přesunou (uloží i rozpracované změny) a nastaví mu
+  odpovídající stav.
+- Návrat na Levou/Pravou stranu (i mezi Dílnou a Kaufmannem navzájem) jde přes
+  stejný výběr **Strana/Plac · Řada · Pozice** jako běžný přesun.
+- Tlačítko **🗄 Po předprodeji** v detailu vozu ho vyřadí ze všech aktivních
+  parkovišť. V **Archivu** (menu → Archiv) zůstane natrvalo jen VIN a číslo
+  klíče — bez možnosti obnovy. Archiv má vlastní vyhledávání, nezávislé na
+  hledání v aktivních parkovištích.
+
 ## API
 
 | Metoda | Cesta | Co dělá |
 |--------|-------|---------|
-| GET | `/api/state` | vrátí všechny vozy |
-| POST | `/api/vehicles` | přidá vůz (pozice v řadě se dopočítá) |
+| GET | `/api/state` | vrátí všechny vozy (aktivní parkoviště, vč. Dílny/Kaufmannu) |
+| POST | `/api/vehicles` | přidá vůz (pozice se dopočítá; `side` = `left`/`right`/`dilna`/`kaufmann`) |
 | PUT | `/api/vehicles/:id` | upraví vůz (model, VIN, klíč, poznámka, stav) |
 | DELETE | `/api/vehicles/:id` | smaže vůz |
+| POST | `/api/move` | přesun/přeskladnění `{side,row,order}` (i mezi Dílnou/Kaufmannem) |
 | POST | `/api/rows/delete` | smaže celou řadu `{side,row}` |
 | POST | `/api/reset` | obnoví původních 64 vozů |
+| POST | `/api/archive` | vyřadí vůz po předprodeji `{id}` — do archivu jen VIN + klíč |
+| GET | `/api/archive` | seznam vyřazených vozů (VIN + klíč) |
 
 ## Nasazení
 
@@ -67,7 +86,7 @@ Pošli ho komukoli, na telefonu pak prohlížeč → *Přidat na plochu*.
 
 ```bash
 npm install
-npm test                # otestuje API logiku (mock D1), 18 kontrol
+npm test                # otestuje API logiku (mock D1), 36 kontrol
 npx wrangler dev        # lokální běh (potřebuje wrangler login kvůli D1)
 ```
 

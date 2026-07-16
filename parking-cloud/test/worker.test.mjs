@@ -8,6 +8,7 @@ import worker from '../src/worker.js';
 // ---- Mock D1 ----
 function makeDB(initial) {
   let rows = initial.slice();
+  let archiveRows = [];
   function prepare(sql) {
     // Jako reálné D1: .bind() vrací NOVÝ statement, .run() vrací { meta }.
     const make = (args) => ({
@@ -61,12 +62,23 @@ function makeDB(initial) {
       return { rows: [], meta: { changes: before - rows.length } };
     }
     if (sql.startsWith('DELETE FROM vehicles')) { const n = rows.length; rows = []; return { rows: [], meta: { changes: n } }; }
+    if (sql.startsWith('CREATE TABLE IF NOT EXISTS archive')) { return { rows: [], meta: { changes: 0 } }; }
+    if (sql.startsWith('INSERT INTO archive')) {
+      const [id, vin, keynum, archived_at] = a;
+      archiveRows.push({ id, vin, keynum, archived_at });
+      return { rows: [], meta: { changes: 1 } };
+    }
+    if (sql.startsWith('SELECT * FROM archive ORDER BY')) {
+      const r = archiveRows.slice().sort((x, y) => y.archived_at - x.archived_at);
+      return { rows: r, meta: {} };
+    }
     throw new Error('Mock D1: neznámý SQL: ' + sql);
   }
   return {
     prepare,
     async batch(stmts) { for (const s of stmts) await s.run(); return []; },
     _rows: () => rows,
+    _archiveRows: () => archiveRows,
   };
 }
 
@@ -159,6 +171,42 @@ const tests = async () => {
   console.log('POST /api/move bez order → 400');
   r = await call('POST', '/api/move', { side: 'left', row: 1, order: [] });
   ok(r.status === 400, 'status 400');
+
+  console.log('POST /api/vehicles na plac Dílna (side=dilna, row=0, bez řad)');
+  r = await call('POST', '/api/vehicles', { side: 'dilna', row: 0, model: 'Octavia', vin: '555', key: '9', status: 'workshop' });
+  ok(r.status === 201, 'status 201');
+  ok(r.data.side === 'dilna' && r.data.row === 0, 'row zůstal 0 (nespadl na fallback 1)');
+  const dilnaId = r.data.id;
+
+  console.log('POST /api/vehicles na plac Kaufmann + FIFO append');
+  r = await call('POST', '/api/vehicles', { side: 'kaufmann', row: 0, model: 'Superb', vin: '666', key: '11', status: 'kaufmann' });
+  ok(r.status === 201 && r.data.pos === 0, 'první vůz na Kaufmannu má pos 0');
+  r = await call('POST', '/api/vehicles', { side: 'kaufmann', row: 0, model: 'Superb', vin: '777', key: '12', status: 'kaufmann' });
+  ok(r.data.pos === 1, 'druhý vůz na Kaufmannu se přidal na konec (FIFO, pos 1)');
+
+  console.log('POST /api/move mezi placy (dilna → kaufmann)');
+  r = await call('POST', '/api/move', { side: 'kaufmann', row: 0, order: [dilnaId] });
+  ok(r.status === 200, 'move na kaufmann OK');
+  r = await call('GET', '/api/state');
+  const movedPlace = r.data.vehicles.find(v => v.id === dilnaId);
+  ok(movedPlace.side === 'kaufmann' && movedPlace.row === 0, 'vůz přesunut z dílny na kaufmann, row 0');
+
+  console.log('POST /api/archive (vyřazení po předprodeji)');
+  r = await call('POST', '/api/archive', { id: dilnaId });
+  ok(r.status === 200 && r.data.ok === true, 'archivace OK');
+  r = await call('GET', '/api/state');
+  ok(!r.data.vehicles.some(v => v.id === dilnaId), 'vůz zmizel z aktivních parkovišť');
+
+  console.log('GET /api/archive');
+  r = await call('GET', '/api/archive');
+  ok(r.status === 200, 'status 200');
+  ok(r.data.items.length === 1, 'archiv obsahuje 1 záznam');
+  ok(r.data.items[0].vin === '555' && r.data.items[0].key === '9', 'archiv uchoval jen VIN a číslo klíče');
+  ok(r.data.items[0].model === undefined, 'archiv neuchovává model');
+
+  console.log('POST /api/archive na neexistující vůz → 404');
+  r = await call('POST', '/api/archive', { id: 'nope' });
+  ok(r.status === 404, 'status 404');
 
   console.log('Neznámá cesta → 404');
   r = await call('GET', '/api/blah');

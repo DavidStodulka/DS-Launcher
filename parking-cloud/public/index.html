@@ -25,6 +25,7 @@
     --workshop: #f2a33c;
     --received: #36c98d;
     --departure: #b46cff;
+    --kaufmann: #1fb6c9;
     --danger: #ef5d6b;
     --radius: 14px;
     --safe-top: env(safe-area-inset-top, 0px);
@@ -108,6 +109,9 @@
     color: var(--muted); font-size: 14px; font-weight: 700; cursor: pointer;
   }
   .side-tabs button.active { background: var(--accent); color: #fff; box-shadow: 0 3px 10px rgba(79,157,255,.4); }
+  .place-tabs { margin-top: -6px; }
+  .place-tabs button.active { background: var(--workshop); color: #fff; box-shadow: 0 3px 10px rgba(242,163,60,.4); }
+  .place-tabs button[data-side="kaufmann"].active { background: var(--kaufmann); box-shadow: 0 3px 10px rgba(31,182,201,.4); }
 
   .row-card {
     background: var(--panel); border: 1px solid var(--line);
@@ -149,6 +153,7 @@
   .tile.workshop { background: linear-gradient(150deg, #6b4a16, #b9802a); }
   .tile.received { background: linear-gradient(150deg, #145c43, #1f9468); }
   .tile.departure { background: linear-gradient(150deg, #4d2a7d, #9a52d6); }
+  .tile.kaufmann { background: linear-gradient(150deg, #0e5b63, #1fb6c9); }
   .tile.dragging {
     position: fixed; z-index: 999; pointer-events: none; touch-action: none;
     box-shadow: 0 16px 34px rgba(0,0,0,.55); transform: scale(1.05);
@@ -230,6 +235,10 @@
   .status-btns button.sel-parked { border-color: var(--accent); background: rgba(79,157,255,.16); }
   .status-btns button.sel-departure { border-color: var(--departure); background: rgba(180,108,255,.18); }
 
+  .place-btns { margin-top: -6px; }
+  .place-btns button[data-place="dilna"] { border-color: var(--workshop); }
+  .place-btns button[data-place="kaufmann"] { border-color: var(--kaufmann); }
+
   .sheet-actions { display: flex; gap: 10px; margin-top: 4px; }
   .btn {
     flex: 1; padding: 14px; border-radius: 12px; border: 0; font-size: 15px; font-weight: 800;
@@ -238,6 +247,7 @@
   .btn-primary { background: var(--accent); }
   .btn-ghost { background: var(--panel); border: 1px solid var(--line); color: var(--text); }
   .btn-danger { background: transparent; border: 1px solid var(--danger); color: var(--danger); flex: 0 0 auto; width: 52px; }
+  .btn-archive { background: transparent; border: 1px solid var(--workshop); color: var(--workshop); flex: 0 0 auto; width: 52px; }
   .btn:active { transform: scale(.97); }
 
   /* menu sheet */
@@ -287,7 +297,11 @@
     <button data-side="left" class="active">◀ Levá strana</button>
     <button data-side="right">Pravá strana ▶</button>
   </div>
-  <div class="drag-hint" id="dragHint">👆 Podrž dlaždici a táhni — přeskupíš pořadí <b>v rámci řady</b>. Pro přesun do jiné řady/strany klepni na vozidlo a vyber Stranu · Řadu · Pozici.</div>
+  <div class="side-tabs place-tabs" id="placeTabs">
+    <button data-side="dilna">🔧 Parkoviště Dílna</button>
+    <button data-side="kaufmann">🏭 Parkoviště Kaufmann</button>
+  </div>
+  <div class="drag-hint" id="dragHint">👆 Podrž dlaždici a táhni — přeskupíš pořadí <b>v rámci řady/placu</b>. Pro přesun jinam klepni na vozidlo a vyber Stranu/Plac · Řadu · Pozici.</div>
   <div id="rows"></div>
 </main>
 
@@ -300,9 +314,13 @@
 
     <div class="status-btns" id="statusBtns">
       <button data-status="parked"><span class="ic">🅿️</span>Zaparkováno</button>
-      <button data-status="workshop"><span class="ic">🔧</span>Dílna</button>
       <button data-status="received"><span class="ic">🆕</span>Nově přijato</button>
       <button data-status="departure"><span class="ic">🚗</span>Připravit na odjezd</button>
+    </div>
+
+    <div class="status-btns place-btns" id="placeBtns">
+      <button data-place="dilna"><span class="ic">🔧</span>Přeskladnit do Dílny</button>
+      <button data-place="kaufmann"><span class="ic">🏭</span>Přeskladnit do Kaufmannu</button>
     </div>
 
     <div class="field">
@@ -325,28 +343,31 @@
     </div>
 
     <div id="moveSection">
-      <div class="move-label">↔ Přesunout vůz — strana, řada a pozice</div>
+      <div class="move-label">↔ Přesunout vůz — strana/plac, řada a pozice</div>
       <div class="row2">
         <div class="field">
-          <label>Strana</label>
+          <label>Strana / Plac</label>
           <select id="fSide">
             <option value="left">Levá strana</option>
             <option value="right">Pravá strana</option>
+            <option value="dilna">Parkoviště Dílna</option>
+            <option value="kaufmann">Parkoviště Kaufmann</option>
           </select>
         </div>
-        <div class="field">
+        <div class="field" id="rowField">
           <label>Řada</label>
           <select id="fRow"></select>
         </div>
       </div>
       <div class="field">
-        <label>Pozice v řadě</label>
+        <label>Pozice</label>
         <select id="fPos"></select>
       </div>
     </div>
 
     <div class="sheet-actions">
       <button class="btn btn-danger" id="vehDelete" title="Smazat">🗑</button>
+      <button class="btn btn-archive" id="vehArchive" title="Po předprodeji (do archivu)">🗄</button>
       <button class="btn btn-ghost" id="vehCancel">Zavřít</button>
       <button class="btn btn-primary" id="vehSave">Uložit</button>
     </div>
@@ -364,11 +385,30 @@
       <span><i style="background:var(--workshop)"></i> Dílna</span>
       <span><i style="background:var(--received)"></i> Nově přijato</span>
       <span><i style="background:var(--departure)"></i> Připravit na odjezd</span>
+      <span><i style="background:var(--kaufmann)"></i> Kaufmann</span>
     </div>
     <div class="menu-item" id="miRefresh"><span class="mi-ic">🔄</span><div><div>Obnovit ze serveru</div><div class="mi-sub">Načte aktuální stav</div></div></div>
+    <div class="menu-item" id="miArchive"><span class="mi-ic">🗄</span><div><div>Archiv</div><div class="mi-sub">Vozy vyřazené po předprodeji</div></div></div>
     <div class="menu-item" id="miShare"><span class="mi-ic">🔗</span><div><div>Sdílet odkaz</div><div class="mi-sub">Pošli appku kolegům</div></div></div>
     <div class="menu-item" id="miExport"><span class="mi-ic">📤</span><div><div>Stáhnout zálohu</div><div class="mi-sub">Aktuální stav jako .json</div></div></div>
     <div class="menu-item danger" id="miReset"><span class="mi-ic">♻️</span><div><div>Obnovit původní seznam</div><div class="mi-sub">Vrátí všech 64 vozů z TXT (pro všechny!)</div></div></div>
+  </div>
+</div>
+
+<!-- Archive sheet -->
+<div class="overlay" id="archiveOverlay">
+  <div class="sheet">
+    <div class="grabber"></div>
+    <h2>Archiv</h2>
+    <div class="sub">Vozy vyřazené po předprodeji — uchován jen VIN a číslo klíče, natrvalo. Vyhledávání zde je nezávislé na hledání v aktivních parkovištích.</div>
+    <div class="search" style="margin-top:0">
+      <span>🔎</span>
+      <input id="archiveSearch" placeholder="Hledat VIN nebo číslo klíče…" autocomplete="off" />
+    </div>
+    <div id="archiveList" style="margin-top:14px"></div>
+    <div class="sheet-actions">
+      <button class="btn btn-ghost" id="archiveCancel">Zavřít</button>
+    </div>
   </div>
 </div>
 
