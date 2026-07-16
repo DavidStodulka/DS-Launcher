@@ -6,8 +6,13 @@
  *   POST   /api/vehicles              -> vytvoří vůz, vrátí ho
  *   PUT    /api/vehicles/:id          -> upraví vůz, vrátí ho
  *   DELETE /api/vehicles/:id          -> smaže vůz
+ *   POST   /api/move {side,row,order} -> přesun/přeskladnění (levá/pravá/dílna/kaufmann)
  *   POST   /api/rows/delete {side,row}-> smaže celou řadu
  *   POST   /api/reset                 -> obnoví původní seznam (64 vozů)
+ *   POST   /api/archive {id}          -> vyřadí vůz po předprodeji (jen VIN+klíč do archivu)
+ *   GET    /api/archive               -> seznam vyřazených vozů (VIN+klíč)
+ *
+ * side: 'left' | 'right' (řady) | 'dilna' | 'kaufmann' (placy bez řad, rownum vždy 0, FIFO přes pos)
  */
 
 const JSON_HEADERS = {
@@ -31,7 +36,10 @@ function rowToVehicle(r) {
     note: r.note || '', status: r.status || 'parked',
   };
 }
-const VALID_STATUS = ['parked', 'workshop', 'received', 'departure'];
+const VALID_STATUS = ['parked', 'workshop', 'received', 'departure', 'kaufmann'];
+const VALID_SIDES = ['left', 'right', 'dilna', 'kaufmann'];
+function normSide(s) { return VALID_SIDES.includes(s) ? s : 'left'; }
+function normRow(v) { const n = parseInt(v, 10); return Number.isFinite(n) ? n : 1; }
 
 export default {
   async fetch(request, env) {
@@ -57,8 +65,8 @@ export default {
       // POST /api/vehicles
       if (pathname === '/api/vehicles' && request.method === 'POST') {
         const b = await request.json();
-        const side = b.side === 'left' ? 'left' : 'right';
-        const row = parseInt(b.row, 10) || 1;
+        const side = normSide(b.side);
+        const row = normRow(b.row);
         const status = VALID_STATUS.includes(b.status) ? b.status : 'parked';
         const id = uid();
         const posRow = await env.DB.prepare(
@@ -95,7 +103,7 @@ export default {
       // POST /api/move  { side, row, order:[ids] } — přesun/seřazení dlaždic
       if (pathname === '/api/move' && request.method === 'POST') {
         const b = await request.json();
-        const side = b.side === 'left' ? 'left' : 'right';
+        const side = normSide(b.side);
         const row = parseInt(b.row, 10);
         const order = Array.isArray(b.order) ? b.order : [];
         if (isNaN(row) || !order.length) return json({ error: 'bad request' }, 400);
@@ -111,10 +119,38 @@ export default {
       // POST /api/rows/delete
       if (pathname === '/api/rows/delete' && request.method === 'POST') {
         const b = await request.json();
-        const side = b.side === 'left' ? 'left' : 'right';
+        const side = normSide(b.side);
         const row = parseInt(b.row, 10);
         await env.DB.prepare('DELETE FROM vehicles WHERE side=? AND rownum=?').bind(side, row).run();
         return json({ ok: true });
+      }
+
+      // POST /api/archive  { id } — vyřadí vůz po předprodeji: smaže z aktivních
+      // parkovišť, v archivu uchová natrvalo jen VIN a číslo klíče (bez možnosti obnovy)
+      if (pathname === '/api/archive' && request.method === 'POST') {
+        const b = await request.json();
+        const id = String(b.id || '');
+        const v = await env.DB.prepare('SELECT * FROM vehicles WHERE id=?').bind(id).first();
+        if (!v) return json({ error: 'not found' }, 404);
+        await env.DB.prepare(
+          'CREATE TABLE IF NOT EXISTS archive (id TEXT PRIMARY KEY, vin TEXT, keynum TEXT, archived_at INTEGER)'
+        ).run();
+        await env.DB.prepare(
+          'INSERT INTO archive (id,vin,keynum,archived_at) VALUES (?,?,?,?)'
+        ).bind(uid(), v.vin || '', v.keynum || '', Date.now()).run();
+        await env.DB.prepare('DELETE FROM vehicles WHERE id=?').bind(id).run();
+        return json({ ok: true });
+      }
+
+      // GET /api/archive — seznam vyřazených vozů (jen VIN + číslo klíče), odděleně od /api/state
+      if (pathname === '/api/archive' && request.method === 'GET') {
+        await env.DB.prepare(
+          'CREATE TABLE IF NOT EXISTS archive (id TEXT PRIMARY KEY, vin TEXT, keynum TEXT, archived_at INTEGER)'
+        ).run();
+        const { results } = await env.DB.prepare('SELECT * FROM archive ORDER BY archived_at DESC').all();
+        return json({
+          items: (results || []).map((r) => ({ id: r.id, vin: r.vin || '', key: r.keynum || '', archivedAt: r.archived_at })),
+        });
       }
 
       // POST /api/reset
